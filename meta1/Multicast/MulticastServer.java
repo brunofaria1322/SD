@@ -1,3 +1,3 @@
-public class MulticastServer {
+public class MulticastServer extends Thread {
     
 }
