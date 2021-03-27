@@ -87,6 +87,7 @@ class Heartbeat implements Runnable {
 public class RMIServer extends UnicastRemoteObject {
 	public static Connection conn;
 	private static String enckey = "cenabuesegura";
+	public static ArrayList<Pair<String,String>> logged;
 	public RMIServer() throws RemoteException {
 		super();
 	}
@@ -164,6 +165,7 @@ public class RMIServer extends UnicastRemoteObject {
 				return false; //dados invalidos
 			}
 			if(AES.decrypt(rs.getString("password"),enckey).equals(password)){
+				logged.add(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
 				return true; //sucesso
 			}
 		} catch (SQLException e) {
@@ -173,7 +175,7 @@ public class RMIServer extends UnicastRemoteObject {
 		return false;
 	}
 	// =======================================================
-	public static int createVoting(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim){
+	public static int createElection(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim){
 		//cargos = {'aluno','docente','funcionario','all'}
 		//departamentos, mesas = ndeps separados por ; (; no fim também)
 		try {
@@ -195,7 +197,7 @@ public class RMIServer extends UnicastRemoteObject {
 			return -1; // Erro qualquer que não devia acontecer
 		}
 	}
-	public static int editVoting(int neleicao, boolean remove, String departamentos, String mesas){
+	public static int editElection(int neleicao, boolean remove, String departamentos, String mesas){
 		try {
 			String query = "SELECT * FROM eleicoes WHERE neleicao = '"+neleicao+"';";
 			System.out.println(query);
@@ -233,6 +235,212 @@ public class RMIServer extends UnicastRemoteObject {
 			}
 			rs.updateRow();
 			return 1;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return -3; // Erro qualquer que não devia acontecer
+		}
+	}
+	public static HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa){
+		// {neleicao:{titulo:String, descricao: String, inicio: String, fim: String}}
+		try {
+			String query;
+			PreparedStatement st;
+			ResultSet rs;
+			if(username!=null){
+				query = "SELECT * FROM users WHERE username = '"+username+"';";
+				System.out.println(query);
+				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				rs = st.executeQuery();
+				rs.next();
+				int departamento = rs.getInt("ndep");
+				String cargo = rs.getString("cargo");
+				query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%"+departamento+";%' AND mesas LIKE '%"+dep_mesa+";%' AND estado = 'open';";
+			}
+			else{
+				query = "SELECT * FROM eleicoes;";
+			}
+			System.out.println(query);
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			final ResultSet rs2 = st.executeQuery();
+			HashMap<Integer,HashMap<String,String>> out = new HashMap<Integer,HashMap<String,String>>();
+			while(rs2.next()){
+				out.put(rs2.getInt("neleicao"), new HashMap<String,String>(){{
+					put("titulo",rs2.getString("titulo"));
+					put("descricao", rs2.getString("descricao"));
+					put("inicio",rs2.getTimestamp("inicio").toString());
+					put("fim", rs2.getTimestamp("fim").toString());
+					}});
+			}
+			return out;
+		}catch (SQLException e) {
+			e.printStackTrace();
+			return null; // Provavelmente não existem eleições
+		}
+		
+	}
+	public static Pair<String,String> getUser(String usernameOrCC){
+		// (cc,nome)
+		try {
+			String query = "SELECT * FROM users WHERE username = '"+usernameOrCC+"' OR numcc = '"+usernameOrCC+"';";
+			System.out.println(query);
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()==false){
+				return null; //não há user com esse username
+			}
+			return new Pair<String,String>(rs.getString("numcc"),rs.getString("nome"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public static boolean logOut(String username){
+		try{
+			String query = "SELECT * FROM users WHERE username = '"+username+"';";
+			System.out.println(query);
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			if(rs.next()){
+				logged.indexOf(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
+				return true;
+			}
+			else{
+				return false;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	public static int createList(int neleicao, String nome, String cargo, int departamento, ArrayList<Pair<String,String>> users){
+		//Pair(numcc,nome); cargo null e departamento 0 se não houverem restrições
+		try{
+			String query;
+			PreparedStatement st;
+			ResultSet rs;
+			query = "SELECT COUNT(nlista) as count FROM listas;";
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			rs.next();
+			int count = rs.getInt("count");
+			for (Pair<String,String> pair : users) {
+				query = "SELECT * FROM users WHERE numcc = '"+pair.left+"';";
+				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				rs = st.executeQuery();
+				if(rs.next()){
+					if((cargo != null && !rs.getString("cargo").equals(cargo)) || (departamento != 0 && rs.getInt("ndep") != departamento)){
+						return -1; //O user não corresponde aos parâmetros pedidos
+					}
+					rs.updateInt("nlista",count+1);
+					rs.updateRow();
+				}
+				else{ //cria uma pessoa não registada
+					rs.moveToInsertRow();
+					rs.updateString("cargo", cargo); rs.updateString("nome", pair.right); rs.updateString("numcc", pair.left);
+					rs.updateInt("nlista",count+1);
+					rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
+					rs.insertRow();
+				}
+			}
+			query = "SELECT * FROM listas WHERE nome = '"+nome+"';";
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			if(rs.next()){
+				return 0; //ATENÇÃO: Já existe uma lista com esse nome. Tem a certeza?
+			}
+			else{
+				rs.moveToInsertRow();
+				rs.updateInt("neleicao",neleicao);
+				rs.updateString("nome",nome);
+				if(cargo != null){
+					rs.updateString("cargo",cargo);
+				}
+				if(departamento != 0){
+					rs.updateInt("ndep", departamento);
+				}
+				rs.insertRow();
+			}
+			return 1;
+		}catch (SQLException e) {
+			e.printStackTrace();
+			return -2;
+		}
+	}
+	public static HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
+		// {nlista:{(nome,[(cc,nome)])}
+		try {
+			String query;
+			PreparedStatement st;
+			ResultSet rs;
+			
+			if(neleicao!=0){
+				query = "SELECT * FROM listas WHERE neleicao = '"+neleicao+"';";
+			}
+			else{
+				query = "SELECT * FROM listas;";
+			}
+			System.out.println(query);
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			int lista = rs.getInt("nlista");
+			HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> out = new HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>>();
+			while(rs.next()){
+				out.put(lista, new Pair<String,ArrayList<Pair<String,String>>>(rs.getString("nome"),new ArrayList<Pair<String,String>>(){{
+					String query2;
+					PreparedStatement st2;
+					ResultSet rs2;
+					query2 = "SELECT * FROM users WHERE nlista = '"+lista+"';";
+					st2 = conn.prepareStatement(query2,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+					rs2 = st2.executeQuery();
+					while(rs2.next()){
+						add(new Pair<String,String>(rs2.getString("numcc"),rs2.getString("nome")));
+					}
+					}}));
+			}
+			return out;
+		}catch (SQLException e) {
+			e.printStackTrace();
+			return null; // Provavelmente não existem listas
+		}
+		
+	}
+	public static int vote(String username, int neleicao, int nlista, int mesa){
+		try {
+			String query = "SELECT * FROM users WHERE username = '"+username+"';";
+			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			rs.next();
+			Timestamp criado = rs.getTimestamp("data_created");
+			query = "SELECT * FROM votos WHERE username = '"+username+"' AND neleicao = '"+neleicao+"';";
+			System.out.println(query);
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			if(rs.next()){
+				return -1; // Já votou nesta eleição
+			}
+			else{
+				rs.moveToInsertRow();
+				rs.updateString("username", username); rs.updateInt("ndep", mesa); rs.updateInt("neleicao", neleicao);
+				rs.insertRow();
+				query = "SELECT * FROM eleicoes WHERE neleicao = '"+neleicao+"';";
+				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				rs = st.executeQuery();
+				rs.next();
+				if(criado.before(rs.getTimestamp("inicio"))){
+					query = "SELECT * FROM listas WHERE nlista = '"+nlista+"';";
+					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+					rs = st.executeQuery();
+					rs.next();
+					rs.updateInt("votos",rs.getInt("votos")+1);
+					return 1;
+				}
+				else{
+					return -2; //Conta criada depois da eleição
+				}
+			}
+				
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return -3; // Erro qualquer que não devia acontecer
