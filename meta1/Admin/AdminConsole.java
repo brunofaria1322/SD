@@ -37,14 +37,10 @@ public class AdminConsole {
                     }
                     break;
                 case 2:
-                    if (createElection(in)){
-                        System.out.println("Election successfully created!");
-                    } else {
-                        System.out.println("Election creation was aborted!");
-                    }
+                    createElection(in);
                     break;
                 case 3:
-                    System.out.println("Option 3!");
+                    chooseElection(in);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -58,7 +54,7 @@ public class AdminConsole {
         int type, ndep;
         boolean isValid = false;
         do{
-            System.out.print("\n1 - Regist student\n2 - Regist teacher\n3 - Regist employee\n0 - Abort\noption: ");
+            System.out.print("\n1 - Regist student\n2 - Regist professor\n3 - Regist employee\n0 - Abort\noption: ");
 
             type = in.nextInt();
             in.nextLine();
@@ -148,7 +144,7 @@ public class AdminConsole {
         }while(!isValid);
 
 
-        //TODO:contactar servidor
+        //TODO: contactar servidor
 
         //DEBUG
         System.out.println(
@@ -166,18 +162,18 @@ public class AdminConsole {
         
     }
 
-    private static boolean createElection(Scanner in){
+    private static void createElection(Scanner in){
         int voters, ndep;
         boolean isValid = false;
         do{
-            System.out.print("\nWho are the voters?\n1 - Students\n2 - Teachers\n3 - Employees\n0 - Abort\noption: ");
+            System.out.print("\nWho are the voters?\n1 - Students\n2 - Professors\n3 - Employees\n0 - Abort\noption: ");
 
             voters = in.nextInt();
             in.nextLine();
             
             switch (voters){
                 case 0:
-                    return false;
+                    return;
                 case 1:
                 case 2:
                 case 3:
@@ -200,7 +196,7 @@ public class AdminConsole {
             in.nextLine();
             
             if (ndep == 0){
-                return false;
+                return;
             }
 
             else if (ndep< 0 || ndep > 19){     //TODO: dep > num de departamentos
@@ -257,9 +253,6 @@ public class AdminConsole {
 
         }while(!isValid);
 
-
-        //TODO:contactar servidor
-
         //DEBUG
         System.out.println(
             "\ntype: " + voters +
@@ -269,7 +262,198 @@ public class AdminConsole {
             "\nstart: " + start_time.toString() +
             "\nend: " + end_time.toString()
         );
-        return true;
+
+
+        //TODO: contactar servidor
+
+        //TODO: if registado com sucesso
+            //TODO: maanage election em causa.
+            manageElection(in);
         
     }
+
+    private static void chooseElection(Scanner in){
+
+        //TODO: getElections
+        
+        int nelec;
+        System.out.println("\nbla bla bla... selecionar eleição");
+        do{
+            System.out.print("0 - Back\noption: ");
+
+            nelec = in.nextInt();
+            in.nextLine();
+
+            if (nelec< 0 || nelec > 19){     //TODO: nelec > num de eleições
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(nelec>0) {
+                //TODO: manageElection(in, )
+                manageElection(in);
+            }
+        }while (nelec!=0);
+
+    }
+
+    private static void manageElection(Scanner in){
+
+        //TODO: (if now < eleição.start)
+            int option;
+            do{
+                System.out.print("Election hasn't start yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
+
+                option = in.nextInt();
+                in.nextLine();
+
+                switch (option){
+                    case 0:
+                        break;
+                    case 1:
+                        //TODO: manageCandidateLists(in, election_id);
+                        manageCandidateLists(in);
+                        break;
+                    case 2:
+                        //TODO: managePollingStations(in);
+                        break;
+                    case 3:
+                        //TODO: changeProperties(in);
+                        break;
+                    default:
+                        System.out.println("Wrong option!");
+                        break;
+                }
+                
+                
+            }while (option!=0);
+
+    }
+    
+    private static void manageCandidateLists(Scanner in){
+
+        int option;
+        do{
+            System.out.print("1 - Add candidate list\n2 - Remove candidate list\n3 - Manage candidate list\n0 - Back\noption: ");
+
+            option = in.nextInt();
+            in.nextLine();
+
+            switch (option){
+                case 0:
+                    break;
+                case 1:
+                    //TODO: manageCandidates(in, election_id);
+                    addCandidateList(in);
+                    break;
+                case 2:
+                    //TODO: removeCandidateList(in, election_id);
+                    removeCandidateList(in);
+                    break;
+                case 3:
+                    //TODO: manageCandidates(in, election_id);
+                    manageCandidates(in);
+                    break;
+                default:
+                    System.out.println("Wrong option!");
+                    break;
+            }
+            
+            
+        }while (option!=0);
+    }
+
+    private static void addCandidateList(Scanner in){
+
+        System.out.print("\nList Name: ");
+        String name = in.nextLine();
+
+        //TODO: criar Lista
+        
+        manageCandidates(in);
+
+    }
+
+    private static void removeCandidateList(Scanner in){
+
+        //TODO: getList
+        
+        int nlist;
+        System.out.println("\nbla bla bla... selecionar lista");
+        do{
+            System.out.print("0 - Back\noption: ");
+
+            nlist = in.nextInt();
+            in.nextLine();
+
+            if (nlist< 0 || nlist > 19){     //TODO: nmember > num de membros
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(nlist>0) {
+                //TODO: Remover Membro
+            }
+        }while (nlist!=0);
+
+    }
+
+    private static void manageCandidates(Scanner in){
+        int option;
+        do{
+            System.out.print("1 - Add candidate\n2 - Remove candidate\n0 - Back\noption: ");
+
+            option = in.nextInt();
+            in.nextLine();
+
+            switch (option){
+                case 0:
+                    break;
+                case 1:
+                    //TODO: addCandidate(in, list_id);
+                    addCandidate(in);
+                case 2:
+                    //TODO: removeCandidate(in, list_id);
+                    removeCandidate(in);
+                    break;
+                default:
+                    System.out.println("Wrong option!");
+                    break;
+            }
+            
+        }while (option!=0);
+    }
+
+    private static void addCandidate(Scanner in){
+
+        System.out.print("\nCC number: ");
+        String cc_number = in.nextLine();
+
+        System.out.print("\nName: ");
+        String name = in.nextLine();
+
+        //TODO: adicionar Membro
+    }
+
+    private static void removeCandidate(Scanner in){
+
+        //TODO: getMembers
+        
+        int nmember;
+        System.out.println("\nbla bla bla... selecionar membro");
+        do{
+            System.out.print("0 - Back\noption: ");
+
+            nmember = in.nextInt();
+            in.nextLine();
+
+            if (nmember< 0 || nmember > 19){     //TODO: nmember > num de membros
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(nmember>0) {
+                //TODO: Remover Membro
+            }
+        }while (nmember!=0);
+
+    }
+
 }
