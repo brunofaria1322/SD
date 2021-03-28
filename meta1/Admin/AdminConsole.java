@@ -314,7 +314,8 @@ public class AdminConsole {
                         manageCandidateLists(in);
                         break;
                     case 2:
-                        //TODO: managePollingStations(in);
+                        //TODO: managePollingStations(in, election_id);
+                        managePollingStations(in);
                         break;
                     case 3:
                         //TODO: changeProperties(in, election_id);
@@ -327,9 +328,9 @@ public class AdminConsole {
             }while (option!=0);
         
             
-        //TODO: (if now < eleição.start)
+        //TODO: (if now > eleição.end)
             do{
-                System.out.print("Election \n1 - Check Results\n0 - Back\noption: ");
+                System.out.print("Election has finished \n1 - Check Results\n0 - Back\noption: ");
 
                 option = in.nextInt();
                 in.nextLine();
@@ -340,6 +341,26 @@ public class AdminConsole {
                     case 1:
                         //TODO: checkResults(in, election_id);
                         checkResults(in);
+                        break;
+                    default:
+                        System.out.println("Wrong option!");
+                        break;
+                }                
+            }while (option!=0);
+
+        //TODO: else
+            do{
+                System.out.print("Election is currently active\n1 - Manage polling stations\n0 - Back\noption: ");
+
+                option = in.nextInt();
+                in.nextLine();
+
+                switch (option){
+                    case 0:
+                        break;
+                    case 1:
+                        //TODO: managePollingStations(in, election_id);
+                        managePollingStations(in);
                         break;
                     default:
                         System.out.println("Wrong option!");
@@ -472,6 +493,45 @@ public class AdminConsole {
                 //TODO: Remover Membro
             }
         }while (nmember!=0);
+
+    }
+
+    private static void managePollingStations(Scanner in){
+        int option;
+        do{
+            System.out.print("1 - Add pooling station\n2 - Remove pooling station\n0 - Back\noption: ");
+
+            option = in.nextInt();
+            in.nextLine();
+
+            switch (option){
+                case 0:
+                    break;
+                case 1:
+                    //TODO: addPollingStation(in, list_id);
+                    addPollingStation(in);
+                case 2:
+                    //TODO: removePollingStation(in, list_id);
+                    removePollingStation(in);
+                    break;
+                default:
+                    System.out.println("Wrong option!");
+                    break;
+            }
+            
+        }while (option!=0);
+
+    }
+
+    private static void addPollingStation(Scanner in){
+        
+        //TODO: ISTO
+
+    }
+
+    private static void removePollingStation(Scanner in){
+        
+        //TODO: ISTO
 
     }
 
