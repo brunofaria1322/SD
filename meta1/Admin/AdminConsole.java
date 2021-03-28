@@ -317,7 +317,8 @@ public class AdminConsole {
                         //TODO: managePollingStations(in);
                         break;
                     case 3:
-                        //TODO: changeProperties(in);
+                        //TODO: changeProperties(in, election_id);
+                        changeProperties(in);
                         break;
                     default:
                         System.out.println("Wrong option!");
@@ -328,7 +329,7 @@ public class AdminConsole {
             
         //TODO: (if now < eleição.start)
             do{
-                System.out.print("Election \n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
+                System.out.print("Election \n1 - Check Results\n0 - Back\noption: ");
 
                 option = in.nextInt();
                 in.nextLine();
@@ -337,15 +338,8 @@ public class AdminConsole {
                     case 0:
                         break;
                     case 1:
-                        //TODO: manageCandidateLists(in, election_id);
-                        manageCandidateLists(in);
-                        break;
-                    case 2:
-                        //TODO: managePollingStations(in);
-                        break;
-                    case 3:
-                        //TODO: changeProperties(in, election_id);
-                        changeProperties(in);
+                        //TODO: checkResults(in, election_id);
+                        checkResults(in);
                         break;
                     default:
                         System.out.println("Wrong option!");
@@ -566,6 +560,13 @@ public class AdminConsole {
 
         }while(option != 0);
 
+    }
+
+    private static void checkResults(Scanner in){
+        //TODO: BLA BLA printar os resultados
+        
+        System.out.println("Press enter to continue...");
+        in.nextLine();
     }
 
 }
