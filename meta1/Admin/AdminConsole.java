@@ -298,8 +298,8 @@ public class AdminConsole {
 
     private static void manageElection(Scanner in){
 
+        int option;
         //TODO: (if now < eleição.start)
-            int option;
             do{
                 System.out.print("Election hasn't start yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
 
@@ -322,11 +322,36 @@ public class AdminConsole {
                     default:
                         System.out.println("Wrong option!");
                         break;
-                }
-                
-                
+                }                
             }while (option!=0);
+        
+            
+        //TODO: (if now < eleição.start)
+            do{
+                System.out.print("Election \n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
 
+                option = in.nextInt();
+                in.nextLine();
+
+                switch (option){
+                    case 0:
+                        break;
+                    case 1:
+                        //TODO: manageCandidateLists(in, election_id);
+                        manageCandidateLists(in);
+                        break;
+                    case 2:
+                        //TODO: managePollingStations(in);
+                        break;
+                    case 3:
+                        //TODO: changeProperties(in, election_id);
+                        changeProperties(in);
+                        break;
+                    default:
+                        System.out.println("Wrong option!");
+                        break;
+                }                
+            }while (option!=0);
     }
     
     private static void manageCandidateLists(Scanner in){
@@ -453,6 +478,93 @@ public class AdminConsole {
                 //TODO: Remover Membro
             }
         }while (nmember!=0);
+
+    }
+
+    private static void changeProperties(Scanner in){
+        
+        boolean isValid  = false;
+        int option;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        //TODO: bla bla ir buscar os dados
+        String title = "titulo";
+        String description = "decrição";
+        LocalDateTime start_time = LocalDateTime.now();
+        LocalDateTime end_time = LocalDateTime.now().plusDays(1);
+
+        do{
+            System.out.println(
+            "\ntitle: " + title +
+            "\ndescription: " + description +
+            "\nstart: " + start_time.toString() +
+            "\nend: " + end_time.toString()
+            );
+
+            System.out.print("1 - Change Title\n2 - Change Description\n0 - Back\noption: ");
+
+            option = in.nextInt();
+            in.nextLine();
+
+            switch (option){
+                case 0:
+                    break;
+                case 1:
+                    System.out.print("\nNew election title: ");
+                    title = in.nextLine();
+                    //TODO: comunicar com o sv
+                    break;
+                case 2:
+                    System.out.print("\nElection description: ");
+                    description = in.nextLine();
+                    //TODO: comunicar com o sv
+                    break;
+                case 3:
+                    isValid = false;
+                    do{
+                        System.out.print("\nElection start (dd/MM/yyyy HH:mm): ");
+                        String aux = in.nextLine();
+                        try{
+                            start_time = LocalDateTime.parse(aux, formatter);
+                            if(start_time.isAfter(LocalDateTime.now())){
+                                isValid = true;
+                            }else{
+                                System.out.print("Start date and time already passed. Try Again...");
+                            }
+                        }catch(Exception e){
+                            System.out.print("Invalid date and time! Try Again...");
+                        }
+
+                    }while(!isValid);
+                    //TODO: comunicar com o sv
+                    break;
+                case 4:
+                    isValid = false;
+                    do{
+                        System.out.print("\nElection end (dd/MM/yyyy HH:mm): ");
+                        String aux = in.nextLine();
+                        try{
+                            end_time = LocalDateTime.parse(aux, formatter);
+
+                            if(end_time.isAfter(start_time)){
+                                isValid = true;
+                            }else{
+                                System.out.print("End needs to be after start time! Try Again...");
+                            }
+
+                        }catch(Exception e){
+                            System.out.print("Invalid date and time! Try Again...");
+                        }
+
+                    }while(!isValid);
+                    //TODO: comunicar com o sv
+                    break;
+                default:
+                    System.out.println("Wrong option!");
+                    break;
+            }
+
+        }while(option != 0);
 
     }
 
