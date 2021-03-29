@@ -450,6 +450,7 @@ public class AdminConsole {
                 case 1:
                     //TODO: addCandidate(in, list_id);
                     addCandidate(in);
+                    break;
                 case 2:
                     //TODO: removeCandidate(in, list_id);
                     removeCandidate(in);
@@ -510,6 +511,7 @@ public class AdminConsole {
                 case 1:
                     //TODO: addPollingStation(in, list_id);
                     addPollingStation(in);
+                    break;
                 case 2:
                     //TODO: removePollingStation(in, list_id);
                     removePollingStation(in);
