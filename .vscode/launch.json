@@ -38,18 +38,6 @@
             "request": "launch",
             "mainClass": "VotingTerminal",
             "projectName": "SD_e4037862"
-        },
-        {
-            "type": "java",
-            "name": "Launch MulticastClient",
-            "request": "launch",
-            "mainClass": "MulticastClient"
-        },
-        {
-            "type": "java",
-            "name": "Launch Main",
-            "request": "launch",
-            "mainClass": "Trabalho2.Main"
         }
     ]
 }
