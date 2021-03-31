@@ -1,0 +1,3 @@
+javac RMI/RMIServer.java RMI/AES.java RMI/database.java
+javac Admin/AdminConsole.java Admin/database.java
+java RMI.RMIServer

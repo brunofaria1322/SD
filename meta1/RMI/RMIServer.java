@@ -1,3 +1,5 @@
+package RMI;
+
 import java.rmi.*;
 import java.rmi.server.*;
 import java.sql.Connection;
@@ -15,8 +17,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import com.mysql.cj.exceptions.CJCommunicationsException;
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -85,7 +90,11 @@ class Heartbeat implements Runnable {
 	}
 }
 
-public class RMIServer extends UnicastRemoteObject {
+public class RMIServer extends UnicastRemoteObject implements database{
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -5368081680660901104L;
 	public static Connection conn;
 	private static String enckey = "cenabuesegura";
 	public static ArrayList<Pair<String,String>> logged;
@@ -93,17 +102,28 @@ public class RMIServer extends UnicastRemoteObject {
 		super();
 	}
 
-	private static void primary() {
-		// create our mysql database connection
+	private static void connectToBD(){
 		try {
 			//Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://ba5bfd4cfc576d:f93b7db6@eu-cdbr-west-03.cleardb.net/heroku_5e154400fde3501?reconnect=true");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//createUser("testador",0,"teste","testelandia","123456789","testecc",new Date(1970,1,1),"teste","passparatestes");
 	}
-	public static int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
+
+	private static void primary() {
+		// create our mysql database connection
+		connectToBD();
+		//createUser("testador",0,"teste","testelandia","123456789","testecc",new Date(1970,1,1),"teste","passparatestes");
+		while(true){
+			try {
+				Thread.sleep(System.currentTimeMillis() - updateElections().getTime());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"' OR numcc = '"+numcc+"';";
 			System.out.println(query);
@@ -126,36 +146,36 @@ public class RMIServer extends UnicastRemoteObject {
 			else{
 				return -3; //Erro que não devia acontecer
 			}
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return createUser(cargo, ndep, nome, morada, telefone, numcc, valcc, username, password);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return -3;
 		}
 	}
-	public static HashMap<String,ArrayList<Pair<Integer,String>>> getDepartments(){ // {faculdade: [(ndep,dep)]}
+	public HashMap<Integer,String> getDepartments(){ // {faculdade: [(ndep,dep)]}
 		try {
-			HashMap<String,ArrayList<Pair<Integer,String>>> deps = new HashMap<String,ArrayList<Pair<Integer,String>>>();
+			HashMap<Integer,String>  deps = new HashMap<Integer,String>();
 			String query = "SELECT * FROM departamentos;";
 			System.out.println(query);
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
 			while(rs.next()){
-				if(!deps.containsKey(rs.getString("faculdade"))){
-					ArrayList<Pair<Integer,String>> arr = new ArrayList<Pair<Integer,String>>();
-					arr.add(new Pair<Integer,String>(rs.getInt("ndep"),rs.getString("nome")));
-					deps.put(rs.getString("faculdade"), arr);
-				}
-				else{
-					deps.get(rs.getString("faculdade")).add(new Pair<Integer,String>(rs.getInt("ndep"),rs.getString("nome")));
-				}
+				deps.put(rs.getInt("ndep"), rs.getString("nome"));
 			}
 			return deps;
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return getDepartments();
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
 	}
-	public static boolean login(String username, String password){
+	public boolean login(String username, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
 			System.out.println(query);
@@ -169,14 +189,18 @@ public class RMIServer extends UnicastRemoteObject {
 				logged.add(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
 				return true; //sucesso
 			}
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return login(username, password);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+			return false;
 		}
 		return false;
 	}
 	// =======================================================
-	public static int createElection(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim){
+	public int createElection(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim){
 		//cargos = {'aluno','docente','funcionario','all'}
 		//departamentos, mesas = ndeps separados por ; (; no fim também)
 		try {
@@ -193,12 +217,16 @@ public class RMIServer extends UnicastRemoteObject {
 				rs.updateString("estado", "waiting");
 				rs.insertRow();
 				return ret;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return -1; // Erro qualquer que não devia acontecer
-		}
+			} catch (CommunicationsException e) {
+				connectToBD();
+				return createElection(cargos, departamentos, mesas, titulo, desc, inicio, fim);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return -1;
+			}
 	}
-	public static int editElection(int neleicao, boolean remove, String departamentos, String mesas, int[] listas){
+	public int editElection(int neleicao, boolean remove, String departamentos, String mesas, int[] listas){
 		try {
 			String query = "SELECT * FROM eleicoes WHERE neleicao = "+neleicao+";";
 			System.out.println(query);
@@ -249,12 +277,16 @@ public class RMIServer extends UnicastRemoteObject {
 			}
 			
 			return 1;
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return editElection(neleicao, remove, departamentos, mesas, listas);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return -4; // Erro qualquer que não devia acontecer
+			return -3;
 		}
 	}
-	public static HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa){
+	public HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa){
 		// {neleicao:{titulo:String, descricao: String, inicio: String, fim: String}}
 		try {
 			String query;
@@ -286,13 +318,17 @@ public class RMIServer extends UnicastRemoteObject {
 					}});
 			}
 			return out;
-		}catch (SQLException e) {
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return getElections(username, dep_mesa);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null; // Provavelmente não existem eleições
+			return null;
 		}
 		
 	}
-	public static Pair<String,String> getUser(String usernameOrCC){
+	public Pair<String,String> getUser(String usernameOrCC){
 		// (cc,nome)
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+usernameOrCC+"' OR numcc = '"+usernameOrCC+"';";
@@ -304,12 +340,16 @@ public class RMIServer extends UnicastRemoteObject {
 				return null; //não há user com esse username
 			}
 			return new Pair<String,String>(rs.getString("numcc"),rs.getString("nome"));
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return getUser(usernameOrCC);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
 	}
-	public static boolean logOut(String username){
+	public boolean logOut(String username){
 		try{
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
 			System.out.println(query);
@@ -323,12 +363,16 @@ public class RMIServer extends UnicastRemoteObject {
 			else{
 				return false;
 			}
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return logOut(username);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
 	}
-	public static int createList(int neleicao, String nome, ArrayList<Pair<String,String>> users){
+	public int createList(int neleicao, String nome, ArrayList<Pair<String,String>> users){
 		//Pair(numcc,nome)
 		try{
 			String query;
@@ -383,12 +427,16 @@ public class RMIServer extends UnicastRemoteObject {
 				rs.insertRow();
 			}
 			return 1;
-		}catch (SQLException e) {
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return createList(neleicao, nome, users);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return -3;
 		}
 	}
-	public static HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
+	public HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
 		// {nlista:{(nome,[(cc,nome)])}
 		try {
 			String query;
@@ -420,13 +468,17 @@ public class RMIServer extends UnicastRemoteObject {
 					}}));
 			}
 			return out;
-		}catch (SQLException e) {
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return getLists(neleicao);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null; // Provavelmente não existem listas
+			return null;
 		}
 		
 	}
-	public static int vote(String username, int neleicao, int nlista, int mesa){
+	public int vote(String username, int neleicao, int nlista, int mesa){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
 			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -461,12 +513,15 @@ public class RMIServer extends UnicastRemoteObject {
 				}
 			}
 				
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return vote(username, neleicao, nlista, mesa);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			return -3; // Erro qualquer que não devia acontecer
+			// TODO Auto-generated catch block
+			return -3;
 		}
 	}
-	public static HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>> getResults(int neleicao){
+	public HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>> getResults(int neleicao){
 		// {neleicao: (nome_eleicao, [{nlista: (nome_lista, votos)}])}
 		HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>> out = new HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>>();
 		String query;
@@ -494,9 +549,59 @@ public class RMIServer extends UnicastRemoteObject {
 				}
 			}
 			return out;
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return getResults(neleicao);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+	}
+	public static Timestamp updateElections(){
+		try{
+			String query = "SELECT * FROM eleicoes WHERE estado = 'waiting' ORDER BY inicio ASC;";
+			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			Timestamp nextWaiting = new Timestamp(System.currentTimeMillis());
+			nextWaiting.setTime(nextWaiting.getTime()+TimeUnit.MINUTES.toMillis(1));
+			Timestamp nextOpen = new Timestamp(System.currentTimeMillis());;
+			nextOpen.setTime(nextOpen.getTime()+TimeUnit.MINUTES.toMillis(1));
+			while(rs.next()){
+				nextWaiting = rs.getTimestamp("inicio");
+				if(rs.getTimestamp("inicio").before(new Timestamp(System.currentTimeMillis()))){
+					rs.updateString("estado", "open");
+					rs.updateRow();
+				}
+				else{
+					break;
+				}
+			}
+			query = "SELECT * FROM eleicoes WHERE estado = 'open' ORDER BY fim ASC;";
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			while(rs.next()){
+				nextOpen = rs.getTimestamp("inicio");
+				if(rs.getTimestamp("fim").before(new Timestamp(System.currentTimeMillis()))){
+					rs.updateString("estado", "done");
+					rs.updateRow();
+				}
+				else{
+					break;
+				}
+			}
+			if(nextWaiting.before(nextOpen)){
+				return nextWaiting;
+			}
+			else{
+				return nextOpen;
+			}
+		} catch (CommunicationsException e) {
+			connectToBD();
+			return updateElections();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null; // Erro qualquer que não devia acontecer
+			return null;
 		}
 	}
 	public static void main(String args[]) {
@@ -510,7 +615,6 @@ public class RMIServer extends UnicastRemoteObject {
 			System.out.println("Comecei a trabalhar!");
 			primary();
 		} catch (ExportException re){
-			// argumentos da linha de comando: hostname 
 			int no_replies = 0;
 			DatagramSocket socket = null;
 			try {
