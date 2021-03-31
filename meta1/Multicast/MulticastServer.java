@@ -1,3 +1,5 @@
+package Multicast;
+
 import java.net.MulticastSocket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -9,6 +11,7 @@ import java.io.IOException;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
+import Commun.database;
 public class MulticastServer extends Thread {
     private String MULTICAST_ADDRESS = "224.3.2.1";
     private int PORT = 4321;
@@ -36,6 +39,8 @@ public class MulticastServer extends Thread {
 		} catch (Exception e) {
 			System.out.println("Exception in main: " + e);
 			e.printStackTrace();
+            System.out.println("Exiting...");
+            return;
 		}
         
         System.out.println(DEP + " Polling station running...");
@@ -115,7 +120,7 @@ class PollingStationInterface extends Thread{
             int option;
             Scanner in = new Scanner(System.in);
             do{
-                System.out.print("\n1 - Find Person\noption: ");
+                System.out.println("1 - Find Person");
 
                 option = in.nextInt();
                 in.nextLine();

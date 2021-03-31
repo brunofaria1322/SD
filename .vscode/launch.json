@@ -4,7 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "type": "java",
+            "name": "Launch RMIServer",
+            "request": "launch",
+            "mainClass": "RMI.RMIServer",
+            "projectName": "SD_e4037862"
+        },
+        {
+            "type": "java",
+            "name": "Launch MulticastServer",
+            "request": "launch",
+            "mainClass": "Multicast.MulticastServer",
+            "projectName": "SD_e4037862"
+        },
         {
             "type": "java",
             "name": "Launch Current File",

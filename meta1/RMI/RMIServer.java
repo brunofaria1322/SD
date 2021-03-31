@@ -23,6 +23,8 @@ import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.mysql.cj.exceptions.CJCommunicationsException;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 
+import Commun.database;
+
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
@@ -336,6 +338,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
+
 			if(rs.next()==false){
 				return null; //não há user com esse username
 			}
