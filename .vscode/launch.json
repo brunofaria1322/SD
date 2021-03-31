@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch AdminConsole",
+            "request": "launch",
+            "mainClass": "Admin.AdminConsole",
+            "projectName": "SD_e4037862"
+        },
+        {
+            "type": "java",
             "name": "Launch RMIServer",
             "request": "launch",
             "mainClass": "RMI.RMIServer",
@@ -16,7 +23,9 @@
             "name": "Launch MulticastServer",
             "request": "launch",
             "mainClass": "Multicast.MulticastServer",
-            "projectName": "SD_e4037862"
+            "projectName": "SD_e4037862",
+            "noDebug": true,
+            "__progressId": "a155abd7-7590-4033-adc8-6119a53662bc"
         },
         {
             "type": "java",

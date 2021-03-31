@@ -1,20 +1,31 @@
+package Admin;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.ArrayList;
+import java.sql.Date;
+import java.util.HashMap;
 import java.util.Scanner;
 
-public class AdminConsole {
-    public static void main(String[] args) {
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
-        /*
+import Commun.database;
+
+public class AdminConsole {
+    static database db;
+    public static void main(String[] args) throws RemoteException {
+
+        
         try {
-			Bla bla = (Bla) LocateRegistry.getRegistry(1099).lookup("central");
+			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
 		} catch (Exception e) {
 			System.out.println("Exception in main: " + e);
 			e.printStackTrace();
 		}
-        */
+        
         System.out.println("Welcome to Admin Console");
 
         int option;
@@ -50,22 +61,29 @@ public class AdminConsole {
         in.close();
     }
 
-    private static boolean registerPerson(Scanner in){
+    private static boolean registerPerson(Scanner in) throws RemoteException{
         int type, ndep;
+        String cargo = "all";
         boolean isValid = false;
         do{
             System.out.print("\n1 - Regist student\n2 - Regist professor\n3 - Regist employee\n0 - Abort\noption: ");
 
             type = in.nextInt();
             in.nextLine();
-            
             switch (type){
                 case 0:
                     return false;
                 case 1:
+                    cargo = "aluno";
+                    isValid = true;
+                    break;
                 case 2:
+                    cargo = "docente";
+                    isValid = true;
+                    break;
                 case 3:
                     isValid = true;
+                    cargo = "funcionario";
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -73,13 +91,17 @@ public class AdminConsole {
             }
         }while (!isValid);
 
-        //TODO: escolher departamento da BD
+        HashMap<Integer,String> deps = db.getDepartments();
 
         isValid = false;
-        System.out.println("\nbla bla bla... selecionar o departamento a que pertence");
+        System.out.println("\nSelect the user's department");
         do{
+            int i = 1;
+            for (Integer key : deps.keySet()){
+               System.out.println(i + " - " + deps.get(key));
+               i++;
+            }
             System.out.print("0 - Abort\noption: ");
-
             ndep = in.nextInt();
             in.nextLine();
             
@@ -87,12 +109,13 @@ public class AdminConsole {
                 return false;
             }
 
-            else if (ndep< 0 || ndep > 19){     //TODO: dep > num de departamentos
+            else if (ndep< 0 || ndep > deps.keySet().size()){     
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else{
                 isValid=true;
+                ndep = deps.keySet().toArray(new Integer[deps.keySet().size()])[ndep-1];
             }
         }while (!isValid);
 
@@ -109,15 +132,16 @@ public class AdminConsole {
         String cc_number = in.nextLine();
 
         isValid=false;
-        Date cc_expiration_date = new Date();
+        Date cc_expiration_date = new Date(1970, 1, 1);
         do{
-            System.out.print("\nCC expiration date (dd/mm/yyyy): ");
+            System.out.print("\nCC expiration date (mm/yyyy): ");
             String aux = in.nextLine();
             try{
-                cc_expiration_date = new SimpleDateFormat("dd/MM/yyyy").parse(aux);
+                cc_expiration_date = new Date(new SimpleDateFormat("MM/yyyy").parse(aux).getTime());
                 isValid = true;
             }catch(Exception e){
-                System.out.print("Invalid date! Date should be in format (dd/mm/yyyy). Try Again...");
+                System.out.print(e);
+                System.out.print("Invalid date! Date should be in format (mm/yyyy). Try Again...");
             }
 
         }while(!isValid);
@@ -143,12 +167,10 @@ public class AdminConsole {
             }
         }while(!isValid);
 
-
-        //TODO: contactar servidor
-
+        db.createUser(cargo, ndep, name, address, phone_number, cc_number, cc_expiration_date, username, password);
         //DEBUG
         System.out.println(
-            "\ntype: " + type +
+            "\ntype: " + cargo +
             "\nndep: " + ndep +
             "\nname: " + name +
             "\naddress: " + address +
@@ -162,11 +184,12 @@ public class AdminConsole {
         
     }
 
-    private static void createElection(Scanner in){
+    private static void createElection(Scanner in) throws RemoteException{
         int voters, ndep;
         boolean isValid = false;
+        String cargos = new String();
         do{
-            System.out.print("\nWho are the voters?\n1 - Students\n2 - Professors\n3 - Employees\n0 - Abort\noption: ");
+            System.out.print("\nWho are the voters?\n1 - Students\n2 - Professors\n3 - Employees\n4 - Everyone\n0 - Abort\noption: ");
 
             voters = in.nextInt();
             in.nextLine();
@@ -175,8 +198,19 @@ public class AdminConsole {
                 case 0:
                     return;
                 case 1:
+                    cargos = "aluno";
+                    isValid = true;
+                    break;
                 case 2:
+                    cargos = "docente";
+                    isValid = true;
+                    break;
                 case 3:
+                    cargos = "funcionario";
+                    isValid = true;
+                    break;
+                case 4:
+                    cargos = "all";
                     isValid = true;
                     break;
                 default:
@@ -185,11 +219,17 @@ public class AdminConsole {
             }
         }while (!isValid);
 
-        //TODO: escolher departamento da BD
 
         isValid = false;
-        System.out.println("\nbla bla bla... selecionar o departamento a que pertence");
+        System.out.println("\nWhat are the voters' department?");
         do{
+            HashMap<Integer,String> deps = db.getDepartments();
+            int i = 1;
+            for (Integer key : deps.keySet()){
+               System.out.println(i + " - " + deps.get(key));
+               i++;
+            }
+            System.out.println(i + " - all" );
             System.out.print("0 - Abort\noption: ");
 
             ndep = in.nextInt();
@@ -199,12 +239,18 @@ public class AdminConsole {
                 return;
             }
 
-            else if (ndep< 0 || ndep > 19){     //TODO: dep > num de departamentos
+            else if (ndep< 0 || ndep > deps.keySet().size()+1){     
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else{
                 isValid=true;
+                if(ndep < deps.keySet().size()){
+                    ndep = deps.keySet().toArray(new Integer[deps.keySet().size()])[ndep-1];
+                }
+                else{
+                    ndep = 0;
+                }
             }
         }while (!isValid);
 
@@ -264,7 +310,7 @@ public class AdminConsole {
         );
 
 
-        //TODO: contactar servidor
+        db.createElection(cargos, ndep + ";", ndep + ";", title, description, start_time, end_time);
 
         //TODO: if registado com sucesso
             //TODO: maanage election em causa.
