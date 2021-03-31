@@ -16,9 +16,10 @@ public class VotingTerminal extends Thread {
 
     public void run() {
         MulticastSocket socket = null;
+        VotingInterface it = null;
         try {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
-            VotingInterface it = new VotingInterface(group, PORT);          //TODO: apenas criar quando desbloqueado
+            it = new VotingInterface(group, PORT);
 
             socket = new MulticastSocket(PORT);  // create socket and bind it
             socket.joinGroup(group);
@@ -50,13 +51,23 @@ public class VotingTerminal extends Thread {
                 packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
-                message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println(message);
+                hash_map = it.packetToHashMap(packet);
+                
+                switch (hash_map.get("type")) {
+
+                    default:
+                        //DEBUG
+                        System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
+                        message = new String(packet.getData(), 0, packet.getLength());
+                        System.out.println(message);
+                        break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            it.sendMessage("type | leaving; id | " + this.id);
+
             socket.close();
         }
     }
