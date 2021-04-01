@@ -66,14 +66,12 @@ public class MulticastServer extends Thread {
                 switch (hash_map.get("type")) {
                     case "identification":
                         if(hash_map.get("id") == null){
-                            it.sendMessage("type | identification; id | " + ids);
-                            terminals.put(ids++, true);
+                            it.sendMessage("type | identification; id | " + ids++);
                         }
                         break;
                 
                     case "leaving":
                         if(hash_map.get("id") == null){
-                            terminals.remove(Integer.parseInt(hash_map.get("id")));
 
                             //DEBUG
                             message = new String(packet.getData(), 0, packet.getLength());

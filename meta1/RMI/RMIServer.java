@@ -32,6 +32,8 @@ import java.net.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+import Commun.database;
+
 class Heartbeat implements Runnable {
 	private byte[] buffer;
 	private DatagramPacket request;
