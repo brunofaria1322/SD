@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -100,6 +101,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	public static Connection conn;
 	private static String enckey = "cenabuesegura";
 	public static ArrayList<Pair<String,String>> logged;
+	private static Thread current;
 	public RMIServer() throws RemoteException {
 		super();
 	}
@@ -117,9 +119,11 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		// create our mysql database connection
 		connectToBD();
 		//createUser("testador",0,"teste","testelandia","123456789","testecc",new Date(1970,1,1),"teste","passparatestes");
+		Timestamp ue; 
+		current = Thread.currentThread();
 		while(true){
 			try {
-				Timestamp ue = updateElections();
+				ue = updateElections();
 				if(System.currentTimeMillis() - ue.getTime() > 0){
 					Thread.sleep(System.currentTimeMillis() - ue.getTime());
 				}
@@ -127,7 +131,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					Thread.sleep(60000);
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				; //nova eleicao ou alteração de datas
 			}
 		}
 	}
@@ -161,7 +165,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			else{
 				return -3; //Erro que não devia acontecer
 			}
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return createUser(cargo, ndep, nome, morada, telefone, numcc, valcc, username, password);
 		} catch (SQLException e) {
@@ -181,7 +185,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				deps.put(rs.getInt("ndep"), rs.getString("nome"));
 			}
 			return deps;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getDepartments();
 		} catch (SQLException e) {
@@ -190,23 +194,23 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-	public boolean login(String username, String password){
+	public boolean login(String username, String num_cc, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
 			System.out.println(query);
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
-			if(rs.next()==false){
+			if(rs.next()==false || !rs.getString("numcc").equals(num_cc)){
 				return false; //dados invalidos
 			}
 			if(AES.decrypt(rs.getString("password"),enckey).equals(password)){
 				logged.add(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
 				return true; //sucesso
 			}
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
-			return login(username, password);
+			return login(username, num_cc, password);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,8 +235,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.updateString("cargos", cargos); rs.updateString("departamentos", departamentos); rs.updateString("mesas", mesas); rs.updateString("titulo", titulo); rs.updateString("descricao", desc);rs.updateTimestamp("inicio", Timestamp.valueOf(inicio));rs.updateTimestamp("fim", Timestamp.valueOf(fim));
 				rs.updateString("estado", "waiting");
 				rs.insertRow();
+				current.interrupt();
 				return ret;
-			} catch (CommunicationsException e) {
+			} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 				connectToBD();
 				return createElection(cargos, departamentos, mesas, titulo, desc, inicio, fim);
 			} catch (SQLException e) {
@@ -302,9 +307,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 						}
 				}
 			}
-			
+			current.interrupt();
 			return 1;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return editElection(neleicao, remove, titulo, descricao, inicio, fim, departamentos, mesas, listas);
 		} catch (SQLException e) {
@@ -347,7 +352,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				out.put(rs2.getInt("neleicao"), hm);
 			}
 			return out;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getElections(username, dep_mesa);
 		} catch (SQLException e) {
@@ -370,7 +375,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			}
 			String [] out = {rs.getString("numcc"),rs.getString("nome")};
 			return out;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getUser(usernameOrCC);
 		} catch (SQLException e) {
@@ -393,7 +398,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			else{
 				return false;
 			}
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return logOut(username);
 		} catch (SQLException e) {
@@ -471,7 +476,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.insertRow();
 			}
 			return count+1;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return createOrEditList(neleicao, nome, users, remove);
 		} catch (SQLException e) {
@@ -512,7 +517,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				out.put(lista, new Pair<String,ArrayList<Pair<String,String>>>(rs.getString("nome"),al));
 			}
 			return out;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getLists(neleicao);
 		} catch (SQLException e) {
@@ -557,7 +562,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				}
 			}
 				
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return vote(username, neleicao, nlista, mesa);
 		} catch (SQLException e) {
@@ -591,7 +596,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				}
 			}
 			return out;
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getResults(neleicao);
 		} catch (SQLException e) {
@@ -637,7 +642,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			else{
 				return nextOpen;
 			}
-		} catch (CommunicationsException e) {
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return updateElections();
 		} catch (SQLException e) {

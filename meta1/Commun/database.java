@@ -11,7 +11,7 @@ import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 public interface database extends Remote {
     public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password) throws java.rmi.RemoteException;
     public HashMap<Integer,String> getDepartments() throws java.rmi.RemoteException;
-    public boolean login(String username, String password) throws java.rmi.RemoteException;
+    public boolean login(String username, String num_cc, String password) throws java.rmi.RemoteException;
     public int createElection(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim) throws java.rmi.RemoteException;
     public int editElection(int neleicao, boolean remove, String titulo, String descricao, LocalDateTime inicio, LocalDateTime fim, String departamentos, String mesas, Integer[] listas) throws java.rmi.RemoteException;
     public HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa) throws java.rmi.RemoteException;
