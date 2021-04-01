@@ -1,21 +1,24 @@
 package Admin;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.sql.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 import Commun.database;
-
 public class AdminConsole {
     static database db;
+    static int last_elec = 0;
     public static void main(String[] args) throws RemoteException {
 
         
@@ -41,14 +44,39 @@ public class AdminConsole {
                     System.out.println("Bye!");
                     break;
                 case 1:
-                    if (registerPerson(in)){
-                        System.out.println("Person successfully registered!");
-                    } else {
+                    int rp = registerPerson(in);
+                    if (rp == 1){
+                        System.out.println("Person registered successfully !");
+                    } else if(rp == -4){
                         System.out.println("Registry was aborted!");
+                    }
+                    else if (rp == -3){
+                        System.out.println("Sorry, something went wrong with our server. Please contact us!");
+                    }
+                    else if(rp == -2){
+                        System.out.println("There's already an account with that CC number!");
+                    }
+                    else{
+                        System.out.println("There's already an account with that username!");
                     }
                     break;
                 case 2:
-                    createElection(in);
+                    int ce = createElection(in);
+                    if(ce == -1){
+                        System.out.println("Sorry, something went wrong with our server. Please contact us!");
+                    }
+                    else if(ce == 2){
+                        System.out.println("Election was created successfully!");
+                        System.out.println("WARNING: There was already an election with the same name as the new one's");
+                        manageElection(in,last_elec);
+                    }
+                    else if(ce == 1){
+                        System.out.println("Election was created successfully!");
+                        manageElection(in,last_elec);
+                    }
+                    else{
+                        System.out.println("Creation was aborted!"); 
+                    }
                     break;
                 case 3:
                     chooseElection(in);
@@ -61,7 +89,7 @@ public class AdminConsole {
         in.close();
     }
 
-    private static boolean registerPerson(Scanner in) throws RemoteException{
+    private static int registerPerson(Scanner in) throws RemoteException{
         int type, ndep;
         String cargo = "all";
         boolean isValid = false;
@@ -72,7 +100,7 @@ public class AdminConsole {
             in.nextLine();
             switch (type){
                 case 0:
-                    return false;
+                    return -4;
                 case 1:
                     cargo = "aluno";
                     isValid = true;
@@ -106,7 +134,7 @@ public class AdminConsole {
             in.nextLine();
             
             if (ndep == 0){
-                return false;
+                return -4;
             }
 
             else if (ndep< 0 || ndep > deps.keySet().size()){     
@@ -166,10 +194,8 @@ public class AdminConsole {
                 System.out.print("\nPassword requires a minimum of 4 characters! Try Again...");
             }
         }while(!isValid);
-
-        db.createUser(cargo, ndep, name, address, phone_number, cc_number, cc_expiration_date, username, password);
-        //DEBUG
-        System.out.println(
+         //DEBUG
+        /*System.out.println(
             "\ntype: " + cargo +
             "\nndep: " + ndep +
             "\nname: " + name +
@@ -179,12 +205,14 @@ public class AdminConsole {
             "\nCC val: " + cc_expiration_date.toString() +
             "\nusername: " + username +
             "\npassword: " + password
-        );
-        return true;
+        );*/
+        return db.createUser(cargo, ndep, name, address, phone_number, cc_number, cc_expiration_date, username, password);
+       
+        
         
     }
 
-    private static void createElection(Scanner in) throws RemoteException{
+    private static int createElection(Scanner in) throws RemoteException{
         int voters, ndep;
         boolean isValid = false;
         String cargos = new String();
@@ -196,7 +224,7 @@ public class AdminConsole {
             
             switch (voters){
                 case 0:
-                    return;
+                    return -2;
                 case 1:
                     cargos = "aluno";
                     isValid = true;
@@ -221,7 +249,7 @@ public class AdminConsole {
 
 
         isValid = false;
-        System.out.println("\nWhat are the voters' department?");
+        System.out.println("\nWhat is the voters' department?");
         do{
             HashMap<Integer,String> deps = db.getDepartments();
             int i = 1;
@@ -236,7 +264,7 @@ public class AdminConsole {
             in.nextLine();
             
             if (ndep == 0){
-                return;
+                return -2;
             }
 
             else if (ndep< 0 || ndep > deps.keySet().size()+1){     
@@ -300,6 +328,7 @@ public class AdminConsole {
         }while(!isValid);
 
         //DEBUG
+        /*
         System.out.println(
             "\ntype: " + voters +
             "\nndep: " + ndep +
@@ -308,118 +337,102 @@ public class AdminConsole {
             "\nstart: " + start_time.toString() +
             "\nend: " + end_time.toString()
         );
+        */
 
+        last_elec = ndep;
+        return db.createElection(cargos, ndep + ";", ndep + ";", title, description, start_time, end_time);
 
-        db.createElection(cargos, ndep + ";", ndep + ";", title, description, start_time, end_time);
-
-        //TODO: if registado com sucesso
             //TODO: maanage election em causa.
-            manageElection(in);
+            //manageElection(in);
         
     }
 
-    private static void chooseElection(Scanner in){
-
-        //TODO: getElections
+    private static void chooseElection(Scanner in) throws RemoteException{
+        System.out.println("\nChoose an election:");
+        HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
+        int i= 1;
+        for (Integer key : elections.keySet()){
+            System.out.println(i + " - " + elections.get(key).get("titulo"));
+            i++;
+         }
         
         int nelec;
-        System.out.println("\nbla bla bla... selecionar eleição");
+        
         do{
             System.out.print("0 - Back\noption: ");
 
             nelec = in.nextInt();
             in.nextLine();
 
-            if (nelec< 0 || nelec > 19){     //TODO: nelec > num de eleições
+            if (nelec< 0 || nelec > elections.keySet().size()){     
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else if(nelec>0) {
                 //TODO: manageElection(in, )
-                manageElection(in);
+                manageElection(in, elections.keySet().toArray(new Integer[elections.keySet().size()])[nelec-1]);
             }
         }while (nelec!=0);
 
     }
 
-    private static void manageElection(Scanner in){
-
+    private static void manageElection(Scanner in, int nelec) throws RemoteException{
+        HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
         int option;
+        int estado;
         //TODO: (if now < eleição.start)
             do{
-                System.out.print("Election hasn't start yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                if(LocalDateTime.parse(elections.get(nelec).get("inicio"), formatter).isAfter(LocalDateTime.now())){
+                    estado = 1;
+                    System.out.print("Election hasn't started yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
+                }
+                else if(LocalDateTime.parse(elections.get(nelec).get("fim"), formatter).isAfter(LocalDateTime.now())){
+                    estado = 2;
+                    System.out.print("Election is currently active\n1 - Manage polling stations\n0 - Back\noption: ");
+                }
+                else{
+                    estado = 3;
+                    System.out.print("Election has finished \n1 - Check Results\n0 - Back\noption: ");
+                }
+                
 
                 option = in.nextInt();
                 in.nextLine();
 
-                switch (option){
-                    case 0:
-                        break;
-                    case 1:
-                        //TODO: manageCandidateLists(in, election_id);
-                        manageCandidateLists(in);
-                        break;
-                    case 2:
-                        //TODO: managePollingStations(in, election_id);
-                        managePollingStations(in);
-                        break;
-                    case 3:
-                        //TODO: changeProperties(in, election_id);
-                        changeProperties(in);
-                        break;
-                    default:
-                        System.out.println("Wrong option!");
-                        break;
-                }                
-            }while (option!=0);
-        
             
-        //TODO: (if now > eleição.end)
-            do{
-                System.out.print("Election has finished \n1 - Check Results\n0 - Back\noption: ");
-
-                option = in.nextInt();
-                in.nextLine();
-
-                switch (option){
-                    case 0:
-                        break;
-                    case 1:
-                        //TODO: checkResults(in, election_id);
-                        checkResults(in);
-                        break;
-                    default:
-                        System.out.println("Wrong option!");
-                        break;
-                }                
-            }while (option!=0);
-
-        //TODO: else
-            do{
-                System.out.print("Election is currently active\n1 - Manage polling stations\n0 - Back\noption: ");
-
-                option = in.nextInt();
-                in.nextLine();
-
-                switch (option){
-                    case 0:
-                        break;
-                    case 1:
-                        //TODO: managePollingStations(in, election_id);
-                        managePollingStations(in);
-                        break;
-                    default:
-                        System.out.println("Wrong option!");
-                        break;
-                }                
+                if (option == 1 && estado == 1){
+                    manageCandidateLists(in,nelec);
+                }
+                else if ((option == 2 && estado == 1) || option == 1 && estado == 2){
+                     //TODO: managePollingStations(in, election_id);
+                     managePollingStations(in, nelec);
+                }        
+                else if (option == 3 && estado == 1){
+                    //TODO: changeProperties(in, election_id);
+                    changeProperties(in, nelec);
+                }
+                else if (option == 1 && estado == 3){
+                    //TODO: checkResults(in, election_id);
+                    checkResults(in, nelec);
+                }        
+                else{
+                    System.out.println("Wrong option!");
+                }              
             }while (option!=0);
     }
     
-    private static void manageCandidateLists(Scanner in){
-
+    private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException{
         int option;
         do{
-            System.out.print("1 - Add candidate list\n2 - Remove candidate list\n3 - Manage candidate list\n0 - Back\noption: ");
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
+            System.out.println("Current candidate lists in the election:\n");
+            if(lists != null){
+                for (Integer key : lists.keySet()){
+                    System.out.println("."+lists.get(key).left);
+                }
+            }
+            System.out.println("\n1 - Add candidate list\n2 - Remove candidate list\n3 - Manage candidate list\n0 - Back\noption: ");
 
             option = in.nextInt();
             in.nextLine();
@@ -429,15 +442,15 @@ public class AdminConsole {
                     break;
                 case 1:
                     //TODO: manageCandidates(in, election_id);
-                    addCandidateList(in);
+                    addCandidateList(in,nelec);
                     break;
                 case 2:
                     //TODO: removeCandidateList(in, election_id);
-                    removeCandidateList(in);
+                    removeCandidateList(in,nelec);
                     break;
                 case 3:
-                    //TODO: manageCandidates(in, election_id);
-                    manageCandidates(in);
+                    //TODO: manageCandidates(in, election_id);  
+                    chooseCandidateList(in, nelec);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -448,44 +461,95 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    private static void addCandidateList(Scanner in){
+    private static void addCandidateList(Scanner in, int nelec) throws RemoteException{
 
         System.out.print("\nList Name: ");
         String name = in.nextLine();
-
-        //TODO: criar Lista
-        
-        manageCandidates(in);
-
+        int cl = db.createOrEditList(nelec, name, null,false);
+        if(cl > 0){
+            manageCandidates(in, nelec, cl);
+        }
+        else if (cl == -3){
+            System.out.println("\nThere is already a list with that name associated to this election!");
+        }
+        else{
+            System.out.println("Sorry, something went wrong with our server. Please contact us!");
+        }
     }
 
-    private static void removeCandidateList(Scanner in){
+    private static void removeCandidateList(Scanner in, int nelec) throws RemoteException{
 
-        //TODO: getList
+        
         
         int nlist;
-        System.out.println("\nbla bla bla... selecionar lista");
+        System.out.println("\nWhich list do you want to remove?");
         do{
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
+            int i = 1;
+            if(lists != null){
+                for (Integer key : lists.keySet()){
+                    System.out.println(i + " - " +lists.get(key).left);
+                    i++;
+                }
+            }
             System.out.print("0 - Back\noption: ");
 
             nlist = in.nextInt();
             in.nextLine();
 
-            if (nlist< 0 || nlist > 19){     //TODO: nmember > num de membros
+            if (nlist< 0 || nlist > lists.keySet().size()){     
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else if(nlist>0) {
-                //TODO: Remover Membro
+                Integer a[] = {lists.keySet().toArray(new Integer[lists.keySet().size()])[nlist-1]};
+                db.editElection(nelec, true, null, null, null, null, null, null, a);
             }
         }while (nlist!=0);
 
     }
+    private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException{
 
-    private static void manageCandidates(Scanner in){
+        
+        
+        int nlist;
+        System.out.println("\nWhich list do you want to edit?");
+        do{
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
+            int i = 1;
+            if(lists != null){
+                for (Integer key : lists.keySet()){
+                    System.out.println(i + " - " +lists.get(key).left);
+                    i++;
+                }
+            }
+            System.out.print("0 - Back\noption: ");
+
+            nlist = in.nextInt();
+            in.nextLine();
+
+            if (nlist< 0 || nlist > lists.keySet().size()){     
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(nlist>0) {
+                manageCandidates(in, nelec, lists.keySet().toArray(new Integer[lists.keySet().size()])[nlist-1]);
+            }
+        }while (nlist!=0);
+
+    }
+    private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException{
         int option;
         do{
-            System.out.print("1 - Add candidate\n2 - Remove candidate\n0 - Back\noption: ");
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
+            ArrayList<Pair<String,String>> candis = lists.get(nlista).right;
+            System.out.println("Candidates in the list:\n");
+            if(candis != null){
+                for(Pair<String,String> p : candis){
+                    System.out.println("." + p.right + " ("+ p.left + ")");
+                }
+            }
+            System.out.println("\n1 - Add candidate\n2 - Remove candidate\n0 - Back\noption: ");
 
             option = in.nextInt();
             in.nextLine();
@@ -494,12 +558,11 @@ public class AdminConsole {
                 case 0:
                     break;
                 case 1:
-                    //TODO: addCandidate(in, list_id);
-                    addCandidate(in);
+                    addCandidate(in, nelec, nlista);
                     break;
                 case 2:
                     //TODO: removeCandidate(in, list_id);
-                    removeCandidate(in);
+                    removeCandidate(in, nelec, nlista);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -509,45 +572,71 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    private static void addCandidate(Scanner in){
-
+    private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
+        HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
         System.out.print("\nCC number: ");
         String cc_number = in.nextLine();
 
         System.out.print("\nName: ");
         String name = in.nextLine();
 
-        //TODO: adicionar Membro
+        db.createOrEditList(nelec, lists.get(nlista).left, new ArrayList<Pair<String,String>>(){{add(new Pair<String,String>(cc_number,name));}},false);
     }
 
-    private static void removeCandidate(Scanner in){
-
-        //TODO: getMembers
+    private static void removeCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
+        
         
         int nmember;
-        System.out.println("\nbla bla bla... selecionar membro");
+        System.out.println("\nWhat candidate do you wish to remove?");
         do{
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
+            ArrayList<Pair<String,String>> candis = lists.get(nlista).right;
+            int i= 1;
+            if(candis != null){
+                for(Pair<String,String> p : candis){
+                    System.out.println(i+" - " + p.right + " ("+ p.left + ")");
+                    i++;
+                }
+            }
             System.out.print("0 - Back\noption: ");
 
             nmember = in.nextInt();
             in.nextLine();
 
-            if (nmember< 0 || nmember > 19){     //TODO: nmember > num de membros
+            if (nmember< 0 || nmember > candis.size()){     //TODO: nmember > num de membros
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else if(nmember>0) {
-                //TODO: Remover Membro
+                ArrayList<Pair<String,String>> a =  new ArrayList<Pair<String,String>>();
+                a.add(candis.get(nmember-1));
+                db.createOrEditList(nelec, lists.get(nlista).left,a, true);
             }
         }while (nmember!=0);
 
     }
 
-    private static void managePollingStations(Scanner in){
+    private static void managePollingStations(Scanner in, int nelec) throws RemoteException{
         int option;
+       
         do{
-            System.out.print("1 - Add pooling station\n2 - Remove pooling station\n0 - Back\noption: ");
-
+            HashMap<Integer,HashMap<String,String>> elecs = db.getElections(null, null);
+            HashMap<Integer,String> deps = db.getDepartments();
+            String mesas = elecs.get(nelec).get("mesas");
+            List<String> amesas = Arrays.asList(mesas.split(";"));
+            if(amesas.contains(new String("0"))){
+                amesas = new ArrayList<String>();
+                for(Integer key: deps.keySet()){
+                    amesas.add(key.toString());
+                }
+            }
+            System.out.println("PollingStations associated to the election:\n");
+            if(amesas != null){
+                for(String mesa : amesas){
+                    System.out.println("." + deps.get(Integer.parseInt(mesa)));
+                }
+            }
+            System.out.println("\n1 - Add polling station\n2 - Remove polling station\n0 - Back\noption: ");
             option = in.nextInt();
             in.nextLine();
 
@@ -556,11 +645,11 @@ public class AdminConsole {
                     break;
                 case 1:
                     //TODO: addPollingStation(in, list_id);
-                    addPollingStation(in);
+                    addPollingStation(in, nelec, amesas);
                     break;
                 case 2:
                     //TODO: removePollingStation(in, list_id);
-                    removePollingStation(in);
+                    removePollingStation(in, nelec, amesas);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -571,29 +660,76 @@ public class AdminConsole {
 
     }
 
-    private static void addPollingStation(Scanner in){
-        
-        //TODO: ISTO
+    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException{
+        int option;
+        do{
+            HashMap<Integer,String> deps = db.getDepartments();
+            ArrayList<Integer> amesas = new ArrayList<Integer>();
+            System.out.println("Which polling station would you like to associate to the election?");
+            int i = 1;
+            if(deps != null){
+                for(Integer key : deps.keySet()){
+                    if(!stations.contains(key.toString())){
+                        amesas.add(key);
+                        System.out.println(i + " - " + deps.get(key));
+                        i++;
+                    }
+                }
+            }
+            System.out.print("0 - Back\noption: ");
+            option = in.nextInt();
+            in.nextLine();
+            if (option< 0 || option > amesas.size()){     //TODO: nmember > num de membros
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(option>0) {
+                db.editElection(nelec, false, null, null, null, null, null, amesas.get(option-1)+";", null);
+            }
+        }while (option!=0);
 
     }
 
-    private static void removePollingStation(Scanner in){
-        
-        //TODO: ISTO
+    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException{  
+        int option;
+        do{
+            HashMap<Integer,String> deps = db.getDepartments();
+            int i = 1;
+            System.out.println("Which polling station would you like to remove from the election?");
+            if(stations != null){
+                for(String station : stations){
+                    System.out.println(i + " - " + deps.get(Integer.parseInt(station)));
+                }
+                i++;
+            }
+            System.out.print("0 - Back\noption: ");
+            option = in.nextInt();
+            in.nextLine();
+            if (option< 0 || option > stations.size()){     //TODO: nmember > num de membros
+                System.out.println("Wrong option! Try Again...");
+                break;
+            }
+            else if(option>0) {
+                db.editElection(nelec, true, null, null, null, null, null, stations.get(option-1)+";", null);
+            }
+        }while (option!=0);
+
 
     }
 
-    private static void changeProperties(Scanner in){
+    private static void changeProperties(Scanner in, int nelec) throws RemoteException{
         
         boolean isValid  = false;
         int option;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        HashMap<Integer,HashMap<String,String>> elecs = db.getElections(null, null);
+        HashMap<String,String> elec = elecs.get(nelec);
 
-        //TODO: bla bla ir buscar os dados
-        String title = "titulo";
-        String description = "decrição";
-        LocalDateTime start_time = LocalDateTime.now();
-        LocalDateTime end_time = LocalDateTime.now().plusDays(1);
+        String title = elec.get("titulo");
+        String description = elec.get("descricao");
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+        LocalDateTime start_time = LocalDateTime.parse(elec.get("inicio"),formatter2);
+        LocalDateTime end_time = LocalDateTime.parse(elec.get("fim"),formatter2);
 
         do{
             System.out.println(
@@ -603,7 +739,7 @@ public class AdminConsole {
             "\nend: " + end_time.toString()
             );
 
-            System.out.print("1 - Change Title\n2 - Change Description\n0 - Back\noption: ");
+            System.out.print("1 - Change Title\n2 - Change Description\n3 - Change Start Date\n4- Change End Date\n0 - Back\noption: ");
 
             option = in.nextInt();
             in.nextLine();
@@ -614,12 +750,12 @@ public class AdminConsole {
                 case 1:
                     System.out.print("\nNew election title: ");
                     title = in.nextLine();
-                    //TODO: comunicar com o sv
+                    db.editElection(nelec, false, title, null, null, null, null, null, null);
                     break;
                 case 2:
                     System.out.print("\nElection description: ");
                     description = in.nextLine();
-                    //TODO: comunicar com o sv
+                    db.editElection(nelec, false, null, description, null, null, null, null, null);
                     break;
                 case 3:
                     isValid = false;
@@ -638,7 +774,7 @@ public class AdminConsole {
                         }
 
                     }while(!isValid);
-                    //TODO: comunicar com o sv
+                    db.editElection(nelec, false, null, null, start_time, null, null, null, null);
                     break;
                 case 4:
                     isValid = false;
@@ -659,7 +795,7 @@ public class AdminConsole {
                         }
 
                     }while(!isValid);
-                    //TODO: comunicar com o sv
+                    db.editElection(nelec, false, null, null, null, end_time, null, null, null);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -670,9 +806,14 @@ public class AdminConsole {
 
     }
 
-    private static void checkResults(Scanner in){
-        //TODO: BLA BLA printar os resultados
-        
+    private static void checkResults(Scanner in, int nelec) throws RemoteException{
+        HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(nelec);
+        HashMap<Integer,Pair<String,Integer>> lists = results.get(nelec).right;
+        if(lists != null){
+            for(Integer list : lists.keySet()){
+                System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos");
+            }
+        }
         System.out.println("Press enter to continue...");
         in.nextLine();
     }
