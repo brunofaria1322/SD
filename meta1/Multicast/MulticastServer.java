@@ -31,8 +31,6 @@ public class MulticastServer extends Thread {
     public void run() {
         MulticastSocket socket = null;
         int ids = 0;
-
-        HashMap<Integer,Boolean> terminals = new HashMap<Integer,Boolean>();    // terminal_id : isFree
         
         try {
 			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
@@ -175,7 +173,7 @@ class PollingStationInterface extends Thread{
 
         System.out.print("\nCC number or username: ");
         String aux = in.nextLine();
-        Pair<String,String> user = null;
+        String[] user = null;
         try {
             user = db.getUser(aux);
         } catch (RemoteException e) {
@@ -186,7 +184,7 @@ class PollingStationInterface extends Thread{
             System.out.println("Couldn't find user with CC number or username: " + aux);
         }
         else{
-            System.out.println(user);
+            System.out.println(user[0] + "\t" + user[1]);
         }
     }
 

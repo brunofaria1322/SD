@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch VotingTerminal",
+            "request": "launch",
+            "mainClass": "Voting.VotingTerminal",
+            "projectName": "SD_e4037862"
+        },
+        {
+            "type": "java",
             "name": "Launch AdminConsole",
             "request": "launch",
             "mainClass": "Admin.AdminConsole",

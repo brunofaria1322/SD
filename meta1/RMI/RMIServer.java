@@ -330,7 +330,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 		
 	}
-	public Pair<String,String> getUser(String usernameOrCC){
+	public String[] getUser(String usernameOrCC){
 		// (cc,nome)
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+usernameOrCC+"' OR numcc = '"+usernameOrCC+"';";
@@ -342,7 +342,8 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			if(rs.next()==false){
 				return null; //não há user com esse username
 			}
-			return new Pair<String,String>(rs.getString("numcc"),rs.getString("nome"));
+			String [] out = {rs.getString("numcc"),rs.getString("nome")};
+			return out;
 		} catch (CommunicationsException e) {
 			connectToBD();
 			return getUser(usernameOrCC);
