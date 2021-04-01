@@ -23,8 +23,6 @@ import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.mysql.cj.exceptions.CJCommunicationsException;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 
-import Commun.database;
-
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
@@ -119,7 +117,13 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		//createUser("testador",0,"teste","testelandia","123456789","testecc",new Date(1970,1,1),"teste","passparatestes");
 		while(true){
 			try {
-				Thread.sleep(System.currentTimeMillis() - updateElections().getTime());
+				Timestamp ue = updateElections();
+				if(System.currentTimeMillis() - ue.getTime() > 0){
+					Thread.sleep(System.currentTimeMillis() - ue.getTime());
+				}
+				else{
+					Thread.sleep(60000);
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -143,6 +147,13 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				return -1; //Username já existe
 			}
 			else if(rs.getString("numcc").equals(numcc)){
+				if(rs.getString("username") == null){
+					rs.updateString("cargo", cargo); rs.updateInt("ndep", ndep); rs.updateString("nome", nome); rs.updateString("morada", morada); rs.updateString("telefone", telefone);rs.updateString("numcc", numcc);rs.updateDate("valcc", valcc);rs.updateString("username", username);
+					rs.updateString("password",AES.encrypt(password, enckey));
+					rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
+					rs.updateRow();
+					return 1;
+				}
 				return -2; //CC já existe
 			}
 			else{
@@ -211,7 +222,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			System.out.println(query);
 			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
-			if(rs.next() == false){
+			if(rs.next()){
 				ret = 2; // WARNING: Já existe uma eleição com esse título. Tem a certeza?
 			}
 				rs.moveToInsertRow();
@@ -228,7 +239,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				return -1;
 			}
 	}
-	public int editElection(int neleicao, boolean remove, String departamentos, String mesas, int[] listas){
+	public int editElection(int neleicao, boolean remove, String titulo, String descricao, LocalDateTime inicio, LocalDateTime fim, String departamentos, String mesas, Integer[] listas){
 		try {
 			String query = "SELECT * FROM eleicoes WHERE neleicao = "+neleicao+";";
 			System.out.println(query);
@@ -237,8 +248,20 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			if(rs.next() == false){
 				return -1; //A eleição não existe
 			}
-			if(!rs.getString("estado").equals("waiting") && (departamentos != null || listas != null)){
+			if(!rs.getString("estado").equals("waiting") && (departamentos != null || listas != null || titulo != null || descricao != null)){
 				return -2; //A eleição já começou
+			}
+			if(titulo != null){
+				rs.updateString("titulo", titulo);
+			}
+			if(descricao != null){
+				rs.updateString("descricao", descricao);
+			}
+			if(inicio != null){
+				rs.updateTimestamp("inicio", Timestamp.valueOf(inicio));
+			}
+			if(fim != null){
+				rs.updateTimestamp("fim", Timestamp.valueOf(fim));
 			}
 			if(remove){
 				if(departamentos!=null){
@@ -281,7 +304,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return 1;
 		} catch (CommunicationsException e) {
 			connectToBD();
-			return editElection(neleicao, remove, departamentos, mesas, listas);
+			return editElection(neleicao, remove, titulo, descricao, inicio, fim, departamentos, mesas, listas);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -289,7 +312,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 	}
 	public HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa){
-		// {neleicao:{titulo:String, descricao: String, inicio: String, fim: String}}
+		// {neleicao:{titulo:String, descricao: String, inicio: String, fim: String, departamentos: String, mesas: String}}
 		try {
 			String query;
 			PreparedStatement st;
@@ -312,12 +335,14 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			final ResultSet rs2 = st.executeQuery();
 			HashMap<Integer,HashMap<String,String>> out = new HashMap<Integer,HashMap<String,String>>();
 			while(rs2.next()){
-				out.put(rs2.getInt("neleicao"), new HashMap<String,String>(){{
-					put("titulo",rs2.getString("titulo"));
-					put("descricao", rs2.getString("descricao"));
-					put("inicio",rs2.getTimestamp("inicio").toString());
-					put("fim", rs2.getTimestamp("fim").toString());
-					}});
+				HashMap<String,String> hm = new HashMap<String,String>();
+				hm.put("titulo",rs2.getString("titulo"));
+				hm.put("descricao", rs2.getString("descricao"));
+				hm.put("inicio",rs2.getTimestamp("inicio").toString());
+				hm.put("fim", rs2.getTimestamp("fim").toString());
+				hm.put("departamentos", rs2.getString("departamentos"));
+				hm.put("mesas", rs2.getString("mesas"));
+				out.put(rs2.getInt("neleicao"), hm);
 			}
 			return out;
 		} catch (CommunicationsException e) {
@@ -338,7 +363,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
-
 			if(rs.next()==false){
 				return null; //não há user com esse username
 			}
@@ -375,7 +399,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return false;
 		}
 	}
-	public int createList(int neleicao, String nome, ArrayList<Pair<String,String>> users){
+	public int createOrEditList(int neleicao, String nome, ArrayList<Pair<String,String>> users, boolean remove){
 		//Pair(numcc,nome)
 		try{
 			String query;
@@ -398,30 +422,44 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			rs = st.executeQuery();
 			rs.next();
 			int count = rs.getInt("count");
-			for (Pair<String,String> pair : users) {
-				query = "SELECT * FROM users WHERE numcc = '"+pair.left+"';";
-				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-				rs = st.executeQuery();
-				if(rs.next()){
-					if((cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
-						return -2; //O user não corresponde aos parâmetros pedidos
+			if(users != null){
+				for (Pair<String,String> pair : users) {
+					query = "SELECT * FROM users WHERE numcc = '"+pair.left+"';";
+					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+					rs = st.executeQuery();
+					if(rs.next()){
+						if((cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
+							return -2; //O user não corresponde aos parâmetros pedidos
+						}
+						if(!remove){
+							rs.updateInt("nlista",count+1);
+						}
+						else{
+							rs.updateInt("nlista",0);
+						}
+						rs.updateRow();
 					}
-					rs.updateInt("nlista",count+1);
-					rs.updateRow();
-				}
-				else{ //cria uma pessoa não registada
-					rs.moveToInsertRow();
-					rs.updateString("cargo", cargos); rs.updateString("nome", pair.right); rs.updateString("numcc", pair.left);
-					rs.updateInt("nlista",count+1);
-					rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
-					rs.insertRow();
+					else{ //cria uma pessoa não registada
+						rs.moveToInsertRow();
+						rs.updateString("cargo", cargos); rs.updateString("nome", pair.right); rs.updateString("numcc", pair.left);
+						if(!remove){
+							rs.updateInt("nlista",count+1);
+						}
+						else{
+							rs.updateInt("nlista",0);
+						}
+						rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
+						rs.insertRow();
+					}
 				}
 			}
-			query = "SELECT * FROM listas WHERE nome = '"+nome+"';";
+			query = "SELECT * FROM listas WHERE nome = '"+nome+"' AND neleicao = '"+neleicao+"';";
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
 			if(rs.next()){
-				return 0; //ATENÇÃO: Já existe uma lista com esse nome. Tem a certeza?
+				if(users==null){
+					return -3; //Já existe uma lista com esse nome para essa eleição
+				}
 			}
 			else{
 				rs.moveToInsertRow();
@@ -429,14 +467,14 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.updateString("nome",nome);
 				rs.insertRow();
 			}
-			return 1;
+			return count+1;
 		} catch (CommunicationsException e) {
 			connectToBD();
-			return createList(neleicao, nome, users);
+			return createOrEditList(neleicao, nome, users, remove);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return -3;
+			return -4;
 		}
 	}
 	public HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
@@ -458,17 +496,17 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			int lista = rs.getInt("nlista");
 			HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> out = new HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>>();
 			while(rs.next()){
-				out.put(lista, new Pair<String,ArrayList<Pair<String,String>>>(rs.getString("nome"),new ArrayList<Pair<String,String>>(){{
-					String query2;
-					PreparedStatement st2;
-					ResultSet rs2;
-					query2 = "SELECT * FROM users WHERE nlista = "+lista+";";
-					st2 = conn.prepareStatement(query2,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-					rs2 = st2.executeQuery();
-					while(rs2.next()){
-						add(new Pair<String,String>(rs2.getString("numcc"),rs2.getString("nome")));
-					}
-					}}));
+				ArrayList<Pair<String,String>> al = new ArrayList<Pair<String,String>>();
+				String query2;
+				PreparedStatement st2;
+				ResultSet rs2;
+				query2 = "SELECT * FROM users WHERE nlista = "+lista+";";
+				st2 = conn.prepareStatement(query2,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+				rs2 = st2.executeQuery();
+				while(rs2.next()){
+					al.add(new Pair<String,String>(rs2.getString("numcc"),rs2.getString("nome")));
+				}
+				out.put(lista, new Pair<String,ArrayList<Pair<String,String>>>(rs.getString("nome"),al));
 			}
 			return out;
 		} catch (CommunicationsException e) {
@@ -524,9 +562,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return -3;
 		}
 	}
-	public HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>> getResults(int neleicao){
-		// {neleicao: (nome_eleicao, [{nlista: (nome_lista, votos)}])}
-		HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>> out = new HashMap<Integer,Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>>();
+	public HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> getResults(int neleicao){
+		// {neleicao: (nome_eleicao, {nlista: (nome_lista, votos)})}
+		HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> out = new HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>>();
 		String query;
 		PreparedStatement st;
 		ResultSet rs;
@@ -541,14 +579,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			rs = st.executeQuery();
 			while(rs.next()){
 				if(out.containsKey(rs.getInt("neleicao"))){
-					out.put(rs.getInt("neleicao"), new Pair<String,ArrayList<HashMap<Integer,Pair<String,Integer>>>>(rs.getString("titulo"),new ArrayList<HashMap<Integer,Pair<String,Integer>>>(){{
-						add(new HashMap<Integer,Pair<String,Integer>>(){{
-							put(rs.getInt("nlista"),new Pair<String,Integer>(rs.getString("nome"),rs.getInt("votos")));}});
-				}}));
+					HashMap<Integer,Pair<String,Integer>> hm = new HashMap<Integer,Pair<String,Integer>>();
+					hm.put(rs.getInt("nlista"),new Pair<String,Integer>(rs.getString("nome"),rs.getInt("votos")));
+					out.put(rs.getInt("neleicao"), new Pair<String,HashMap<Integer,Pair<String,Integer>>>(rs.getString("titulo"),hm));
 				}
 				else{
-					out.get(rs.getInt("neleicao")).right.add(new HashMap<Integer,Pair<String,Integer>>(){{
-						put(rs.getInt("nlista"),new Pair<String,Integer>(rs.getString("nome"),rs.getInt("votos")));}}); 
+					out.get(rs.getInt("neleicao")).right.put(rs.getInt("nlista"),new Pair<String,Integer>(rs.getString("nome"),rs.getInt("votos")));
 				}
 			}
 			return out;
