@@ -51,6 +51,7 @@ public class MulticastServer extends Thread {
 		}
         
         System.out.println("Polling station of dep no. "+this.NDEP+" is running...");
+
         try {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
@@ -59,11 +60,33 @@ public class MulticastServer extends Thread {
             socket = new MulticastSocket(PORT);  // create socket and bind it
             socket.joinGroup(group);
 
-            byte[] buffer;
-            DatagramPacket packet;
-            String message;
-            
+            String message = "type | whosthere";
+            it.sendMessage(message);
+
+            byte[] buffer = new byte[256];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
             HashMap<String,String> hash_map;
+            
+            try {
+                socket.setSoTimeout(1000);
+                while (true) {
+                    buffer = new byte[256];
+                    packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+
+                    hash_map = it.packetToHashMap(packet);
+
+                    if(hash_map.get("type").equals("imhere")){
+                        int temp_id = Integer.parseInt(hash_map.get("id"));
+                        if (temp_id >= ids) {
+                            ids = temp_id+1;
+                        }
+                    }
+                }
+            } catch (SocketTimeoutException e) {
+                socket.setSoTimeout(0);
+            }
 
             while (true) {
                 buffer = new byte[256];
@@ -221,7 +244,7 @@ class PollingStationInterface extends Thread{
                     this.read_socket.receive(packet);
 
                     hash_map = this.packetToHashMap(packet);
-                    System.out.println("aqui");
+                    
                     if(hash_map.get("type").equals("imfree")){
                         id = Integer.parseInt(hash_map.get("id"));
                     }

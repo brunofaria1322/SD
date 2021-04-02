@@ -83,6 +83,10 @@ public class VotingTerminal extends Thread {
                             it.sendMessage("type | imfree; id | " + this.id);
                         }
                         break;
+                    case "whosthere":
+                        System.out.println("Im here");
+                        it.sendMessage("type | imhere; id | " + this.id);
+                        break;
                     case "work":
                         if (Integer.parseInt(hash_map.get("to")) == this.id) {
                             it.unlock(hash_map.get("cc"), hash_map.get("name"));
