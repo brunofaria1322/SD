@@ -5,16 +5,20 @@ import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Scanner;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import Commun.database;
 public class MulticastServer extends Thread {
-    private String MULTICAST_ADDRESS = "224.3.2.1";
-    private int PORT = 4321;
-    private String DEP = "NE";
+    private String MULTICAST_ADDRESS;
+    private int PORT;
+    private String NDEP;
     private database db;
 
     public static void main(String[] args) {
@@ -24,7 +28,15 @@ public class MulticastServer extends Thread {
     }
 
     public MulticastServer() {
-        //TODO: ler config.txt
+        try {
+            readConfig();
+        } catch (FileNotFoundException f) {
+            System.out.println("Couldn't find config file");
+            System.exit(-1);
+        } catch (IOException f) {
+            System.out.println("Couldn't read config file");
+            System.exit(-1);
+        }
     }
 
     public void run() {
@@ -34,13 +46,11 @@ public class MulticastServer extends Thread {
         try {
 			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
 		} catch (Exception e) {
-			System.out.println("Exception in main: " + e);
-			e.printStackTrace();
-            System.out.println("Exiting...");
+			System.out.println("Could't connect to RMI server\nExiting");
             return;
 		}
         
-        System.out.println(DEP + " Polling station running...");
+        System.out.println("Polling station of dep no. "+this.NDEP+" is running...");
         try {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
@@ -89,6 +99,17 @@ public class MulticastServer extends Thread {
         } finally {
             socket.close();
         }
+    }
+
+    private void readConfig() throws FileNotFoundException, IOException{
+        Properties prop = new Properties();
+
+        InputStream is = new FileInputStream("meta1/Multicast/station.config");
+        prop.load(is);
+       
+        this.NDEP= prop.getProperty("station.NDEP");
+        this.MULTICAST_ADDRESS = prop.getProperty("station.MULTICAST_ADDRESS");
+        this.PORT = Integer.parseInt(prop.getProperty("station.PORT"));
     }
 }
 

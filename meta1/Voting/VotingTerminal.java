@@ -3,20 +3,35 @@ package Voting;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Scanner;
-import java.util.concurrent.TimeoutException;
+
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class VotingTerminal extends Thread {
-    private String MULTICAST_ADDRESS = "224.3.2.1";
-    private int PORT = 4321;
+    private String MULTICAST_ADDRESS;
+    private int PORT;
     private int id = -1;
 
     public static void main(String[] args) {
         VotingTerminal client = new VotingTerminal();
         client.start();
+    }
+
+    public VotingTerminal(){
+        try {
+            readConfig();
+        } catch (FileNotFoundException f) {
+            System.out.println("Couldn't find config file");
+            System.exit(-1);
+        } catch (IOException f) {
+            System.out.println("Couldn't read config file");
+            System.exit(-1);
+        }
     }
 
     public void run() {
@@ -100,8 +115,17 @@ public class VotingTerminal extends Thread {
             socket.close();
             System.out.println("Exiting...");
             it.leave();
-            return;
         }
+        return;
+    }
+
+    private void readConfig() throws FileNotFoundException, IOException{
+        Properties prop = new Properties();
+
+        prop.load(new FileInputStream("meta1/Voting/terminal.config"));
+       
+        this.MULTICAST_ADDRESS = prop.getProperty("terminal.MULTICAST_ADDRESS");
+        this.PORT = Integer.parseInt(prop.getProperty("terminal.PORT"));
     }
 }
 
