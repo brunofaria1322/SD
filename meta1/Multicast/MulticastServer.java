@@ -1,6 +1,7 @@
 package Multicast;
 
 import java.net.MulticastSocket;
+import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.HashMap;
@@ -8,8 +9,6 @@ import java.util.Scanner;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.IOException;
-
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 import Commun.database;
 public class MulticastServer extends Thread {
@@ -69,16 +68,13 @@ public class MulticastServer extends Thread {
                             it.sendMessage("type | identification; id | " + ids++);
                         }
                         break;
-                
-                    case "leaving":
-                        if(hash_map.get("id") == null){
-
-                            //DEBUG
-                            message = new String(packet.getData(), 0, packet.getLength());
-                            System.out.println(message);
+                    case "login":
+                        if(db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"))){
+                            it.sendMessage("type | login;  status | success; to | " + hash_map.get("id"));
+                        } else{
+                            it.sendMessage("type | login;  status | unsuccess; to | " + hash_map.get("id"));
                         }
                         break;
-                
 
                     default:
                         //DEBUG
@@ -98,9 +94,10 @@ public class MulticastServer extends Thread {
 
 class PollingStationInterface extends Thread{
     private MulticastSocket socket;
+    private MulticastSocket read_socket;
     private InetAddress group;
     private int PORT;
-    private database db;
+    public database db;
 
     public PollingStationInterface(InetAddress group, int PORT, database db){
         this.group = group;
@@ -112,6 +109,7 @@ class PollingStationInterface extends Thread{
     public void run() {
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
+            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it
 
             int option;
             Scanner in = new Scanner(System.in);
@@ -182,12 +180,50 @@ class PollingStationInterface extends Thread{
             System.out.println("Couldn't find user with CC number or username: " + aux);
         }
         else{
-            System.out.println(user[0] + "\t" + user[1]);
+            System.out.println("Unlocking a terminal for " + user[1]);
+            this.sendMessage("type | whosfree");
+
+            try {
+                this.read_socket.setSoTimeout(1000);
+                this.read_socket.joinGroup(group);
+
+                byte[] buffer = new byte[256];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+
+                HashMap<String,String> hash_map;
+
+                int id = -1;
+
+                while (id == -1) {
+                    buffer = new byte[256];
+                    packet = new DatagramPacket(buffer, buffer.length);
+                    this.read_socket.receive(packet);
+
+                    hash_map = this.packetToHashMap(packet);
+                    System.out.println("aqui");
+                    if(hash_map.get("type").equals("imfree")){
+                        id = Integer.parseInt(hash_map.get("id"));
+                    }
+                }
+                this.read_socket.setSoTimeout(0);
+                this.read_socket.leaveGroup(group);
+
+
+                this.sendMessage("type | work; cc | "+ user[0] +"; name | "+ user[1] +"; to | "+ id);
+                System.out.println("Terminal id = "+id+" was ulocked!");
+
+            } catch (SocketTimeoutException e) {
+                System.out.println("Timeout: Couldn't find any free terminals");
+                try {
+                    this.read_socket.setSoTimeout(0);
+                    this.read_socket.leaveGroup(group);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
         }
-    }
-
-    private void unlockVotingTerminal(){
-        //TODO: argument = personId
-
     }
 }
