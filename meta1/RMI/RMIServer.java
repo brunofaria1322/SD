@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.mysql.cj.exceptions.CJCommunicationsException;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 
@@ -34,6 +33,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import Commun.database;
+import Commun.database.Pair;
 
 class Heartbeat implements Runnable {
 	private byte[] buffer;
@@ -100,7 +100,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	private static final long serialVersionUID = -5368081680660901104L;
 	public static Connection conn;
 	private static String enckey = "cenabuesegura";
-	public static ArrayList<Pair<String,String>> logged;
 	private static Thread current;
 	public RMIServer() throws RemoteException {
 		super();
@@ -205,7 +204,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				return false; //dados invalidos
 			}
 			if(AES.decrypt(rs.getString("password"),enckey).equals(password)){
-				logged.add(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
 				return true; //sucesso
 			}
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
@@ -223,6 +221,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		//cargos = {'aluno','docente','funcionario','all'}
 		//departamentos, mesas = ndeps separados por ; (; no fim também)
 		try {
+			if(departamentos == null){
+				departamentos = ";";
+			}
+			if(mesas == null){
+				mesas = ";";
+			}
 			int ret = 0;
 			String query = "SELECT * FROM eleicoes WHERE titulo = '"+titulo+"';";
 			System.out.println(query);
@@ -339,7 +343,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.next();
 				int departamento = rs.getInt("ndep");
 				String cargo = rs.getString("cargo");
-				query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%"+departamento+";%' AND mesas LIKE '%"+dep_mesa+";%' AND estado = 'open';";
+				query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%;"+departamento+";%' AND mesas LIKE '%;"+dep_mesa+";%' AND estado = 'open';";
 			}
 			else{
 				query = "SELECT * FROM eleicoes;";
@@ -391,29 +395,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-	public boolean logOut(String username){
-		try{
-			String query = "SELECT * FROM users WHERE username = '"+username+"';";
-			System.out.println(query);
-			PreparedStatement st;
-			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			ResultSet rs = st.executeQuery();
-			if(rs.next()){
-				logged.indexOf(new Pair<String,String>(rs.getString("numcc"),rs.getString("nome")));
-				return true;
-			}
-			else{
-				return false;
-			}
-		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
-			connectToBD();
-			return logOut(username);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-	}
+	
 	public int createOrEditList(int neleicao, String nome, ArrayList<Pair<String,String>> users, boolean remove){
 		//Pair(numcc,nome)
 		try{
@@ -432,43 +414,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				departamentos = rs.getString("departamentos");
 				cargos = rs.getString("cargos");
 			}
-			query = "SELECT COUNT(nlista) as count FROM listas;";
-			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			rs = st.executeQuery();
-			rs.next();
-			int count = rs.getInt("count");
-			if(users != null){
-				for (Pair<String,String> pair : users) {
-					query = "SELECT * FROM users WHERE numcc = '"+pair.left+"';";
-					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-					rs = st.executeQuery();
-					if(rs.next()){
-						if((cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
-							return -2; //O user não corresponde aos parâmetros pedidos
-						}
-						if(!remove){
-							rs.updateInt("nlista",count+1);
-						}
-						else{
-							rs.updateInt("nlista",0);
-						}
-						rs.updateRow();
-					}
-					else{ //cria uma pessoa não registada
-						rs.moveToInsertRow();
-						rs.updateString("cargo", cargos); rs.updateString("nome", pair.right); rs.updateString("numcc", pair.left);
-						if(!remove){
-							rs.updateInt("nlista",count+1);
-						}
-						else{
-							rs.updateInt("nlista",0);
-						}
-						rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
-						rs.insertRow();
-					}
-				}
-				current.interrupt();
-			}
 			query = "SELECT * FROM listas WHERE nome = '"+nome+"' AND neleicao = '"+neleicao+"';";
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
@@ -483,7 +428,44 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.updateString("nome",nome);
 				rs.insertRow();
 			}
-			return count+1;
+			rs = st.executeQuery("SELECT LAST_INSERT_ID()");
+			rs.next();
+			int count = rs.getInt(1);
+
+			if(users != null){
+				for (Pair<String,String> pair : users) {
+					query = "SELECT * FROM users WHERE numcc = '"+pair.left+"';";
+					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+					rs = st.executeQuery();
+					if(rs.next()){
+						if((cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
+							return -2; //O user não corresponde aos parâmetros pedidos
+						}
+						if(!remove){
+							rs.updateInt("nlista",count);
+						}
+						else{
+							rs.updateInt("nlista",0);
+						}
+						rs.updateRow();
+					}
+					else{ //cria uma pessoa não registada
+						rs.moveToInsertRow();
+						rs.updateString("cargo", cargos); rs.updateString("nome", pair.right); rs.updateString("numcc", pair.left);
+						if(!remove){
+							rs.updateInt("nlista",count);
+						}
+						else{
+							rs.updateInt("nlista",0);
+						}
+						rs.updateTimestamp("data_created", new Timestamp(System.currentTimeMillis()));
+						rs.insertRow();
+					}
+				}
+				current.interrupt();
+			}
+			
+			return count;
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return createOrEditList(neleicao, nome, users, remove);
@@ -585,16 +567,16 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		PreparedStatement st;
 		ResultSet rs;
 		if(neleicao > 0){
-			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = "+neleicao+" AND eleicoes.neleicao = "+neleicao+" AND estado = 'open';";
+			query = "SELECT listas.nlista, listas.neleicao, listas.nome, listas.votos, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = "+neleicao+" AND eleicoes.neleicao = "+neleicao+";";
 		}
 		else{
-			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = eleicoes.neleicao AND estado = 'open';";
+			query = "SELECT listas.nlista, listas.neleicao, listas.nome, listas.votos, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = eleicoes.neleicao AND estado = 'open';";
 		}
 		try{
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
 			while(rs.next()){
-				if(out.containsKey(rs.getInt("neleicao"))){
+				if(!out.containsKey(rs.getInt("neleicao"))){
 					HashMap<Integer,Pair<String,Integer>> hm = new HashMap<Integer,Pair<String,Integer>>();
 					hm.put(rs.getInt("nlista"),new Pair<String,Integer>(rs.getString("nome"),rs.getInt("votos")));
 					out.put(rs.getInt("neleicao"), new Pair<String,HashMap<Integer,Pair<String,Integer>>>(rs.getString("titulo"),hm));
@@ -609,6 +591,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return getResults(neleicao);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			System.out.println("erro: " + e);
 			return null;
 		}
 	}

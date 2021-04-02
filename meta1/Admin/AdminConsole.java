@@ -2,6 +2,7 @@ package Admin;
 
 import java.io.Console;
 import java.io.Serializable;
+import java.net.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.text.SimpleDateFormat;
@@ -11,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.sql.Date;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+
 
 import Commun.database;
+import Commun.database.Pair;
 
 
                 
@@ -24,8 +27,9 @@ import Commun.database;
 
 public class AdminConsole {
     static database db;
+    static textAreaTest tat;
     public static void main(String[] args) throws RemoteException {
-
+    
         
         try {
 			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
@@ -35,11 +39,12 @@ public class AdminConsole {
 		}
         
         System.out.println("Welcome to Admin Console");
-        new textAreaTest(db);
+         tat = new textAreaTest(db);
 
-        int option;
+        int option = -1;
         Scanner in = new Scanner(System.in);
         do{
+            try{
             System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n0 - Quit\noption: ");
 
             option = in.nextInt();
@@ -48,6 +53,8 @@ public class AdminConsole {
             switch (option){
                 case 0:
                     System.out.println("Bye!");
+                    tat.stop();
+                    System.exit(0);
                     break;
                 case 1:
                     int rp = registerPerson(in);
@@ -91,11 +98,23 @@ public class AdminConsole {
                     System.out.println("Wrong option!");
                     break;
             }
+            }
+            catch(ConnectException e){
+                System.out.println("Server is closed");
+                tat.stop();
+                System.exit(0);
+            }
+            catch(InputMismatchException e){
+                System.out.println("Invalid input!");
+                in.nextLine();
+            }
         }while (option != 0);
         in.close();
     }
+    
+    
 
-    private static int registerPerson(Scanner in) throws RemoteException{
+    private static int registerPerson(Scanner in) throws RemoteException, ConnectException{
         int type, ndep;
         String cargo = "all";
         boolean isValid = false;
@@ -239,7 +258,7 @@ public class AdminConsole {
         
     }
 
-    private static int createElection(Scanner in) throws RemoteException{
+    private static int createElection(Scanner in) throws RemoteException, ConnectException{
         int voters, ndep;
         boolean isValid = false;
         String cargos = new String();
@@ -378,14 +397,14 @@ public class AdminConsole {
         */
 
         
-        return db.createElection(cargos, ndep + ";", ndep + ";", title, description, start_time, end_time);
+        return db.createElection(cargos, ";" + ndep + ";", ";"+ ndep + ";", title, description, start_time, end_time);
 
             //TODO: maanage election em causa.
             //manageElection(in);
         
     }
 
-    private static void chooseElection(Scanner in) throws RemoteException{
+    private static void chooseElection(Scanner in) throws RemoteException, ConnectException{
         System.out.println("\nChoose an election:");
         HashMap<Integer,HashMap<String,String>> elections;
         try{
@@ -422,7 +441,7 @@ public class AdminConsole {
 
     }
 
-    private static void manageElection(Scanner in, int nelec) throws RemoteException{
+    private static void manageElection(Scanner in, int nelec) throws RemoteException, ConnectException{
         HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
         int option;
         int estado;
@@ -464,7 +483,7 @@ public class AdminConsole {
             }while (option!=0);
     }
     
-    private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException{
+    private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException, ConnectException{
         int option;
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
@@ -503,7 +522,7 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    private static void addCandidateList(Scanner in, int nelec) throws RemoteException{
+    private static void addCandidateList(Scanner in, int nelec) throws RemoteException, ConnectException{
 
         System.out.print("\nList Name: ");
         String name = in.nextLine();
@@ -552,7 +571,7 @@ public class AdminConsole {
         }while (nlist!=0);
 
     }
-    private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException{
+    private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException, ConnectException{
 
         
         
@@ -582,7 +601,7 @@ public class AdminConsole {
         }while (nlist!=0);
 
     }
-    private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException{
+    private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException, ConnectException{
         int option;
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists;
@@ -624,7 +643,7 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
+    private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException, ConnectException{
         HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
         System.out.print("\nCC number: ");
         String cc_number = in.nextLine();
@@ -679,7 +698,7 @@ public class AdminConsole {
 
     }
 
-    private static void managePollingStations(Scanner in, int nelec) throws RemoteException{
+    private static void managePollingStations(Scanner in, int nelec) throws RemoteException, ConnectException{
         int option;
        
         do{
@@ -731,7 +750,7 @@ public class AdminConsole {
 
     }
 
-    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException{
+    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException{
         int option;
         do{
             HashMap<Integer,String> deps = db.getDepartments();
@@ -761,7 +780,7 @@ public class AdminConsole {
 
     }
 
-    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException{  
+    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException{  
         int option;
         do{
             HashMap<Integer,String> deps = db.getDepartments();
@@ -788,7 +807,7 @@ public class AdminConsole {
 
     }
 
-    private static void changeProperties(Scanner in, int nelec) throws RemoteException{
+    private static void changeProperties(Scanner in, int nelec) throws RemoteException, ConnectException{
         
         boolean isValid  = false;
         int option;
@@ -892,7 +911,7 @@ public class AdminConsole {
 
     }
 
-    private static void manageVoters(Scanner in, int nelec) throws RemoteException{
+    private static void manageVoters(Scanner in, int nelec) throws RemoteException, ConnectException{
         int option;
        
         do{
@@ -936,7 +955,7 @@ public class AdminConsole {
 
     }
 
-    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException{
+    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException{
         int option;
         do{
             HashMap<Integer,String> deps = db.getDepartments();
@@ -966,7 +985,7 @@ public class AdminConsole {
 
     }
 
-    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException{  
+    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException{  
         int option;
         do{
             HashMap<Integer,String> deps = db.getDepartments();
@@ -995,8 +1014,9 @@ public class AdminConsole {
 
     private static void checkResults(Scanner in, int nelec) throws RemoteException{
         HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(nelec);
-        HashMap<Integer,Pair<String,Integer>> lists = results.get(nelec).right;
-        if(lists != null){
+        
+        if(results != null){
+            HashMap<Integer,Pair<String,Integer>> lists = results.get(nelec).right;
             for(Integer list : lists.keySet()){
                 System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos");
             }

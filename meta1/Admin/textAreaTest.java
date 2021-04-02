@@ -7,7 +7,7 @@ import java.util.HashMap;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import Commun.database.Pair;
 
 import Commun.database;
 
@@ -57,11 +57,11 @@ public updateThread(textAreaTest abc, database db)
 public class textAreaTest extends javax.swing.JFrame
 {
 JTextArea area = new JTextArea();
-
+updateThread thread;
 
 public textAreaTest(database db)
     {
-        updateThread thread = new updateThread(this, db);
+        thread = new updateThread(this, db);
         JPanel panel = new JPanel();
         panel.add(area);
         this.setSize(100, 100);
@@ -76,4 +76,7 @@ public void setText(String text)
     {
         area.setText(text);
     }
+public void stop(){
+    thread.stop();
+}
 }
