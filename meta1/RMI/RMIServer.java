@@ -223,27 +223,34 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		//cargos = {'aluno','docente','funcionario','all'}
 		//departamentos, mesas = ndeps separados por ; (; no fim também)
 		try {
-			int ret = 1; // sucesso
+			int ret = 0;
 			String query = "SELECT * FROM eleicoes WHERE titulo = '"+titulo+"';";
 			System.out.println(query);
 			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
 			if(rs.next()){
-				ret = 2; // WARNING: Já existe uma eleição com esse título. Tem a certeza?
+				ret = -1; // WARNING: Já existe uma eleição com esse título. Tem a certeza?
 			}
 				rs.moveToInsertRow();
 				rs.updateString("cargos", cargos); rs.updateString("departamentos", departamentos); rs.updateString("mesas", mesas); rs.updateString("titulo", titulo); rs.updateString("descricao", desc);rs.updateTimestamp("inicio", Timestamp.valueOf(inicio));rs.updateTimestamp("fim", Timestamp.valueOf(fim));
 				rs.updateString("estado", "waiting");
 				rs.insertRow();
 				current.interrupt();
-				return ret;
+				ResultSet rs2 = st.executeQuery("SELECT LAST_INSERT_ID()");
+				rs2.next();
+				if(ret == -1){
+					return 0-rs2.getInt(1);
+				}
+				else{
+					return rs2.getInt(1);
+				}
 			} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 				connectToBD();
 				return createElection(cargos, departamentos, mesas, titulo, desc, inicio, fim);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				return -1;
+				return 0;
 			}
 	}
 	public int editElection(int neleicao, boolean remove, String titulo, String descricao, LocalDateTime inicio, LocalDateTime fim, String departamentos, String mesas, Integer[] listas){
@@ -460,6 +467,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 						rs.insertRow();
 					}
 				}
+				current.interrupt();
 			}
 			query = "SELECT * FROM listas WHERE nome = '"+nome+"' AND neleicao = '"+neleicao+"';";
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -486,7 +494,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 	}
 	public HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
-		// {nlista:{(nome,[(cc,nome)])}
+		// {nlista:(nome,[(cc,nome)])}
 		try {
 			String query;
 			PreparedStatement st;
@@ -577,10 +585,10 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		PreparedStatement st;
 		ResultSet rs;
 		if(neleicao > 0){
-			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = "+neleicao+" AND eleicoes.neleicao = "+neleicao+";";
+			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = "+neleicao+" AND eleicoes.neleicao = "+neleicao+" AND estado = 'open';";
 		}
 		else{
-			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = eleicoes.neleicao;";
+			query = "SELECT listas.nlista, listas.neleicao, listas.nome, eleicoes.titulo FROM listas, eleicoes WHERE listas.neleicao = eleicoes.neleicao AND estado = 'open';";
 		}
 		try{
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -614,10 +622,16 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			Timestamp nextOpen = new Timestamp(System.currentTimeMillis());;
 			nextOpen.setTime(nextOpen.getTime()+TimeUnit.MINUTES.toMillis(1));
 			while(rs.next()){
+				
 				nextWaiting = rs.getTimestamp("inicio");
 				if(rs.getTimestamp("inicio").before(new Timestamp(System.currentTimeMillis()))){
-					rs.updateString("estado", "open");
-					rs.updateRow();
+					String query2 = "SELECT * FROM listas WHERE neleicao = "+rs.getInt("neleicao")+";";
+					PreparedStatement st2 = conn.prepareStatement(query2,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+					ResultSet rs2 = st2.executeQuery();
+					if(rs2.next()){
+						rs.updateString("estado", "open");
+						rs.updateRow();	
+					}
 				}
 				else{
 					break;

@@ -17,9 +17,13 @@ import java.util.Scanner;
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 import Commun.database;
+
+
+                
+          
+
 public class AdminConsole {
     static database db;
-    static int last_elec = 0;
     public static void main(String[] args) throws RemoteException {
 
         
@@ -31,6 +35,7 @@ public class AdminConsole {
 		}
         
         System.out.println("Welcome to Admin Console");
+        new textAreaTest(db);
 
         int option;
         Scanner in = new Scanner(System.in);
@@ -63,17 +68,17 @@ public class AdminConsole {
                     break;
                 case 2:
                     int ce = createElection(in);
-                    if(ce == -1){
+                    if(ce == 0){
                         System.out.println("Sorry, something went wrong with our server. Please contact us!");
                     }
-                    else if(ce == 2){
+                    else if(ce < 0){
                         System.out.println("Election was created successfully!");
                         System.out.println("WARNING: There was already an election with the same name as the new one's");
-                        manageElection(in,last_elec);
+                        manageElection(in,-ce);
                     }
-                    else if(ce == 1){
+                    else if(ce > 0){
                         System.out.println("Election was created successfully!");
-                        manageElection(in,last_elec);
+                        manageElection(in,ce);
                     }
                     else{
                         System.out.println("Creation was aborted!"); 
@@ -197,13 +202,13 @@ public class AdminConsole {
         String password;
         do{ 
             System.out.print("\nPassword: ");
-            password = System.console().readPassword().toString();
+            password = new String(System.console().readPassword());
             if(password.equals("0")){
                 return -4;
             }
             if(password.length()>=4){
                 System.out.print("Confirm password: ");
-                String pv = System.console().readPassword().toString();
+                String pv = new String(System.console().readPassword());
                 if(pv.equals("0")){
                     return -4;
                 }
@@ -372,7 +377,7 @@ public class AdminConsole {
         );
         */
 
-        last_elec = ndep;
+        
         return db.createElection(cargos, ndep + ";", ndep + ";", title, description, start_time, end_time);
 
             //TODO: maanage election em causa.
@@ -421,7 +426,6 @@ public class AdminConsole {
         HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
         int option;
         int estado;
-
             do{
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
                 if(LocalDateTime.parse(elections.get(nelec).get("inicio"), formatter).isAfter(LocalDateTime.now())){
