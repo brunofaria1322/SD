@@ -28,13 +28,13 @@ public updateThread(textAreaTest abc, database db)
     while(true){
         try
             {
-            HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(0);
+            HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
             if(results != null){
                 String display = "";
-                for(Pair<String,HashMap<Integer,Pair<String,Integer>>> el : results.values()){
-                    display="---"+display+el.left + "---\n";
-                    for (Pair<String,Integer> li : el.right.values()){
-                        display+="\t"+li.left+": " + li.right + " votes";
+                for(String el : results.keySet()){
+                    display="---"+ el + "---\n";
+                    for (String mesa : results.get(el).keySet()){
+                        display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
                     }
                 }
                     aa.setText(display);

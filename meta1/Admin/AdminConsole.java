@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.net.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,7 +29,7 @@ import Commun.database.Pair;
 public class AdminConsole {
     static database db;
     static textAreaTest tat;
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, InterruptedException {
     
         
         try {
@@ -45,7 +46,7 @@ public class AdminConsole {
         Scanner in = new Scanner(System.in);
         do{
             try{
-            System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n0 - Quit\noption: ");
+            System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
 
             option = in.nextInt();
             in.nextLine();
@@ -93,6 +94,9 @@ public class AdminConsole {
                     break;
                 case 3:
                     chooseElection(in);
+                    break;
+                case 4:
+                    getUserVotes(in);
                     break;
                 default:
                     System.out.println("Wrong option!");
@@ -330,7 +334,7 @@ public class AdminConsole {
 
         System.out.print("\nElection title: ");
         String title = in.nextLine();
-        if(title.equals("0")){
+        if(title.equals("0") || title.equals("votos nulos") || title.equals("votos em branco")){
             return -2;
         }
 
@@ -404,7 +408,7 @@ public class AdminConsole {
         
     }
 
-    private static void chooseElection(Scanner in) throws RemoteException, ConnectException{
+    private static void chooseElection(Scanner in) throws RemoteException, ConnectException, InterruptedException{
         System.out.println("\nChoose an election:");
         HashMap<Integer,HashMap<String,String>> elections;
         try{
@@ -441,7 +445,7 @@ public class AdminConsole {
 
     }
 
-    private static void manageElection(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void manageElection(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
         HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
         int option;
         int estado;
@@ -449,7 +453,7 @@ public class AdminConsole {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
                 if(LocalDateTime.parse(elections.get(nelec).get("inicio"), formatter).isAfter(LocalDateTime.now())){
                     estado = 1;
-                    System.out.print("Election hasn't started yet\n1 - Manage candidate list\n2 - Manage polling stations\n3- Change properties\n0 - Back\noption: ");
+                    System.out.print("Election hasn't started yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
                 }
                 else if(LocalDateTime.parse(elections.get(nelec).get("fim"), formatter).isAfter(LocalDateTime.now())){
                     estado = 2;
@@ -490,7 +494,12 @@ public class AdminConsole {
             System.out.println("Current candidate lists in the election:\n");
             if(lists != null){
                 for (Integer key : lists.keySet()){
-                    System.out.println("."+lists.get(key).left);
+                    if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
+                        System.out.println("."+lists.get(key).left);
+                    }
+                    else{
+                        lists.remove(key);
+                    }
                 }
             }
             System.out.println("\n1 - Add candidate list\n2 - Remove candidate list\n3 - Manage candidate list\n0 - Back\noption: ");
@@ -549,9 +558,15 @@ public class AdminConsole {
             int i = 1;
             if(lists != null){
                 for (Integer key : lists.keySet()){
-                    System.out.println(i + " - " +lists.get(key).left);
-                    i++;
+                    if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
+                        System.out.println(i + " - " +lists.get(key).left);
+                        i++;
+                    }
+                    else{
+                        lists.remove(key);
+                    }
                 }
+                
             }
             System.out.print("0 - Back\noption: ");
 
@@ -698,7 +713,7 @@ public class AdminConsole {
 
     }
 
-    private static void managePollingStations(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void managePollingStations(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
         int option;
        
         do{
@@ -713,7 +728,7 @@ public class AdminConsole {
                 deps = null;
             }
             String mesas = elecs.get(nelec).get("mesas");
-            List<String> amesas = Arrays.asList(mesas.split(";"));
+            List<String> amesas = new ArrayList<String>(Arrays.asList(mesas.split(";")));
             if(amesas.contains(new String("0"))){
                 amesas = new ArrayList<String>();
                 for(Integer key: deps.keySet()){
@@ -723,7 +738,12 @@ public class AdminConsole {
             System.out.println("PollingStations associated to the election:\n");
             if(amesas != null){
                 for(String mesa : amesas){
-                    System.out.println("." + deps.get(Integer.parseInt(mesa)));
+                    try{
+                        System.out.println("." + deps.get(Integer.parseInt(mesa)));
+                    }
+                    catch(NumberFormatException e){
+                        ;
+                    }
                 }
             }
             System.out.println("\n1 - Add polling station\n2 - Remove polling station\n0 - Back\noption: ");
@@ -750,9 +770,10 @@ public class AdminConsole {
 
     }
 
-    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException{
+    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException, InterruptedException{
         int option;
         do{
+            
             HashMap<Integer,String> deps = db.getDepartments();
             ArrayList<Integer> amesas = new ArrayList<Integer>();
             System.out.println("Which polling station would you like to associate to the election?");
@@ -775,22 +796,30 @@ public class AdminConsole {
             }
             else if(option>0) {
                 db.editElection(nelec, false, null, null, null, null, null, amesas.get(option-1)+";", null);
+                stations.add(Integer.toString(amesas.get(option-1)));
             }
         }while (option!=0);
 
     }
 
-    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException{  
+    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException, InterruptedException{  
         int option;
         do{
+            
             HashMap<Integer,String> deps = db.getDepartments();
             int i = 1;
             System.out.println("Which polling station would you like to remove from the election?");
             if(stations != null){
                 for(String station : stations){
-                    System.out.println(i + " - " + deps.get(Integer.parseInt(station)));
+                    try{
+                        System.out.println(i + " - " + deps.get(Integer.parseInt(station)));
+                        i++;
+                    }
+                    catch(NumberFormatException e){
+                        ;
+                    }
                 }
-                i++;
+                
             }
             System.out.print("0 - Back\noption: ");
             option = in.nextInt();
@@ -800,14 +829,15 @@ public class AdminConsole {
                 break;
             }
             else if(option>0) {
-                db.editElection(nelec, true, null, null, null, null, null, stations.get(option-1)+";", null);
+                db.editElection(nelec, true, null, null, null, null, null, stations.get(option)+";", null);
+                stations.remove(option);
             }
         }while (option!=0);
 
 
     }
 
-    private static void changeProperties(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void changeProperties(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
         
         boolean isValid  = false;
         int option;
@@ -911,14 +941,14 @@ public class AdminConsole {
 
     }
 
-    private static void manageVoters(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void manageVoters(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
         int option;
        
         do{
             HashMap<Integer,HashMap<String,String>> elecs = db.getElections(null, null);
             HashMap<Integer,String> deps = db.getDepartments();
             String depars = elecs.get(nelec).get("departamentos");
-            List<String> adeps= Arrays.asList(depars.split(";"));
+            List<String> adeps= new ArrayList<String>(Arrays.asList(depars.split(";")));
             if(adeps.contains(new String("0"))){
                 adeps = new ArrayList<String>();
                 for(Integer key: deps.keySet()){
@@ -927,8 +957,13 @@ public class AdminConsole {
             }
             System.out.println("You can vote if you belong to one of the following departments:\n");
             if(adeps != null){
-                for(String mesa : adeps){
-                    System.out.println("." + deps.get(Integer.parseInt(mesa)));
+                for(String dep : adeps){
+                    try{
+                        System.out.println("." + deps.get(Integer.parseInt(dep)));
+                    }
+                    catch(NumberFormatException e){
+                        ;
+                    }
                 }
             }
             System.out.println("\n1 - Add department\n2 - Remove department\n0 - Back\noption: ");
@@ -955,9 +990,10 @@ public class AdminConsole {
 
     }
 
-    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException{
+    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException, InterruptedException{
         int option;
         do{
+            
             HashMap<Integer,String> deps = db.getDepartments();
             ArrayList<Integer> adeps = new ArrayList<Integer>();
             System.out.println("Which department do you wish to add to the election?");
@@ -980,22 +1016,31 @@ public class AdminConsole {
             }
             else if(option>0) {
                 db.editElection(nelec, false, null, null, null, null, adeps.get(option-1)+";", null , null);
+                departments.add(Integer.toString(adeps.get(option-1)));
             }
         }while (option!=0);
 
     }
 
-    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException{  
+    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException, InterruptedException{  
         int option;
         do{
+            
             HashMap<Integer,String> deps = db.getDepartments();
             int i = 1;
             System.out.println("Which department do you wish to remove from the election?");
             if(departments != null){
                 for(String station : departments){
-                    System.out.println(i + " - " + deps.get(Integer.parseInt(station)));
+                    try{
+                        System.out.println(i + " - " + deps.get(Integer.parseInt(station)));
+                        i++;
+                    }
+                    catch(NumberFormatException e){
+                        ;
+                    }
+                    
                 }
-                i++;
+                
             }
             System.out.print("0 - Back\noption: ");
             option = in.nextInt();
@@ -1005,7 +1050,8 @@ public class AdminConsole {
                 break;
             }
             else if(option>0) {
-                db.editElection(nelec, true, null, null, null, null, departments.get(option-1)+";", null, null);
+                db.editElection(nelec, true, null, null, null, null, departments.get(option)+";", null, null);
+                departments.remove(option);
             }
         }while (option!=0);
 
@@ -1016,10 +1062,32 @@ public class AdminConsole {
         HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(nelec);
         
         if(results != null){
+            int total = 0;
             HashMap<Integer,Pair<String,Integer>> lists = results.get(nelec).right;
             for(Integer list : lists.keySet()){
-                System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos");
+                total+=lists.get(list).right;
             }
+            if(total == 0){
+                total = 1;
+            }
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            for(Integer list : lists.keySet()){
+                System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos ("+df.format(lists.get(list).right*100/total+"%)"));
+            }
+        }
+        System.out.println("Press enter to continue...");
+        in.nextLine();
+    }
+    
+    private static void getUserVotes(Scanner in) throws RemoteException{
+        System.out.print("\nUsername: ");
+        String username = in.nextLine();
+        HashMap<Integer,Pair<Integer,String>> votes = db.getUserVotes(username);
+        HashMap<Integer,String> deps = db.getDepartments();
+        HashMap<Integer,HashMap<String,String>> elecs = db.getElections(username, null);
+        for(Integer key: votes.keySet()){
+            System.out.println(elecs.get(key).get("titulo")+": "+ deps.get(votes.get(key).left)+" at " + votes.get(key).right);
         }
         System.out.println("Press enter to continue...");
         in.nextLine();

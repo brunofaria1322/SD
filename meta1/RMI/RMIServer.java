@@ -101,6 +101,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	public static Connection conn;
 	private static String enckey = "cenabuesegura";
 	private static Thread current;
+	private static HashMap<String,HashMap<String,Integer>> rtstations;
 	public RMIServer() throws RemoteException {
 		super();
 	}
@@ -109,6 +110,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		try {
 			//Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://ba5bfd4cfc576d:f93b7db6@eu-cdbr-west-03.cleardb.net/heroku_5e154400fde3501?reconnect=true");
+			rtstations = NumberVotesPerStation();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -242,6 +244,8 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				current.interrupt();
 				ResultSet rs2 = st.executeQuery("SELECT LAST_INSERT_ID()");
 				rs2.next();
+				createOrEditList(rs2.getInt(1), "votos em branco", null, false);
+				createOrEditList(rs2.getInt(1), "votos nulos", null, false);
 				if(ret == -1){
 					return 0-rs2.getInt(1);
 				}
@@ -343,7 +347,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.next();
 				int departamento = rs.getInt("ndep");
 				String cargo = rs.getString("cargo");
-				query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%;"+departamento+";%' AND mesas LIKE '%;"+dep_mesa+";%' AND estado = 'open';";
+				if(dep_mesa!=null){
+					query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%;"+departamento+";%' AND mesas LIKE '%;"+dep_mesa+";%' AND estado = 'open';";
+				}
+				else{
+					query = "SELECT * FROM eleicoes WHERE (cargos = '"+cargo+"' OR cargos = 'all') AND departamentos LIKE '%;"+departamento+";%' AND estado != 'open';";
+				}
 			}
 			else{
 				query = "SELECT * FROM eleicoes;";
@@ -417,7 +426,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			query = "SELECT * FROM listas WHERE nome = '"+nome+"' AND neleicao = '"+neleicao+"';";
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
+			int count;
 			if(rs.next()){
+				count = rs.getInt("nlista");
 				if(users==null){
 					return -3; //Já existe uma lista com esse nome para essa eleição
 				}
@@ -427,10 +438,10 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				rs.updateInt("neleicao",neleicao);
 				rs.updateString("nome",nome);
 				rs.insertRow();
+				rs = st.executeQuery("SELECT LAST_INSERT_ID()");
+				rs.next();
+				count = rs.getInt(1);
 			}
-			rs = st.executeQuery("SELECT LAST_INSERT_ID()");
-			rs.next();
-			int count = rs.getInt(1);
 
 			if(users != null){
 				for (Pair<String,String> pair : users) {
@@ -438,7 +449,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 					rs = st.executeQuery();
 					if(rs.next()){
-						if((cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
+						if((rs.getString("username")!= null && !cargos.equals("all") && !rs.getString("cargo").equals(cargos)) || (departamentos != null && Arrays.asList(departamentos.split(";")).contains(Integer.valueOf(rs.getInt("ndep")).toString()))){
 							return -2; //O user não corresponde aos parâmetros pedidos
 						}
 						if(!remove){
@@ -491,9 +502,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			System.out.println(query);
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
-			int lista = rs.getInt("nlista");
 			HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> out = new HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>>();
 			while(rs.next()){
+				int lista = rs.getInt("nlista");
 				ArrayList<Pair<String,String>> al = new ArrayList<Pair<String,String>>();
 				String query2;
 				PreparedStatement st2;
@@ -524,7 +535,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			ResultSet rs = st.executeQuery();
 			rs.next();
 			Timestamp criado = rs.getTimestamp("data_created");
-			query = "SELECT * FROM votos WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
+			query = "SELECT * FROM departamentos WHERE ndep = "+mesa+";";
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			rs = st.executeQuery();
+			rs.next();
+			String dep = rs.getString("nome");
+			query = "SELECT * FROM votos, WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
 			System.out.println(query);
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
@@ -539,12 +555,22 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 				rs = st.executeQuery();
 				rs.next();
+				String elec = rs.getString("titulo");
 				if(criado.before(rs.getTimestamp("inicio"))){
 					query = "SELECT * FROM listas WHERE nlista = "+nlista+";";
 					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 					rs = st.executeQuery();
 					rs.next();
 					rs.updateInt("votos",rs.getInt("votos")+1);
+					rs.updateTimestamp("data", new Timestamp(System.currentTimeMillis()));
+					if(rtstations.containsKey(elec)){
+						rtstations.get(elec).put(dep, rtstations.get(elec).get(dep)+1);
+					}
+					else{
+						HashMap<String,Integer> hm = new HashMap<String,Integer>();
+						hm.put(dep, rtstations.get(elec).get(dep)+1);
+						rtstations.put(elec, hm);
+					}
 					return 1;
 				}
 				else{
@@ -611,7 +637,11 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					String query2 = "SELECT * FROM listas WHERE neleicao = "+rs.getInt("neleicao")+";";
 					PreparedStatement st2 = conn.prepareStatement(query2,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 					ResultSet rs2 = st2.executeQuery();
-					if(rs2.next()){
+					int size = 0;
+					while(rs2.next()){
+						size+=1;
+					}
+					if(size > 2){
 						rs.updateString("estado", "open");
 						rs.updateRow();	
 					}
@@ -647,6 +677,49 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			e.printStackTrace();
 			return null;
 		}
+	}
+	public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException{
+		//{eleicao:mesa}
+		
+		try {
+			HashMap<Integer,Pair<Integer,String>> out = new HashMap<Integer,Pair<Integer,String>>();
+			String query = "SELECT * FROM votos WHERE username = '"+username+"';";
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			while(rs.next()){
+				out.put(rs.getInt("neleicao"), new Pair<Integer,String>(rs.getInt("ndep"),rs.getTimestamp("data").toString()));
+			}
+			return out;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	private static HashMap<String,HashMap<String,Integer>> NumberVotesPerStation(){
+		//{eleicao:{dep:votos}}
+		try {
+			HashMap<String,HashMap<String,Integer>> out = new HashMap<String,HashMap<String,Integer>>();
+			String query = "SELECT eleicoes.titulo,departamentos.nome, COUNT(*) as count FROM votos, eleicoes, departamentos WHERE votos.neleicao = eleicoes.neleicao AND eleicoes.estado = 'open' AND votos.ndep = departamentos.ndep GROUP BY eleicoes.neleicao, votos.ndep";
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			while(rs.next()){
+				HashMap<String,Integer> hm = new HashMap<String,Integer>();
+				hm.put(rs.getString("departamentos.nome"), rs.getInt("count"));
+				out.put(rs.getString("eleicoes.titulo"), hm);
+			}
+			return out;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public HashMap<String,HashMap<String,Integer>> getNumberVotesPerStation() throws java.rmi.RemoteException{
+		return rtstations;
 	}
 	public static void main(String args[]) {
 

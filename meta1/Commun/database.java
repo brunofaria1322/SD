@@ -33,4 +33,6 @@ public interface database extends Remote {
     public HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao) throws java.rmi.RemoteException;
     public int vote(String username, int neleicao, int nlista, int mesa) throws java.rmi.RemoteException;
     public HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> getResults(int neleicao) throws java.rmi.RemoteException;
+    public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException;
+    public HashMap<String,HashMap<String,Integer>> getNumberVotesPerStation() throws java.rmi.RemoteException;
 }
