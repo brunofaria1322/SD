@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 
 public interface database extends Remote {
-    class Pair<T,T2> implements Serializable{
+    public class Pair<T,T2> implements Serializable{
         /**
          *
          */
@@ -20,6 +20,10 @@ public interface database extends Remote {
         public Pair(T left, T2 right){
             this.left = left;
             this.right = right;
+        }
+
+        public String toString(){
+            return ("( " + this.left + " , " + this.right + " )");
         }
     }
     public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password) throws java.rmi.RemoteException;

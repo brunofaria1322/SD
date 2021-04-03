@@ -4,6 +4,7 @@ import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import Commun.database;
+import Commun.database.Pair;
+
 public class MulticastServer extends Thread {
     private String MULTICAST_ADDRESS;
     private int PORT;
@@ -44,7 +47,7 @@ public class MulticastServer extends Thread {
         int ids = 0;
         
         try {
-			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+			this.db= (database) LocateRegistry.getRegistry(1099).lookup("central");
 		} catch (Exception e) {
 			System.out.println("Could't connect to RMI server\nExiting");
             return;
@@ -55,9 +58,9 @@ public class MulticastServer extends Thread {
         try {
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
-            PollingStationInterface it = new PollingStationInterface(group, PORT, db);
+            PollingStationInterface it = new PollingStationInterface(group, this.PORT, this.db);
 
-            socket = new MulticastSocket(PORT);  // create socket and bind it
+            socket = new MulticastSocket(this.PORT);  // create socket and bind it
             socket.joinGroup(group);
 
             String message = "type | whosthere";
@@ -68,6 +71,10 @@ public class MulticastServer extends Thread {
 
             HashMap<String,String> hash_map;
             
+            /*  
+                In case pooling station needed restart it will continue the ids
+                based on the biggest id among the terminals connected
+            */
             try {
                 socket.setSoTimeout(1000);
                 while (true) {
@@ -102,18 +109,68 @@ public class MulticastServer extends Thread {
                         }
                         break;
                     case "login":
-                        if(db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"))){
-                            it.sendMessage("type | login;  status | success; to | " + hash_map.get("id"));
-                        } else{
-                            it.sendMessage("type | login;  status | unsuccess; to | " + hash_map.get("id"));
+                        if(hash_map.get("id") != null){
+                            if(db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"))){
+                                it.sendMessage("type | login; status | success; to | " + hash_map.get("id"));
+                            } else{
+                                it.sendMessage("type | login; status | unsuccess; to | " + hash_map.get("id"));
+                            }
+                        }
+                        break;
+                    case "getElections":
+                        if(hash_map.get("id") != null && hash_map.get("username")!= null){
+
+                            HashMap<Integer,HashMap<String,String>> elections;
+                            try{
+                                elections = db.getElections(hash_map.get("username"), this.NDEP);
+                            }
+                            catch(NullPointerException e){
+                                elections = null;
+                            }
+                            String out = "type | electionsList; to | " + hash_map.get("id");
+                            
+                            if(elections != null){
+                                for (Integer elec_id: elections.keySet()){
+                                    out = out + "; "+elec_id+ " | " + elections.get(elec_id).get("titulo");
+                                }
+                            }
+
+                            it.sendMessage(out);
+                        }
+                        break;
+                    case "getLists":
+                        if(hash_map.get("id") != null && hash_map.get("nelec")!= null){
+
+                            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists;
+                            try{
+                                lists = db.getLists(Integer.parseInt(hash_map.get("nelec")));
+                            }
+                            catch(NullPointerException e){
+                                lists = null;
+                            }
+
+                            System.out.println(lists);
+                            
+                            String out = "type | candidatsList; to | " + hash_map.get("id");
+                            
+                            if(lists != null){
+                                for (Integer elec_id: lists.keySet()){
+                                    out = out + "; "+elec_id+ " | ";
+                                }
+                            }
+
+                            //it.sendMessage(out);
                         }
                         break;
 
                     default:
+                        //NOT FOR ME
+                        /*
                         //DEBUG
                         System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
                         message = new String(packet.getData(), 0, packet.getLength());
                         System.out.println(message);
+                        */
                         break;
                 }
             }
@@ -158,7 +215,7 @@ class PollingStationInterface extends Thread{
             int option;
             Scanner in = new Scanner(System.in);
             do{
-                System.out.println("1 - Find Person");
+                System.out.println("\n1 - Find Person");
 
                 option = in.nextInt();
                 in.nextLine();

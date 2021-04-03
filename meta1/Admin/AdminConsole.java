@@ -417,16 +417,16 @@ public class AdminConsole {
         catch(NullPointerException e){
             elections = null;
         }
-        int i= 1;
-        if(elections != null){
-            for (Integer key : elections.keySet()){
-                System.out.println(i + " - " + elections.get(key).get("titulo"));
-                i++;
-            }
-        }
-        int nelec;
         
+        int i, nelec;
         do{
+            i= 1;
+            if(elections != null){
+                for (Integer key : elections.keySet()){
+                    System.out.println(i + " - " + elections.get(key).get("titulo"));
+                    i++;
+                }
+            }
             System.out.print("0 - Back\noption: ");
 
             nelec = in.nextInt();
@@ -436,7 +436,6 @@ public class AdminConsole {
             }
             if (nelec< 0 || (nelec>0 && elections == null) || nelec > elections.keySet().size()){     
                 System.out.println("Wrong option! Try Again...");
-                break;
             }
             else if(nelec>0) {
                 manageElection(in, elections.keySet().toArray(new Integer[elections.keySet().size()])[nelec-1]);

@@ -79,12 +79,10 @@ public class VotingTerminal extends Thread {
                 switch (hash_map.get("type")) {
                     case "whosfree":
                         if (it.locked) {
-                            System.out.println("Im free");
                             it.sendMessage("type | imfree; id | " + this.id);
                         }
                         break;
                     case "whosthere":
-                        System.out.println("Im here");
                         it.sendMessage("type | imhere; id | " + this.id);
                         break;
                     case "work":
@@ -93,9 +91,9 @@ public class VotingTerminal extends Thread {
                         }
                         break;
                     case "login":
-                        if (Integer.parseInt(hash_map.get("to")) == this.id) {
-                            if(hash_map.get("to").equals("success")){
-                                //TODO: eleiçoes
+                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                            if(hash_map.get("status").equals("success")){
+                                it.sendMessage("type | getElections; username | " + it.u_username + "; id | " + it.id);
                             }
                             else{
                                 System.out.println("Wrong credentials on login! Try again");
@@ -103,11 +101,30 @@ public class VotingTerminal extends Thread {
                             }
                         }
                         break;
+                    case "electionsList":
+                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                            hash_map.remove("type");
+                            hash_map.remove("to");
+
+                            if (hash_map.isEmpty()){
+                                System.out.println("There are no elections for you to vote here");
+                                it.lock();
+                            }
+                            else {
+                                it.chooseElection(hash_map);
+                            }
+                        }
+                        break;
+
+
                     default:
+                        //NOT FOR ME
+                        /*
                         //DEBUG
                         System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
                         message = new String(packet.getData(), 0, packet.getLength());
                         System.out.println(message);
+                        */
                         break;
                 }
             }
@@ -138,10 +155,12 @@ class VotingInterface extends Thread{
     private InetAddress group;
     private int PORT;
     private boolean running = true;
+    private Scanner in;
 
     public boolean locked = true;
     public int id;
-    public Semaphore sem = new Semaphore();
+    public Semaphore sem;
+    public String u_username;
 
     private String u_name;
     private String u_cc;
@@ -149,32 +168,31 @@ class VotingInterface extends Thread{
     public VotingInterface(InetAddress group, int PORT){
         this.group = group;
         this.PORT = PORT;
+        this.in = new Scanner(System.in);
+        this.sem = new Semaphore();
         this.start();
     }
 
     public void run() {
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
- 
-            Scanner in = new Scanner(System.in);
-
+            
+            System.out.println("\nLOCKED!");
             while(this.running){
                 if (this.locked){
-                    System.out.println("LOCKED!");
                 } else {
-                    System.out.println("UNLOCKED!");
-                    this.login(in);
+                    this.login();
                 }
                 sem.doWait();
             }
-
                 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            socket.close();
+            this.socket.close();
+            this.in.close();
         }
     }
 
@@ -183,9 +201,14 @@ class VotingInterface extends Thread{
         this.u_cc = cc;
         
         this.locked = false;
+        System.out.println("\nUNLOCKED!");
         sem.doSignal();
     }
 
+    public void lock(){
+        this.locked = true;
+        System.out.println("\nLOCKED!");
+    }
 
     public void sendMessage( String message ){
         try {
@@ -219,16 +242,43 @@ class VotingInterface extends Thread{
         return hash_map;
     }
 
-    public void login(Scanner in){
-        System.out.println("Hi " + u_name + "\nPlease Log in");
+    private void login(){
+        System.out.println("\nHi " + u_name + "\nPlease Log in");
         
         System.out.print("username: ");
-        String username = in.nextLine();
+        this.u_username = this.in.nextLine();
 
         System.out.print("password: ");
         String password = new String( System.console().readPassword() );
 
-        this.sendMessage("type | login; username | " + username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
+        this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
+    }
+
+    public void chooseElection(HashMap<String, String> elections) {
+        System.out.println("\nChoose an election:");
+
+        int i = 1;
+        for (String name : elections.values()){
+            System.out.println(i + " - " + name);
+            i++;
+        }
+
+        int nelec;
+        
+        do{
+            System.out.print("0 - Back\noption: ");
+
+            nelec = this.in.nextInt();
+            this.in.nextLine();
+            
+            if (nelec< 0 || nelec >= i){     
+                System.out.println("Wrong option! Try Again...");
+            }
+            else if (nelec != 0){
+                this.sendMessage("type | getLists; id | " + this.id + "; nelec | " + elections.keySet().toArray()[nelec-1]);;
+                break;
+            }
+        }while (nelec!=0);
     }
 }
 

@@ -212,7 +212,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			connectToBD();
 			return login(username, num_cc, password);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			//TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
