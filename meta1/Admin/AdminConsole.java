@@ -492,14 +492,18 @@ public class AdminConsole {
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
             System.out.println("Current candidate lists in the election:\n");
+            ArrayList<Integer> toremove = new ArrayList<Integer>();
             if(lists != null){
                 for (Integer key : lists.keySet()){
                     if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
                         System.out.println("."+lists.get(key).left);
                     }
                     else{
-                        lists.remove(key);
+                        toremove.add(key);
                     }
+                }
+                for(Integer i : toremove){
+                    lists.remove(i);
                 }
             }
             System.out.println("\n1 - Add candidate list\n2 - Remove candidate list\n3 - Manage candidate list\n0 - Back\noption: ");
@@ -557,14 +561,18 @@ public class AdminConsole {
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
             int i = 1;
             if(lists != null){
+                ArrayList<Integer> toremove = new ArrayList<Integer>();
                 for (Integer key : lists.keySet()){
                     if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
                         System.out.println(i + " - " +lists.get(key).left);
                         i++;
                     }
                     else{
-                        lists.remove(key);
+                        toremove.add(key);
                     }
+                }
+                for(Integer j : toremove){
+                    lists.remove(j);
                 }
                 
             }
