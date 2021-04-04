@@ -36,18 +36,12 @@ import Commun.database;
 import Commun.database.Pair;
 
 class Heartbeat implements Runnable {
-	/**
-	 *
-	 */
 	private byte[] buffer;
 	private DatagramPacket request;
 	private DatagramSocket socket;
 	CountDownLatch latch;
 	private int connections;
 
-	/**
-	 * @param wait_for_sec
-	 */
 	public Heartbeat(boolean wait_for_sec) {
 		buffer = new byte[20];
 		request = new DatagramPacket(buffer, buffer.length);
@@ -68,9 +62,6 @@ class Heartbeat implements Runnable {
 		}
 	}
 
-	/**
-	 *
-	 */
 	public synchronized void run() {
 		while (true) {
 			try {
@@ -111,30 +102,21 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	private static String enckey = "cenabuesegura";
 	private static Thread current;
 	private static HashMap<String,HashMap<String,Integer>> rtstations;
-
-	/**
-	 * @throws RemoteException
-	 */
 	public RMIServer() throws RemoteException {
 		super();
 	}
-
-	/**
-	 *
-	 */
+	private static boolean isworking = false;
 	private static void connectToBD(){
 		try {
 			//Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://ba5bfd4cfc576d:f93b7db6@eu-cdbr-west-03.cleardb.net/heroku_5e154400fde3501?reconnect=true");
 			rtstations = NumberVotesPerStation();
+			isworking = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	/**
-	 *
-	 */
 	private static void primary() {
 		// create our mysql database connection
 		connectToBD();
@@ -155,19 +137,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			}
 		}
 	}
-
-	/**
-	 * @param cargo
-	 * @param ndep
-	 * @param nome
-	 * @param morada
-	 * @param telefone
-	 * @param numcc
-	 * @param valcc
-	 * @param username
-	 * @param password
-	 * @return
-	 */
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"' OR numcc = '"+numcc+"';";
@@ -206,10 +175,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return -3;
 		}
 	}
-
-	/**
-	 * @return
-	 */
 	public HashMap<Integer,String> getDepartments(){ // {faculdade: [(ndep,dep)]}
 		try {
 			HashMap<Integer,String>  deps = new HashMap<Integer,String>();
@@ -231,13 +196,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-
-	/**
-	 * @param username
-	 * @param num_cc
-	 * @param password
-	 * @return
-	 */
 	public boolean login(String username, String num_cc, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
@@ -261,17 +219,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 		return false;
 	}
-
-	/**
-	 * @param cargos
-	 * @param departamentos
-	 * @param mesas
-	 * @param titulo
-	 * @param desc
-	 * @param inicio
-	 * @param fim
-	 * @return
-	 */
 	// =======================================================
 	public int createElection(String cargos, String departamentos, String mesas, String titulo, String desc, LocalDateTime inicio, LocalDateTime fim){
 		//cargos = {'aluno','docente','funcionario','all'}
@@ -315,19 +262,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				return 0;
 			}
 	}
-
-	/**
-	 * @param neleicao
-	 * @param remove
-	 * @param titulo
-	 * @param descricao
-	 * @param inicio
-	 * @param fim
-	 * @param departamentos
-	 * @param mesas
-	 * @param listas
-	 * @return
-	 */
 	public int editElection(int neleicao, boolean remove, String titulo, String descricao, LocalDateTime inicio, LocalDateTime fim, String departamentos, String mesas, Integer[] listas){
 		try {
 			String query = "SELECT * FROM eleicoes WHERE neleicao = "+neleicao+";";
@@ -400,12 +334,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return -3;
 		}
 	}
-
-	/**
-	 * @param username
-	 * @param dep_mesa
-	 * @return
-	 */
 	public HashMap<Integer,HashMap<String,String>> getElections(String username, String dep_mesa){
 		// {neleicao:{titulo:String, descricao: String, inicio: String, fim: String, departamentos: String, mesas: String}}
 		try {
@@ -455,11 +383,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 		
 	}
-
-	/**
-	 * @param usernameOrCC
-	 * @return
-	 */
 	public String[] getUser(String usernameOrCC){
 		// (cc,nome)
 		try {
@@ -482,14 +405,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-
-	/**
-	 * @param neleicao
-	 * @param nome
-	 * @param users
-	 * @param remove
-	 * @return
-	 */
+	
 	public int createOrEditList(int neleicao, String nome, ArrayList<Pair<String,String>> users, boolean remove){
 		//Pair(numcc,nome)
 		try{
@@ -571,11 +487,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return -4;
 		}
 	}
-
-	/**
-	 * @param neleicao
-	 * @return
-	 */
 	public HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> getLists(int neleicao){
 		// {nlista:(nome,[(cc,nome)])}
 		try {
@@ -618,14 +529,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 		
 	}
-
-	/**
-	 * @param username
-	 * @param neleicao
-	 * @param nlista
-	 * @param mesa
-	 * @return
-	 */
 	public int vote(String username, int neleicao, int nlista, int mesa){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"';";
@@ -693,11 +596,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return -3;
 		}
 	}
-
-	/**
-	 * @param neleicao
-	 * @return
-	 */
 	public HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> getResults(int neleicao){
 		// {neleicao: (nome_eleicao, {nlista: (nome_lista, votos)})}
 		HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> out = new HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>>();
@@ -733,10 +631,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-
-	/**
-	 * @return
-	 */
 	public static Timestamp updateElections(){
 		try{
 			String query = "SELECT * FROM eleicoes WHERE estado = 'waiting' ORDER BY inicio ASC;";
@@ -794,12 +688,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-
-	/**
-	 * @param username
-	 * @return
-	 * @throws java.rmi.RemoteException
-	 */
 	public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException{
 		//{eleicao:mesa}
 		
@@ -820,10 +708,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 		
 	}
-
-	/**
-	 * @return
-	 */
 	private static HashMap<String,HashMap<String,Integer>> NumberVotesPerStation(){
 		//{eleicao:{dep:votos}}
 		try {
@@ -844,13 +728,11 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-
-	/**
-	 * @return
-	 * @throws java.rmi.RemoteException
-	 */
 	public HashMap<String,HashMap<String,Integer>> getNumberVotesPerStation() throws java.rmi.RemoteException{
 		return rtstations;
+	}
+	public boolean isWorking() throws java.rmi.RemoteException{
+		return isworking;
 	}
 	public static void main(String args[]) {
 

@@ -12,17 +12,11 @@ import javax.crypto.spec.SecretKeySpec;
 //codigo retirado de https://howtodoinjava.com/java/java-security/java-aes-encryption-example/
 
 public class AES {
-    /**
-     *
-     */
  
     private static SecretKeySpec secretKey;
     private static byte[] key;
-
-    /**
-     * @param myKey
-     */
-    public static void setKey(String myKey)
+ 
+    public static void setKey(String myKey) 
     {
         MessageDigest sha = null;
         try {
@@ -39,13 +33,8 @@ public class AES {
             e.printStackTrace();
         }
     }
-
-    /**
-     * @param strToEncrypt
-     * @param secret
-     * @return
-     */
-    public static String encrypt(String strToEncrypt, String secret)
+ 
+    public static String encrypt(String strToEncrypt, String secret) 
     {
         try
         {
@@ -60,13 +49,8 @@ public class AES {
         }
         return null;
     }
-
-    /**
-     * @param strToDecrypt
-     * @param secret
-     * @return
-     */
-    public static String decrypt(String strToDecrypt, String secret)
+ 
+    public static String decrypt(String strToDecrypt, String secret) 
     {
         try
         {

@@ -1,60 +1,153 @@
 package Admin;
 
+import java.awt.Container;
+import java.io.Console;
+import java.io.Serializable;
 import java.net.ConnectException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+
 import Commun.database;
 import Commun.database.Pair;
 
 
-/**
- * Main Class for the Admin Console
- *
- * @author Bruno Faria
- * @version 1.0
- */
-public class AdminConsole {
+                
+          
 
+public class AdminConsole {
     static database db;
     static textAreaTest tat;
 
-    /**
-     * Main Function
-     *
-     * @param args                      Arguments
-     * @throws RemoteException          Error when connecting to RMI Server
-     * @throws InterruptedException     TODO
-     */
+    static class updateThread extends Thread{
+        textAreaTest aa;
+        Integer i;
+        Thread princ;
+    
+
+        public updateThread(textAreaTest abc,Thread princ)
+        {
+                    aa = abc;
+                    this.princ = princ;
+        }
+
+        @Override
+        public void run(){
+                while(true){  
+                    try{ 
+                        HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
+                        if(results != null){
+                            String display = "";
+                            for(String el : results.keySet()){
+                                display="---"+ el + "---\n";
+                                for (String mesa : results.get(el).keySet()){
+                                    display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
+                                }
+                            }
+                                aa.setText(display);
+                                sleep(100);
+                        }
+                    }
+                    catch (InterruptedException e){
+                        //e.printStackTrace();
+                    } 
+                    catch (RemoteException e) {
+                        princ.suspend();
+                        reconnect();
+                        princ.resume();
+                    }
+
+                }
+        }
+            
+    }        
+    
+
+    static class textAreaTest extends javax.swing.JFrame
+    {
+        JTextArea area = new JTextArea();
+        updateThread thread;
+
+        public textAreaTest(Thread princ)
+            {
+                thread = new updateThread(this, princ);
+                JPanel panel = new JPanel();
+                panel.add(area);
+                this.setSize(1000, 500);
+                Container c = this.getContentPane();
+                c.add(area);
+                this.setVisible(true);
+                thread.start();
+            }
+
+        public void setText(String text)
+            {
+                area.setText(text);
+            }
+        public void stop(){
+            thread.stop();
+        }
+        public void resume(){
+            thread.resume();
+        }
+    }
+
+    private static synchronized void reconnect(){
+        long until = System.currentTimeMillis()+30000;
+        boolean ok = false;
+        while(System.currentTimeMillis() <= until){
+            try {
+                db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+                if(db.isWorking()){
+                    ok = true;
+                    break;
+                }
+            } catch (Exception e1) {
+                ;
+            }
+        }
+        if(!ok){
+            System.out.println("Server is closed");
+            System.exit(0);
+        }
+    }
     public static void main(String[] args) throws RemoteException, InterruptedException {
     
         
         try {
 			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+            if(!db.isWorking()){
+                System.out.println("Server closed. Sorry...");
+                System.exit(0);
+            }
 		} catch (Exception e) {
-			System.out.println("Exception in main: " + e);
-			e.printStackTrace();
+			System.out.println("Server closed. Sorry...");
+            System.exit(0);
 		}
         
         System.out.println("Welcome to Admin Console");
-         tat = new textAreaTest(db);
+        tat = new textAreaTest(Thread.currentThread());
 
         int option = -1;
         Scanner in = new Scanner(System.in);
         do{
             try{
-            System.out.print("\n1 - Register person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
+            System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
 
             option = in.nextInt();
             in.nextLine();
@@ -111,27 +204,23 @@ public class AdminConsole {
                     break;
             }
             }
-            catch(ConnectException e){
-                System.out.println("Server is closed");
-                tat.stop();
-                System.exit(0);
-            }
             catch(InputMismatchException e){
                 System.out.println("Invalid input!");
                 in.nextLine();
             }
+            catch(RemoteException e){
+                reconnect();
+            }
+            catch(java.util.NoSuchElementException e){
+                System.exit(0);
+            }
         }while (option != 0);
         in.close();
     }
+    
+    
 
-
-    /**
-     * @param in
-     * @return
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static int registerPerson(Scanner in) throws RemoteException, ConnectException{
+    private static int registerPerson(Scanner in) throws RemoteException{
         int type, ndep;
         String cargo = "all";
         boolean isValid = false;
@@ -194,21 +283,47 @@ public class AdminConsole {
         if(name.equals("0")){
             return -4;
         }
-
+        if(name.length()>64){
+            System.out.println("Please make the name shorter than 64 characters. You can replace the middle names for their initials."); 
+        }
         System.out.print("\nAddress: ");
         String address = in.nextLine();
         if(address.equals("0")){
             return -4;
+        }
+        if(address.length()>64){
+            System.out.println("Please make the address shorter than 64 characters. Sorry..."); 
         }
         System.out.print("\nPhone number: ");
         String phone_number = in.nextLine();
         if(phone_number.equals("0")){
             return -4;
         }
+        try{
+            Integer.parseInt(phone_number);
+        }
+        catch(Exception e){
+            System.out.println("A phone number can only have digits!"); 
+            return -4;
+        }
+        if(phone_number.length() < 7 || phone_number.length() > 16){
+            System.out.println("That is not a valid phone number!"); 
+            return -4;
+        }
         System.out.print("\nCC number: ");
         String cc_number = in.nextLine();
         if(cc_number.equals("0")){
             return -4;
+        }
+        try{
+            Integer.parseInt(cc_number);
+        }
+        catch(Exception e){
+            System.out.println("An ID must only have digits!");
+            return -4;
+        }
+        if(cc_number.length()>16 || cc_number.length() < 8){
+        System.out.println("That is not a valid ID!");
         }
         isValid=false;
         Date cc_expiration_date = new Date(1970, 1, 1);
@@ -233,6 +348,10 @@ public class AdminConsole {
         if(username.equals("0")){
             return -4;
         }
+        if(username.length() > 16 || username.length() < 3){
+            System.out.println("username must have between 3 and 16 characters.");
+            return -4;
+        }
 
         isValid = false;
         String password;
@@ -242,7 +361,7 @@ public class AdminConsole {
             if(password.equals("0")){
                 return -4;
             }
-            if(password.length()>=4){
+            if(password.length()>=4 || password.length() > 16){
                 System.out.print("Confirm password: ");
                 String pv = new String(System.console().readPassword());
                 if(pv.equals("0")){
@@ -254,7 +373,7 @@ public class AdminConsole {
                     System.out.print("\nPasswords dont match! Try Again...");
                 }
             }else{
-                System.out.print("\nPassword requires a minimum of 4 characters! Try Again...");
+                System.out.print("\nPassword requires a minimum of 4 characters and a maximum of 16 characters! Try Again...");
             }
         }while(!isValid);
          //DEBUG
@@ -275,13 +394,7 @@ public class AdminConsole {
         
     }
 
-    /**
-     * @param in
-     * @return
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static int createElection(Scanner in) throws RemoteException, ConnectException{
+    private static int createElection(Scanner in) throws RemoteException{
         int voters, ndep;
         boolean isValid = false;
         String cargos = new String();
@@ -356,6 +469,10 @@ public class AdminConsole {
         if(title.equals("0") || title.equals("votos nulos") || title.equals("votos em branco")){
             return -2;
         }
+        if(title.length()>64){
+            System.out.println("Please make the title shorter than 64 characters. You can write more details of the election in the description!"); 
+            return -2;
+        }
 
         System.out.print("\nElection description: ");
         String description = in.nextLine();
@@ -427,13 +544,7 @@ public class AdminConsole {
         
     }
 
-    /**
-     * @param in
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void chooseElection(Scanner in) throws RemoteException, ConnectException, InterruptedException{
+    private static void chooseElection(Scanner in) throws RemoteException, InterruptedException{
         System.out.println("\nChoose an election:");
         HashMap<Integer,HashMap<String,String>> elections;
         try{
@@ -469,14 +580,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void manageElection(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
+    private static void manageElection(Scanner in, int nelec) throws RemoteException, InterruptedException{
         HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
         int option;
         int estado;
@@ -517,14 +621,8 @@ public class AdminConsole {
                 }              
             }while (option!=0);
     }
-
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException, ConnectException{
+    
+    private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException{
         int option;
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
@@ -572,33 +670,31 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static void addCandidateList(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void addCandidateList(Scanner in, int nelec) throws RemoteException{
 
         System.out.print("\nList Name: ");
         String name = in.nextLine();
-        int cl = db.createOrEditList(nelec, name, null,false);
+        int cl;
+        if(name.length()>64){
+           cl = db.createOrEditList(nelec, name, null,false);
+        }
+        else{
+            cl = -1;
+        }
         if(cl > 0){
             manageCandidates(in, nelec, cl);
         }
         else if (cl == -3){
             System.out.println("\nThere is already a list with that name associated to this election!");
         }
+        else if ( cl == -1){
+            System.out.println("\nPlease make the list's name shorter than 64 characters.");
+        }
         else{
             System.out.println("Sorry, something went wrong with our server. Please contact us!");
         }
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     */
     private static void removeCandidateList(Scanner in, int nelec) throws RemoteException{
 
         
@@ -642,14 +738,7 @@ public class AdminConsole {
         }while (nlist!=0);
 
     }
-
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException, ConnectException{
+    private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException{
 
         
         
@@ -679,15 +768,7 @@ public class AdminConsole {
         }while (nlist!=0);
 
     }
-
-    /**
-     * @param in
-     * @param nelec
-     * @param nlista
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException, ConnectException{
+    private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException{
         int option;
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists;
@@ -729,14 +810,7 @@ public class AdminConsole {
         }while (option!=0);
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param nlista
-     * @throws RemoteException
-     * @throws ConnectException
-     */
-    private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException, ConnectException{
+    private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
         HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
         System.out.print("\nCC number: ");
         String cc_number = in.nextLine();
@@ -750,12 +824,6 @@ public class AdminConsole {
         }
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param nlista
-     * @throws RemoteException
-     */
     private static void removeCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
         
         
@@ -797,14 +865,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void managePollingStations(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
+    private static void managePollingStations(Scanner in, int nelec) throws RemoteException, InterruptedException{
         int option;
        
         do{
@@ -861,15 +922,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param stations
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException, InterruptedException{
+    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, InterruptedException{
         int option;
         do{
             
@@ -901,15 +954,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param stations
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, ConnectException, InterruptedException{
+    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, InterruptedException{  
         int option;
         do{
             
@@ -944,14 +989,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void changeProperties(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
+    private static void changeProperties(Scanner in, int nelec) throws RemoteException, InterruptedException{
         
         boolean isValid  = false;
         int option;
@@ -1055,14 +1093,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void manageVoters(Scanner in, int nelec) throws RemoteException, ConnectException, InterruptedException{
+    private static void manageVoters(Scanner in, int nelec) throws RemoteException, InterruptedException{
         int option;
        
         do{
@@ -1111,15 +1142,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param departments
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException, InterruptedException{
+    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, InterruptedException{
         int option;
         do{
             
@@ -1151,15 +1174,7 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @param departments
-     * @throws RemoteException
-     * @throws ConnectException
-     * @throws InterruptedException
-     */
-    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, ConnectException, InterruptedException{
+    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, InterruptedException{  
         int option;
         do{
             
@@ -1195,11 +1210,6 @@ public class AdminConsole {
 
     }
 
-    /**
-     * @param in
-     * @param nelec
-     * @throws RemoteException
-     */
     private static void checkResults(Scanner in, int nelec) throws RemoteException{
         HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(nelec);
         
@@ -1221,19 +1231,20 @@ public class AdminConsole {
         System.out.println("Press enter to continue...");
         in.nextLine();
     }
-
-    /**
-     * @param in
-     * @throws RemoteException
-     */
+    
     private static void getUserVotes(Scanner in) throws RemoteException{
         System.out.print("\nUsername: ");
         String username = in.nextLine();
         HashMap<Integer,Pair<Integer,String>> votes = db.getUserVotes(username);
         HashMap<Integer,String> deps = db.getDepartments();
         HashMap<Integer,HashMap<String,String>> elecs = db.getElections(username, null);
-        for(Integer key: votes.keySet()){
-            System.out.println(elecs.get(key).get("titulo")+": "+ deps.get(votes.get(key).left)+" at " + votes.get(key).right);
+        try{
+            for(Integer key: votes.keySet()){
+                System.out.println(elecs.get(key).get("titulo")+": "+ deps.get(votes.get(key).left)+" at " + votes.get(key).right);
+            }
+        }
+        catch( java.lang.NullPointerException e){
+            System.out.println("This user has no past votes.\n");
         }
         System.out.println("Press enter to continue...");
         in.nextLine();
