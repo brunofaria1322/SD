@@ -82,14 +82,17 @@ public class VotingTerminal extends Thread {
                             it.sendMessage("type | imfree; id | " + this.id);
                         }
                         break;
+
                     case "whosthere":
                         it.sendMessage("type | imhere; id | " + this.id);
                         break;
+
                     case "work":
                         if (Integer.parseInt(hash_map.get("to")) == this.id) {
                             it.unlock(hash_map.get("cc"), hash_map.get("name"));
                         }
                         break;
+
                     case "login":
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
                             if(hash_map.get("status").equals("success")){
@@ -101,6 +104,7 @@ public class VotingTerminal extends Thread {
                             }
                         }
                         break;
+
                     case "electionsList":
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
                             hash_map.remove("type");
@@ -113,6 +117,32 @@ public class VotingTerminal extends Thread {
                             else {
                                 it.chooseElection(hash_map);
                             }
+                        }
+                        break;
+
+                    case "candidatsList":
+                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                            hash_map.remove("type");
+                            hash_map.remove("to");
+                            String nelec = hash_map.get("nelec");
+                            hash_map.remove("nelec");
+
+                            
+                            it.vote(hash_map, nelec);
+                            
+                        }
+                        break;
+
+                    case "vote":
+                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                            if(hash_map.get("status").equals("success")){
+                                System.out.println("Vote sent successfully!");
+                            }
+                            else{
+                                System.out.println("Vote was rejected! Cause: " + hash_map.get("msg"));
+                            }
+                            it.sendMessage("type | getElections; username | " + it.u_username + "; id | " + it.id);
+                            
                         }
                         break;
 
@@ -257,28 +287,69 @@ class VotingInterface extends Thread{
     public void chooseElection(HashMap<String, String> elections) {
         System.out.println("\nChoose an election:");
 
-        int i = 1;
-        for (String name : elections.values()){
-            System.out.println(i + " - " + name);
-            i++;
-        }
-
         int nelec;
         
         do{
-            System.out.print("0 - Back\noption: ");
+            int i = 1;
+            for (String name : elections.values()){
+                System.out.println(i + " - " + name);
+                i++;
+            }
+
+            System.out.print("0 - Exit\noption: ");
 
             nelec = this.in.nextInt();
             this.in.nextLine();
             
-            if (nelec< 0 || nelec >= i){     
-                System.out.println("Wrong option! Try Again...");
+            if(nelec == 0){
+                this.lock();
+            }
+            else if (nelec< 0 || nelec >= i){     
+                System.out.println("Wrong option! Try Again...\n");
             }
             else if (nelec != 0){
                 this.sendMessage("type | getLists; id | " + this.id + "; nelec | " + elections.keySet().toArray()[nelec-1]);;
                 break;
             }
         }while (nelec!=0);
+    }
+
+    public void vote(HashMap<String, String> lists, String nelec) {
+        System.out.println("\nChoose a list:");
+
+        int nlist;
+        
+        do{  
+            int i = 1;
+            for (String name : lists.values()){
+                if(name.equals("votos nulos")){
+                    System.out.println(i + " - Voto Nulo");
+                }
+                else if(name.equals("votos em branco")){
+                    System.out.println(i + " - Voto Branco");
+                }
+                else{
+                    System.out.println(i + " - " + name);
+                }
+                i++;
+            }
+
+            System.out.print("0 - Back\noption: ");
+
+            nlist = this.in.nextInt();
+            this.in.nextLine();
+            
+            if(nlist == 0){
+                this.sendMessage("type | getElections; username | " + this.u_username + "; id | " + this.id);
+            }
+            else if (nlist< 0 || nlist >= i){     
+                System.out.println("Wrong option! Try Again...\n");
+            }
+            else{
+                this.sendMessage("type | vote; id | " + this.id + "; nlista | " + lists.keySet().toArray()[nlist-1] + "; username | " + this.u_username + "; neleicao | " + nelec);
+                break;
+            }
+        }while (nlist!=0);
     }
 }
 

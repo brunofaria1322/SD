@@ -614,7 +614,7 @@ public class AdminConsole {
             in.nextLine();
 
             if (nlist< 0 || nlist > lists.keySet().size()){     
-                System.out.println("Wrong option! Try Again...");
+                System.out.println("Wrong option! Try Again...\n");
                 break;
             }
             else if(nlist>0) {

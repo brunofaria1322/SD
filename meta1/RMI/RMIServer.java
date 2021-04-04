@@ -393,7 +393,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			if(rs.next()==false){
 				return null; //não há user com esse username
 			}
-			String [] out = {rs.getString("numcc"),rs.getString("nome")};
+			String [] out = {rs.getString("numcc"),rs.getString("nome"),rs.getString("username")};
 			return out;
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
@@ -582,6 +582,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			connectToBD();
 			return vote(username, neleicao, nlista, mesa);
 		} catch (SQLException e) {
+			e.printStackTrace();
 			// TODO Auto-generated catch block
 			return -3;
 		}
