@@ -19,17 +19,26 @@ import Commun.database;
 import Commun.database.Pair;
 
 public class MulticastServer extends Thread {
+    /**
+     *
+     */
     private String MULTICAST_ADDRESS;
     private int PORT;
     private String NDEP;
     private database db;
 
+    /**
+     * @param args
+     */
     public static void main(String[] args) {
 
         MulticastServer server = new MulticastServer();
         server.start();
     }
 
+    /**
+     *
+     */
     public MulticastServer() {
         try {
             readConfig();
@@ -42,6 +51,9 @@ public class MulticastServer extends Thread {
         }
     }
 
+    /**
+     *
+     */
     public void run() {
         MulticastSocket socket = null;
         int ids = 0;
@@ -206,6 +218,10 @@ public class MulticastServer extends Thread {
         }
     }
 
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
@@ -219,6 +235,9 @@ public class MulticastServer extends Thread {
 }
 
 class PollingStationInterface extends Thread{
+    /**
+     *
+     */
     private MulticastSocket socket;
     private MulticastSocket read_socket;
     private InetAddress group;
@@ -226,6 +245,12 @@ class PollingStationInterface extends Thread{
     public database db;
     private String NDEP;
 
+    /**
+     * @param group
+     * @param PORT
+     * @param db
+     * @param NDEP
+     */
     public PollingStationInterface(InetAddress group, int PORT, database db, String NDEP){
         this.group = group;
         this.PORT = PORT;
@@ -234,6 +259,9 @@ class PollingStationInterface extends Thread{
         this.start();
     }
 
+    /**
+     *
+     */
     public void run() {
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
@@ -267,6 +295,9 @@ class PollingStationInterface extends Thread{
         }
     }
 
+    /**
+     * @param message
+     */
     public void sendMessage( String message ){
         try {
             byte[] buffer = message.getBytes();
@@ -279,6 +310,10 @@ class PollingStationInterface extends Thread{
         }
     }
 
+    /**
+     * @param packet
+     * @return
+     */
     public HashMap<String, String> packetToHashMap(DatagramPacket packet) {
         String message = new String(packet.getData(), 0, packet.getLength());
         HashMap<String, String> hash_map = new HashMap<String, String>();
@@ -293,6 +328,9 @@ class PollingStationInterface extends Thread{
         return hash_map;
     }
 
+    /**
+     * @param in
+     */
     private void findPersonByUsernameOrCC(Scanner in){
 
         System.out.print("\nCC number or username: ");

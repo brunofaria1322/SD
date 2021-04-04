@@ -8,58 +8,72 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 import Commun.database.Pair;
-
 import Commun.database;
 
-class updateThread extends Thread
-{
-textAreaTest aa;
-Integer i;
-database db;
-public updateThread(textAreaTest abc, database db)
-   {
-            aa = abc;
-            this.db = db;
-   }
+class updateThread extends Thread {
+    /**
+     *
+     */
+    textAreaTest aa;
+    Integer i;
+    database db;
 
-@Override
-   public void run()
-   {
-    while(true){
-        try
+    /**
+     * @param abc
+     * @param db
+     */
+    public updateThread(textAreaTest abc, database db)
+    {
+        aa = abc;
+        this.db = db;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void run()
+    {
+        while(true){
+            try
             {
-            HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
-            if(results != null){
-                String display = "";
-                for(String el : results.keySet()){
-                    display="---"+ el + "---\n";
-                    for (String mesa : results.get(el).keySet()){
-                        display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
+                HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
+                if(results != null){
+                    String display = "";
+                    for(String el : results.keySet()){
+                        display="---"+ el + "---\n";
+                        for (String mesa : results.get(el).keySet()){
+                            display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
+                        }
                     }
-                }
                     aa.setText(display);
                     sleep(1000);
                 }
             }
-        catch (InterruptedException e)
+            catch (InterruptedException e)
             {
                 //e.printStackTrace();
             } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
         }
-        
-        }
-   }
+    }
 
 }
 
-public class textAreaTest extends javax.swing.JFrame
-{
-JTextArea area = new JTextArea();
-updateThread thread;
+public class textAreaTest extends javax.swing.JFrame {
+    /**
+     *
+     */
+    JTextArea area = new JTextArea();
+    updateThread thread;
 
-public textAreaTest(database db)
+    /**
+     * @param db
+     */
+    public textAreaTest(database db)
     {
         thread = new updateThread(this, db);
         JPanel panel = new JPanel();
@@ -71,11 +85,18 @@ public textAreaTest(database db)
         thread.start();
     }
 
-public void setText(String text)
+    /**
+     * @param text
+     */
+    public void setText(String text)
     {
         area.setText(text);
     }
-public void stop(){
-    thread.stop();
-}
+
+    /**
+     *
+     */
+    public void stop(){
+        thread.stop();
+    }
 }

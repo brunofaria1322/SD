@@ -13,15 +13,24 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class VotingTerminal extends Thread {
+    /**
+     *
+     */
     private String MULTICAST_ADDRESS;
     private int PORT;
     private int id = -1;
 
+    /**
+     * @param args
+     */
     public static void main(String[] args) {
         VotingTerminal client = new VotingTerminal();
         client.start();
     }
 
+    /**
+     *
+     */
     public VotingTerminal(){
         try {
             readConfig();
@@ -34,6 +43,9 @@ public class VotingTerminal extends Thread {
         }
     }
 
+    /**
+     *
+     */
     public void run() {
         MulticastSocket socket = null;
         VotingInterface it = null;
@@ -170,6 +182,10 @@ public class VotingTerminal extends Thread {
         return;
     }
 
+    /**
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
@@ -181,6 +197,9 @@ public class VotingTerminal extends Thread {
 }
 
 class VotingInterface extends Thread{
+    /**
+     *
+     */
     private MulticastSocket socket;
     private InetAddress group;
     private int PORT;
@@ -195,6 +214,10 @@ class VotingInterface extends Thread{
     private String u_name;
     private String u_cc;
 
+    /**
+     * @param group
+     * @param PORT
+     */
     public VotingInterface(InetAddress group, int PORT){
         this.group = group;
         this.PORT = PORT;
@@ -203,6 +226,9 @@ class VotingInterface extends Thread{
         this.start();
     }
 
+    /**
+     *
+     */
     public void run() {
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
@@ -226,6 +252,10 @@ class VotingInterface extends Thread{
         }
     }
 
+    /**
+     * @param cc
+     * @param name
+     */
     public void unlock(String cc, String name){
         this.u_name = name;
         this.u_cc = cc;
@@ -235,11 +265,17 @@ class VotingInterface extends Thread{
         sem.doSignal();
     }
 
+    /**
+     *
+     */
     public void lock(){
         this.locked = true;
         System.out.println("\nLOCKED!");
     }
 
+    /**
+     * @param message
+     */
     public void sendMessage( String message ){
         try {
             byte[] buffer = message.getBytes();
@@ -252,12 +288,19 @@ class VotingInterface extends Thread{
         }
     }
 
+    /**
+     *
+     */
     public void leave(){
         this.running = false;
         
         sem.doSignal();
     }
-    
+
+    /**
+     * @param packet
+     * @return
+     */
     public HashMap<String, String> packetToHashMap(DatagramPacket packet) {
         String message = new String(packet.getData(), 0, packet.getLength());
         HashMap<String, String> hash_map = new HashMap<String, String>();
@@ -272,6 +315,9 @@ class VotingInterface extends Thread{
         return hash_map;
     }
 
+    /**
+     *
+     */
     private void login(){
         System.out.println("\nHi " + u_name + "\nPlease Log in");
         
@@ -284,6 +330,9 @@ class VotingInterface extends Thread{
         this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
     }
 
+    /**
+     * @param elections
+     */
     public void chooseElection(HashMap<String, String> elections) {
         System.out.println("\nChoose an election:");
 
@@ -314,6 +363,10 @@ class VotingInterface extends Thread{
         }while (nelec!=0);
     }
 
+    /**
+     * @param lists
+     * @param nelec
+     */
     public void vote(HashMap<String, String> lists, String nelec) {
         System.out.println("\nChoose a list:");
 
@@ -354,8 +407,14 @@ class VotingInterface extends Thread{
 }
 
 class Semaphore {
+    /**
+     *
+     */
     boolean waiting = true;
 
+    /**
+     * @throws InterruptedException
+     */
     public synchronized void doWait() throws InterruptedException {
         while (waiting) {
             wait();
@@ -365,6 +424,9 @@ class Semaphore {
     }
 
 
+    /**
+     *
+     */
     public synchronized void doSignal() {
         waiting = !waiting;
         notify();
