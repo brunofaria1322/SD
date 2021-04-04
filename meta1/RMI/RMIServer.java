@@ -540,7 +540,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			rs = st.executeQuery();
 			rs.next();
 			String dep = rs.getString("nome");
-			query = "SELECT * FROM votos, WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
+			query = "SELECT * FROM votos WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
 			System.out.println(query);
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
