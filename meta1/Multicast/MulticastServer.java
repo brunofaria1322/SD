@@ -18,17 +18,34 @@ import java.io.InputStream;
 import Commun.database;
 import Commun.database.Pair;
 
+
+/**
+ * Main Class for the Polling Station
+ *
+ * @author Bruno Faria
+ * @version 1.0
+ */
 public class MulticastServer extends Thread {
-    /**
-     *
-     */
-    private String MULTICAST_ADDRESS;
-    private int PORT;
-    private String NDEP;
-    private database db;
 
     /**
-     * @param args
+     * The Multicast address
+     */
+    private String MULTICAST_ADDRESS;
+
+    /**
+     * The Multicast port
+     */
+    private int PORT;
+
+    /**
+     * Number of department of this Polling Station
+     */
+    private String NDEP;
+
+    /**
+     * Main Function
+     *
+     * @param args      Arguments
      */
     public static void main(String[] args) {
 
@@ -37,10 +54,11 @@ public class MulticastServer extends Thread {
     }
 
     /**
-     *
+     * Constructor for the Polling Station
      */
     public MulticastServer() {
         try {
+            //reads config file
             readConfig();
         } catch (FileNotFoundException f) {
             System.out.println("Couldn't find config file");
@@ -52,40 +70,46 @@ public class MulticastServer extends Thread {
     }
 
     /**
-     *
+     * Run Function for the Thread start
      */
     public void run() {
         MulticastSocket socket = null;
         int ids = 0;
-        
+
+        database db;
         try {
-			this.db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+            //connects to rmi server
+			db = (database) LocateRegistry.getRegistry(1099).lookup("central");
 		} catch (Exception e) {
-			System.out.println("Could't connect to RMI server\nExiting");
+			System.out.println("Couldn't connect to RMI server\nExiting...");
             return;
 		}
         
         System.out.println("Polling station of dep no. "+this.NDEP+" is running...");
 
         try {
+            //connects to the multicast
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
-            PollingStationInterface it = new PollingStationInterface(group, this.PORT, this.db, this.NDEP);
+            //creation of interface thread
+            PollingStationInterface it = new PollingStationInterface(group, this.PORT, db, this.NDEP);
 
-            socket = new MulticastSocket(this.PORT);  // create socket and bind it
-            socket.joinGroup(group);
+            socket = new MulticastSocket(this.PORT);    // create socket and bind it
+            socket.joinGroup(group);                    // joins the group
 
+            /* Sends message to Multicast Group to keep up with ids and
+                to check if there is no other Polling Station on this group */
             String message = "type | whosthere";
             it.sendMessage(message);
 
-            byte[] buffer = new byte[256];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            byte[] buffer;
+            DatagramPacket packet;
 
             HashMap<String,String> hash_map;
             
-            /*  
-                In case pooling station needed restart it will continue the ids
+            /* In case Polling Station needed restart it will continue the ids
                 based on the biggest id among the terminals connected
+               If there is already a Polling Station on this group this one will leave
             */
             try {
                 socket.setSoTimeout(1000);
@@ -97,13 +121,23 @@ public class MulticastServer extends Thread {
                     hash_map = it.packetToHashMap(packet);
 
                     if(hash_map.get("type").equals("imhere")){
-                        int temp_id = Integer.parseInt(hash_map.get("id"));
-                        if (temp_id >= ids) {
-                            ids = temp_id+1;
+                        if (hash_map.get("id") != null){
+                            //Response from a Voting Terminal
+                            int temp_id = Integer.parseInt(hash_map.get("id"));
+                            if (temp_id >= ids) {
+                                ids = temp_id+1;
+                            }
+                        }
+                        else if(hash_map.get("ndep") != null){
+                            //Response from a Polling Station
+                            System.out.println("There is already a Polling Station in this group\nLeaving...");
+                            it.interrupt();
+                            System.exit(0);
                         }
                     }
                 }
             } catch (SocketTimeoutException e) {
+                //No more requests to catch
                 socket.setSoTimeout(0);
             }
 
@@ -115,12 +149,19 @@ public class MulticastServer extends Thread {
                 hash_map = it.packetToHashMap(packet);
                 
                 switch (hash_map.get("type")) {
+                    // when Polling Station asks who's connected to the multicast group
+                    case "whosthere":
+                        it.sendMessage("type | imhere; ndep | " + this.NDEP);
+                        break;
+
+                    // when Voting Terminal asks for an ID
                     case "identification":
                         if(hash_map.get("id") == null){
                             it.sendMessage("type | identification; id | " + ids++);
                         }
                         break;
 
+                    // Sends response to login request
                     case "login":
                         if(hash_map.get("id") != null){
                             if(db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"))){
@@ -131,6 +172,9 @@ public class MulticastServer extends Thread {
                         }
                         break;
 
+                    /* Response to the request for the elections
+                        sends the list of elections that the user is able to vote in the current department
+                    */
                     case "getElections":
                         if(hash_map.get("id") != null && hash_map.get("username")!= null){
 
@@ -141,18 +185,19 @@ public class MulticastServer extends Thread {
                             catch(NullPointerException e){
                                 elections = null;
                             }
-                            String out = "type | electionsList; to | " + hash_map.get("id");
+                            StringBuilder out = new StringBuilder("type | electionsList; to | " + hash_map.get("id"));
                             
                             if(elections != null){
                                 for (Integer elec_id: elections.keySet()){
-                                    out = out + "; "+elec_id+ " | " + elections.get(elec_id).get("titulo");
+                                    out.append("; ").append(elec_id).append(" | ").append(elections.get(elec_id).get("titulo"));
                                 }
                             }
 
-                            it.sendMessage(out);
+                            it.sendMessage(out.toString());
                         }
                         break;
 
+                    // Response to the request for the list of candidates
                     case "getLists":
                         if(hash_map.get("id") != null && hash_map.get("nelec")!= null){
 
@@ -164,18 +209,19 @@ public class MulticastServer extends Thread {
                                 lists = null;
                             }
                             
-                            String out = "type | candidatsList; to | " + hash_map.get("id") + "; nelec | " + hash_map.get("nelec");
+                            StringBuilder out = new StringBuilder("type | candidatsList; to | " + hash_map.get("id") + "; nelec | " + hash_map.get("nelec"));
                             
                             if(lists != null){
                                 for (Integer list_id: lists.keySet()){
-                                    out = out + "; "+list_id+ " | " + lists.get(list_id).left;
+                                    out.append("; ").append(list_id).append(" | ").append(lists.get(list_id).left);
                                 }
                             }
 
-                            it.sendMessage(out);
+                            it.sendMessage(out.toString());
                         }
                         break;
-                    
+
+                    // sends the response to the vote request
                     case "vote":
                         if(hash_map.get("id") != null){
                             int temp = db.vote(hash_map.get("username"), Integer.parseInt(hash_map.get("neleicao")), Integer.parseInt(hash_map.get("nlista")), Integer.parseInt(this.NDEP));
@@ -200,27 +246,34 @@ public class MulticastServer extends Thread {
                         }
                         break;
 
+                    // Messages that are not for Polling Station
                     default:
-                        //NOT FOR ME
+
                         /*
-                        //DEBUG
+                        DEBUG
                         System.out.println("Received packet from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
                         message = new String(packet.getData(), 0, packet.getLength());
                         System.out.println(message);
                         */
+
                         break;
                 }
             }
         } catch (IOException e) {
+            //TODO
             e.printStackTrace();
         } finally {
-            socket.close();
+            if (socket != null) {
+                socket.close();
+            }
         }
     }
 
     /**
-     * @throws FileNotFoundException
-     * @throws IOException
+     * Reads the terminal.config file
+     *
+     * @throws FileNotFoundException    When file was not found
+     * @throws IOException              When file content is not as expected
      */
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
@@ -234,22 +287,51 @@ public class MulticastServer extends Thread {
     }
 }
 
+/**
+ * The Polling Station Interface
+ *
+ * @author Bruno Faria
+ * @version 1.0
+ */
 class PollingStationInterface extends Thread{
-    /**
-     *
-     */
-    private MulticastSocket socket;
-    private MulticastSocket read_socket;
-    private InetAddress group;
-    private int PORT;
-    public database db;
-    private String NDEP;
 
     /**
-     * @param group
-     * @param PORT
-     * @param db
-     * @param NDEP
+     * The Multicast socket
+     */
+    private MulticastSocket socket;
+
+    /**
+     * The Multicast socket for reading
+     */
+    private MulticastSocket read_socket;
+
+    /**
+     * The Multicast group
+     */
+    private final InetAddress group;
+
+    /**
+     * The Multicast Port
+     */
+    private final int PORT;
+
+    /**
+     * The RMI server connector
+     */
+    public database db;
+
+    /**
+     * The number of department of the Polling Station
+     */
+    private final String NDEP;
+
+    /**
+     * Constructor for the Polling Station Interface
+     *
+     * @param group     the Multicast group
+     * @param PORT      the Multicast Port
+     * @param db        the RMI Server connector
+     * @param NDEP      the number of department of the Polling Station
      */
     public PollingStationInterface(InetAddress group, int PORT, database db, String NDEP){
         this.group = group;
@@ -260,15 +342,16 @@ class PollingStationInterface extends Thread{
     }
 
     /**
-     *
+     * Run Function for the Thread start
      */
     public void run() {
+        Scanner in = null;
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
-            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it
+            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it (only for reading)
 
             int option;
-            Scanner in = new Scanner(System.in);
+            in = new Scanner(System.in);
             do{
                 System.out.println("\n1 - Find Person\n0 - exit");
 
@@ -286,17 +369,23 @@ class PollingStationInterface extends Thread{
                         break;
                 }
             }while (option != 0);
-            in.close();
         } catch (IOException e) {
+            //TODO
             e.printStackTrace();
         } finally {
+            if (in != null) {
+                in.close();
+            }
             System.out.println("Bye!");
-            socket.close();
+            this.socket.close();
+            this.read_socket.close();
         }
     }
 
     /**
-     * @param message
+     * Sends message to Multicast group
+     *
+     * @param message   Message to be sent
      */
     public void sendMessage( String message ){
         try {
@@ -306,30 +395,35 @@ class PollingStationInterface extends Thread{
             this.socket.send(packet);
                 
         } catch (IOException e) {
+            //TODO
             e.printStackTrace();
         }
     }
 
     /**
-     * @param packet
-     * @return
+     * Turns packet received from multicast group to a HashMap
+     *
+     * @param packet    packet received
+     * @return          returns the HashMap
      */
     public HashMap<String, String> packetToHashMap(DatagramPacket packet) {
         String message = new String(packet.getData(), 0, packet.getLength());
-        HashMap<String, String> hash_map = new HashMap<String, String>();
-            
+        HashMap<String, String> hash_map = new HashMap<>();
+
         for(String aux : message.split(";")){
-            String key_value[] = aux.split("\\|");
+            String[] key_value = aux.split("\\|");
             
             hash_map.put(key_value[0].trim(), key_value[1].trim());
         }
-        
+
         //System.out.println("String:\n\t" + message + "\nto HashMap:\n\t" + hash_map);
         return hash_map;
     }
 
     /**
-     * @param in
+     * Interface used to search for a person by CC number or username
+     *
+     * @param in    the input Scanner
      */
     private void findPersonByUsernameOrCC(Scanner in){
 
@@ -339,6 +433,7 @@ class PollingStationInterface extends Thread{
         try {
             user = db.getUser(aux);
         } catch (RemoteException e) {
+            //TODO
             e.printStackTrace();
         }
 
@@ -351,25 +446,29 @@ class PollingStationInterface extends Thread{
             try{
                 elections = db.getElections(user[2], this.NDEP);
             }
-            catch(NullPointerException e){
-                elections = null;
+            catch(NullPointerException ignored){
+                //ignored because elections is already initialized as null
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
+            //if there are no elections for this user to vote in the current Polling Station
             if(elections == null || elections.isEmpty()){
                 System.out.println("There are no elections for "+ user[1] +" to vote here");
+                return;
             }
 
+            //asks for a free Voting Terminal
             System.out.println("Unlocking a terminal for " + user[1]);
             this.sendMessage("type | whosfree");
 
             try {
+                //timeout for the request for a free Voting Terminal
                 this.read_socket.setSoTimeout(1000);
                 this.read_socket.joinGroup(group);
 
-                byte[] buffer = new byte[256];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                byte[] buffer;
+                DatagramPacket packet;
 
                 HashMap<String,String> hash_map;
 
@@ -394,14 +493,17 @@ class PollingStationInterface extends Thread{
                 System.out.println("Terminal id = "+id+" was ulocked!");
 
             } catch (SocketTimeoutException e) {
+                //when there was no response to the request
                 System.out.println("Timeout: Couldn't find any free terminals");
                 try {
                     this.read_socket.setSoTimeout(0);
                     this.read_socket.leaveGroup(group);
                 } catch (IOException e1) {
+                    //TODO
                     e1.printStackTrace();
                 }
             } catch (IOException e) {
+                //TODO
                 e.printStackTrace();
             }
             

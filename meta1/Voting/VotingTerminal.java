@@ -71,13 +71,14 @@ public class VotingTerminal extends Thread {
         try {
             //connects to the multicast
             InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
+
             //creation of interface thread
             it = new VotingInterface(group, PORT);
 
             socket = new MulticastSocket(PORT);     // create socket and bind it
             socket.joinGroup(group);                // joins the group
 
-            // Sends message to polling stations requesting an id
+            // Sends message to Polling Station requesting an id
             String message = "type | identification";
             it.sendMessage(message);
 
@@ -120,10 +121,12 @@ public class VotingTerminal extends Thread {
                             it.sendMessage("type | imfree; id | " + this.id);
                         }
                         break;
-                    // when polling station asks who's connected to the multicast group
+
+                    // when Polling Station asks who's connected to the multicast group
                     case "whosthere":
                         it.sendMessage("type | imhere; id | " + this.id);
                         break;
+
                     // Sends this terminal to work
                     case "work":
                         if (Integer.parseInt(hash_map.get("to")) == this.id) {
@@ -131,6 +134,7 @@ public class VotingTerminal extends Thread {
                             it.unlock(hash_map.get("cc"), hash_map.get("name"));
                         }
                         break;
+
                     // response to login request
                     case "login":
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
@@ -144,7 +148,8 @@ public class VotingTerminal extends Thread {
                             }
                         }
                         break;
-                    // response to getElections
+
+                    // response to getElections (list of elections)
                     case "electionsList":
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
                             hash_map.remove("type");
@@ -192,7 +197,7 @@ public class VotingTerminal extends Thread {
                         }
                         break;
 
-                    // Messages not for Voting Terminal
+                    // Messages that are not for Voting Terminal
                     default:
 
                         /*
@@ -252,44 +257,54 @@ class VotingInterface extends Thread{
      * The Multicast socket
      */
     private MulticastSocket socket;
+
     /**
      * The Multicast group
      */
     private final InetAddress group;
+
     /**
      * The Multicast Port
      */
     private final int PORT;
+
     /**
      * Is Terminal running
      */
     private boolean running = true;
+
     /**
      * Input Scanner
      */
     private final Scanner in;
 
+
     /**
      * Is Terminal Locked
      */
     public boolean locked = true;
+
     /**
      * Terminal ID
      */
     public int id;
+
     /**
      * Semaphore
      */
     public Semaphore sem;
+
     /**
      * Username of current user
      */
     public String u_username;
 
+
     /**
      * Name of current user
      */
     private String u_name;
+
     /**
      * CC number of current user
      */
