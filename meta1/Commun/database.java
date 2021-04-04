@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 public interface database extends Remote {
     /**
+     * @author Diogo
      *
      */
     public class Pair<T,T2> implements Serializable{

@@ -1,17 +1,15 @@
 package Admin;
 
-import java.io.Console;
-import java.io.Serializable;
 import java.net.ConnectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.sql.Date;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -21,17 +19,23 @@ import Commun.database;
 import Commun.database.Pair;
 
 
+/**
+ * Main Class for the Admin Console
+ *
+ * @author Bruno Faria
+ * @version 1.0
+ */
 public class AdminConsole {
-    /**
-     *
-     */
+
     static database db;
     static textAreaTest tat;
 
     /**
-     * @param args
-     * @throws RemoteException
-     * @throws InterruptedException
+     * Main Function
+     *
+     * @param args                      Arguments
+     * @throws RemoteException          Error when connecting to RMI Server
+     * @throws InterruptedException     TODO
      */
     public static void main(String[] args) throws RemoteException, InterruptedException {
     
@@ -50,7 +54,7 @@ public class AdminConsole {
         Scanner in = new Scanner(System.in);
         do{
             try{
-            System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
+            System.out.print("\n1 - Register person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
 
             option = in.nextInt();
             in.nextLine();
