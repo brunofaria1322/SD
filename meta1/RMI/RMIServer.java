@@ -550,6 +550,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			else{
 				rs.moveToInsertRow();
 				rs.updateString("username", username); rs.updateInt("ndep", mesa); rs.updateInt("neleicao", neleicao);
+				rs.updateTimestamp("data", new Timestamp(System.currentTimeMillis()));
 				rs.insertRow();
 				query = "SELECT * FROM eleicoes WHERE neleicao = "+neleicao+";";
 				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -562,7 +563,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					rs = st.executeQuery();
 					rs.next();
 					rs.updateInt("votos",rs.getInt("votos")+1);
-					rs.updateTimestamp("data", new Timestamp(System.currentTimeMillis()));
 					if(rtstations.containsKey(elec)){
 						rtstations.get(elec).put(dep, rtstations.get(elec).get(dep)+1);
 					}
