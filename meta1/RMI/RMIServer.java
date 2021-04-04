@@ -563,14 +563,22 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					rs = st.executeQuery();
 					rs.next();
 					rs.updateInt("votos",rs.getInt("votos")+1);
+					rs.updateRow();
 					if(rtstations.containsKey(elec)){
-						rtstations.get(elec).put(dep, rtstations.get(elec).get(dep)+1);
+						if(rtstations.get(elec).containsKey(dep)){
+							rtstations.get(elec).put(dep, rtstations.get(elec).get(dep)+1);
+						}
+						else{
+							rtstations.get(elec).put(dep, 1);
+						}
+						
 					}
 					else{
-						HashMap<String,Integer> hm = new HashMap<String,Integer>();
-						hm.put(dep, rtstations.get(elec).get(dep)+1);
-						rtstations.put(elec, hm);
+							HashMap<String,Integer> hm = new HashMap<String,Integer>();
+							hm.put(dep, 1);
+							rtstations.put(elec, hm);
 					}
+					
 					return 1;
 				}
 				else{

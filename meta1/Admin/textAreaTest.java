@@ -64,10 +64,9 @@ public textAreaTest(database db)
         thread = new updateThread(this, db);
         JPanel panel = new JPanel();
         panel.add(area);
-        this.setSize(100, 100);
+        this.setSize(1000, 500);
         Container c = this.getContentPane();
         c.add(area);
-        this.pack();
         this.setVisible(true);
         thread.start();
     }
