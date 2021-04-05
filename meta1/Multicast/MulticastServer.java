@@ -347,7 +347,7 @@ public class MulticastServer extends Thread {
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
-        InputStream is = new FileInputStream("meta1/Multicast/station.config");
+        InputStream is = new FileInputStream("config/station.config");
         prop.load(is);
        
         this.NDEP= prop.getProperty("station.NDEP");

@@ -237,7 +237,7 @@ public class VotingTerminal extends Thread {
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
-        prop.load(new FileInputStream("meta1/Voting/terminal.config"));
+        prop.load(new FileInputStream("config/terminal.config"));
 
         //reads the variables
         this.MULTICAST_ADDRESS = prop.getProperty("terminal.MULTICAST_ADDRESS");
