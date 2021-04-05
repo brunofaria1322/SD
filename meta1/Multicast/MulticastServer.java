@@ -147,6 +147,11 @@ public class MulticastServer extends Thread {
                 socket.setSoTimeout(0);
             }
 
+            if (ids != 0){
+                it.updateStatus(socket);
+            }
+
+
             while (true) {
                 buffer = new byte[256];
                 packet = new DatagramPacket(buffer, buffer.length);
@@ -165,6 +170,7 @@ public class MulticastServer extends Thread {
                         if(hash_map.get("id") == null){
                             it.sendMessage("type | identification; id | " + ids++);
                         }
+                        it.updateStatus(socket);
                         break;
 
                     
@@ -596,7 +602,7 @@ class PollingStationInterface extends Thread{
      * This function is called whenever a Voting Terminal is Locked or Unlocked and his purpose is to
      * update the Terminals status for the real time updated status in the admin console
      * This function starts by requesting the status for everyone in the Multicast group. Then, while receiving
-     * responses, will increment to the locked or unlocked counters. After 1 second without any response it
+     * responses, will increment to the locked and all terminals counters. After 1 second without any response it
      * will update the values on the RMI server side
      *
      * @param socket                    the Mulicast Socket for reading
@@ -615,7 +621,7 @@ class PollingStationInterface extends Thread{
         
         // Captures the messages from the Voting terminals receiving his id and status
         
-        int availableTerminals = 0, lockedTerminals = 0;
+        int allTerminals = 0, lockedTerminals = 0;
         try {
             socket.setSoTimeout(1000);
             while (true) {
@@ -629,9 +635,9 @@ class PollingStationInterface extends Thread{
                     if (hash_map.get("id") != null) {
                         if (hash_map.get("status").equals("locked")) {
                             lockedTerminals++;
-                        } else {
-                            availableTerminals++;
-                        }
+                        } 
+                        allTerminals++;
+                        
 
                     }
                 }
@@ -650,12 +656,12 @@ class PollingStationInterface extends Thread{
         }
 
         try {
-            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), availableTerminals, lockedTerminals);
+            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), allTerminals, lockedTerminals);
 
         } catch (RemoteException e) {
             //tries to reconnect to RMI Server
             this.reconnect(db);
-            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), availableTerminals, lockedTerminals);
+            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), allTerminals, lockedTerminals);
         }
 
     }
