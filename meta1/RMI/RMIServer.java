@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -898,6 +899,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				socket.receive(reply);
 				if(!new String(reply.getData(), 0, reply.getLength()).equals("gosto de ti")){
 					System.out.println("Ja existem servidores primario e secundario logo sou inutil. Adeus!");
+					
+					System.out.println("Press enter to continue...");
+					Scanner n = new Scanner(System.in);
+					n.nextLine();
+					n.close();
+
 					System.exit(0);
 				}
 				System.out.println("Sou o servidor secundario!");

@@ -59,9 +59,21 @@ public class VotingTerminal extends Thread {
             readConfig();
         } catch (FileNotFoundException f) {
             System.out.println("Couldn't find config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(-1);
         } catch (IOException f) {
             System.out.println("Couldn't read config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(-1);
         }
     }
@@ -204,6 +216,12 @@ public class VotingTerminal extends Thread {
                 socket.close();
             }
             System.out.println("Exiting...");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             if(it != null){
                 it.leave();
             }
@@ -540,6 +558,8 @@ class VotingInterface extends Thread{
                 break;
             }
         }while (nelec!=0);
+
+        this.lock();
     }
 
     /**
