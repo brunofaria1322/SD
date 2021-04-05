@@ -82,8 +82,8 @@ public class VotingTerminal extends Thread {
             String message = "type | identification";
             it.sendMessage(message);
 
-            byte[] buffer = new byte[256];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            byte[] buffer;
+            DatagramPacket packet;
 
             HashMap<String,String> hash_map;
 
@@ -289,7 +289,7 @@ class VotingInterface extends Thread{
     /**
      * Timer for blocking after 120 seconds without use
      */
-    private Timer timer;
+    private final Timer timer;
 
     /**
      * Constructor for the Voting Terminal Interface
@@ -420,7 +420,7 @@ class VotingInterface extends Thread{
             this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
     
             try {
-                this.sem.wait();
+                this.sem.doWait();
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -439,7 +439,7 @@ class VotingInterface extends Thread{
             byte[] buffer;
             DatagramPacket packet;
 
-            HashMap<String,String> hash_map = null;
+            HashMap<String,String> hash_map;
 
             boolean canLeave = false;
 
@@ -527,7 +527,7 @@ class VotingInterface extends Thread{
             byte[] buffer;
             DatagramPacket packet;
 
-            HashMap<String,String> hash_map = null;
+            HashMap<String,String> hash_map;
 
             boolean canLeave = false;
 
@@ -653,26 +653,47 @@ class Semaphore {
  * @version 1.0
  */
 class Timer extends Thread{
-    long init = 0l;
+
+    /**
+     * initial time - when we want to start "counting" our time
+     */
+    long init;
+
+    /**
+     * Voting Interface - used for interruption after passing the 120 seconds
+     */
     VotingInterface vi;
 
+    /**
+     * Constructor for the Timer
+     *
+     * @param vi    the Voting Interface
+     */
     public Timer(VotingInterface vi){
         this.vi = vi;
     }
-    
+
+    /**
+     * Run Function for the Thread start
+     */
     public void run() {
         this.init = System.currentTimeMillis();
-        while(System.currentTimeMillis() < this.init+120000l){
+        while(System.currentTimeMillis() < this.init+ 120000L){
         	try {
         		Thread.sleep(1000);
         		    
     		} catch(Exception e) {
-                //couldn't sleep 
+                //couldn't sleep - not important, will keep doing his job
     		}
         }
+        //locks the Voting Terminal
+        System.out.println("You ran out of time! 120 seconds passed without any input.");
         vi.lock();
     }
-    
+
+    /**
+     * Resets the init time (and the "counter")
+     */
     public void update(){
         this.init = System.currentTimeMillis();
     }
