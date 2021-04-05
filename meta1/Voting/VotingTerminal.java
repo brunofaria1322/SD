@@ -130,6 +130,8 @@ public class VotingTerminal extends Thread {
                     // Sends this terminal to work
                     case "work":
                         if (Integer.parseInt(hash_map.get("to")) == this.id) {
+                            //creation of interface thread
+                            it = new VotingInterface(group, PORT);
                             //unlocks terminal
                             it.unlock(hash_map.get("cc"), hash_map.get("name"));
                         }
@@ -140,6 +142,8 @@ public class VotingTerminal extends Thread {
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
                             if(hash_map.get("status").equals("success")){
                                 // asks for elections
+                                it.logged = true;
+                                it.sem.doSignal();
                                 it.sendMessage("type | getElections; username | " + it.u_username + "; id | " + it.id);
                             }
                             else{
@@ -241,9 +245,9 @@ class VotingInterface extends Thread{
     private final int PORT;
 
     /**
-     * Is Terminal running
+     * Is user logged
      */
-    private boolean running = true;
+    public boolean logged = false;
 
     /**
      * Input Scanner
@@ -281,6 +285,11 @@ class VotingInterface extends Thread{
      * CC number of current user
      */
     private String u_cc;
+    
+    /**
+     * Timer for blocking after 120 seconds without use
+     */
+    private Timer timer;
 
     /**
      * Constructor for the Voting Terminal Interface
@@ -293,34 +302,27 @@ class VotingInterface extends Thread{
         this.PORT = PORT;
         this.in = new Scanner(System.in);
         this.sem = new Semaphore();
-        this.start();
+        this.timer = new Timer(this);
+        try {
+            this.socket = new MulticastSocket();    // create socket without binding it (only for sending)
+
+            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it (only for reading)
+            this.read_socket.joinGroup(group);
+
+        } catch (IOException e) {
+
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }  
+
     }
 
     /**
      * Run Function for the Thread start
      */
     public void run() {
-        try {
-            this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
-            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it (only for reading)
-
-            System.out.println("\nLOCKED!");
-            while(this.running){
-                if (!this.locked){
-                    this.login();
-                }
-                //waits for signal
-                sem.doWait();
-            }
-
-        } catch (Exception e) {
-            //TODO
-            e.printStackTrace();
-        } finally {
-            this.socket.close();
-            this.read_socket.close();
-            this.in.close();
-        }
+        this.timer.start();
+        this.login();
     }
 
     /**
@@ -336,7 +338,8 @@ class VotingInterface extends Thread{
         this.locked = false;
         System.out.println("\nUNLOCKED!");
 
-        sem.doSignal();
+        this.start();
+
     }
 
     /**
@@ -344,7 +347,11 @@ class VotingInterface extends Thread{
      */
     public void lock(){
         this.locked = true;
+        this.logged = false;
         System.out.println("\nLOCKED!");
+
+        this.timer.interrupt();
+        this.interrupt();
     }
 
     /**
@@ -369,9 +376,10 @@ class VotingInterface extends Thread{
      * Makes Thread leave while loop
      */
     public void leave(){
-        this.running = false;
         
-        sem.doSignal();
+        this.socket.close();
+        this.read_socket.close();
+        this.in.close();
     }
 
     /**
@@ -400,14 +408,25 @@ class VotingInterface extends Thread{
     private void login(){
         System.out.println("\nHi " + u_name + "\nPlease Log in");
         
-        System.out.print("username: ");
-        this.u_username = this.in.nextLine();
+        do{
+            System.out.print("username: ");
+            this.u_username = this.in.nextLine();
+            this.timer.update();
 
-        System.out.print("password: ");
-        String password = new String( System.console().readPassword() );
+            System.out.print("password: ");
+            String password = new String( System.console().readPassword() );
+            this.timer.update();
 
-        this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
+            this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
     
+            try {
+                this.sem.wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }while(!logged);
         this.getElections();
     }
 
@@ -416,7 +435,6 @@ class VotingInterface extends Thread{
      */
     private void getElections(){
         try{
-            this.read_socket.joinGroup(group);
 
             byte[] buffer;
             DatagramPacket packet;
@@ -436,7 +454,6 @@ class VotingInterface extends Thread{
                 if(hash_map.get("type").equals("electionsList")){
                     if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
                         
-                        this.read_socket.leaveGroup(group);
                         canLeave = true;
 
                         hash_map.remove("type");
@@ -483,6 +500,7 @@ class VotingInterface extends Thread{
 
             nelec = this.in.nextInt();
             this.in.nextLine();
+            this.timer.update();
             
             if(nelec == 0){
                 this.lock();
@@ -505,7 +523,6 @@ class VotingInterface extends Thread{
      */
     private void getCandidats(){
         try{
-            this.read_socket.joinGroup(group);
 
             byte[] buffer;
             DatagramPacket packet;
@@ -524,7 +541,7 @@ class VotingInterface extends Thread{
                 // response to getElections (list of elections)
                 if(hash_map.get("type").equals("candidatsList")){
                     if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
-                        this.read_socket.leaveGroup(group);
+                        
                         canLeave = true;
 
                         hash_map.remove("type");
@@ -576,6 +593,7 @@ class VotingInterface extends Thread{
 
             nlist = this.in.nextInt();
             this.in.nextLine();
+            this.timer.update();
             
             if(nlist == 0){
                 this.sendMessage("type | getElections; username | " + this.u_username + "; id | " + this.id);
@@ -627,12 +645,35 @@ class Semaphore {
     }
 }
 
+
 /**
  * Timer class for blocking Voting Terminal after 120s of no use
  *
  * @author Bruno Faria
  * @version 1.0
  */
-class Timer {
+class Timer extends Thread{
+    long init = 0l;
+    VotingInterface vi;
 
+    public Timer(VotingInterface vi){
+        this.vi = vi;
+    }
+    
+    public void run() {
+        this.init = System.currentTimeMillis();
+        while(System.currentTimeMillis() < this.init+120000l){
+        	try {
+        		Thread.sleep(1000);
+        		    
+    		} catch(Exception e) {
+                //couldn't sleep 
+    		}
+        }
+        vi.lock();
+    }
+    
+    public void update(){
+        this.init = System.currentTimeMillis();
+    }
 }
