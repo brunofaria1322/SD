@@ -50,18 +50,27 @@ public class AdminConsole {
         public void run(){
                 while(true){  
                     try{ 
+                        HashMap<String,Pair<Integer,Integer>> stations = db.getActiveStationStatus();
                         HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
+                        String display = "";
+                        if(stations != null){
+                            for(String mesa : stations.keySet()){
+                                display+=mesa+": ("+stations.get(mesa).right+"/"+stations.get(mesa).left+") active voting terminals\n";
+                            }
+                        }
+                        display+="\n\n";
                         if(results != null){
-                            String display = "";
+                            
                             for(String el : results.keySet()){
-                                display="---"+ el + "---\n";
+                                display+="---"+ el + "---\n";
                                 for (String mesa : results.get(el).keySet()){
                                     display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
                                 }
                             }
-                                aa.setText(display);
+                                
                                 sleep(100);
                         }
+                        aa.setText(display);
                     }
                     catch (InterruptedException e){
                         //e.printStackTrace();
@@ -180,7 +189,7 @@ public class AdminConsole {
                     if(ce == 0){
                         System.out.println("Sorry, something went wrong with our server. Please contact us!");
                     }
-                    else if(ce < 0){
+                    else if(ce == -2){
                         System.out.println("Election was created successfully!");
                         System.out.println("WARNING: There was already an election with the same name as the new one's");
                         manageElection(in,-ce);
@@ -406,7 +415,7 @@ public class AdminConsole {
             
             switch (voters){
                 case 0:
-                    return -2;
+                    return -1;
                 case 1:
                     cargos = "aluno";
                     isValid = true;
@@ -467,17 +476,17 @@ public class AdminConsole {
         System.out.print("\nElection title: ");
         String title = in.nextLine();
         if(title.equals("0") || title.equals("votos nulos") || title.equals("votos em branco")){
-            return -2;
+            return -1;
         }
         if(title.length()>64){
             System.out.println("Please make the title shorter than 64 characters. You can write more details of the election in the description!"); 
-            return -2;
+            return -1;
         }
 
         System.out.print("\nElection description: ");
         String description = in.nextLine();
         if(description.equals("0")){
-            return -2;
+            return -1;
         }
         isValid=false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -486,7 +495,7 @@ public class AdminConsole {
             System.out.print("\nElection start (dd/MM/yyyy HH:mm): ");
             String aux = in.nextLine();
             if(aux.equals("0")){
-                return -2;
+                return -1;
             }
             try{
                 start_time = LocalDateTime.parse(aux, formatter);
@@ -507,7 +516,7 @@ public class AdminConsole {
             System.out.print("\nElection end (dd/MM/yyyy HH:mm): ");
             String aux = in.nextLine();
             if(aux.equals("0")){
-                return -2;
+                return -1;
             }
             try{
                 end_time = LocalDateTime.parse(aux, formatter);
@@ -675,7 +684,7 @@ public class AdminConsole {
         System.out.print("\nList Name: ");
         String name = in.nextLine();
         int cl;
-        if(name.length()>64){
+        if(name.length()<64){
            cl = db.createOrEditList(nelec, name, null,false);
         }
         else{
@@ -1225,7 +1234,7 @@ public class AdminConsole {
             DecimalFormat df = new DecimalFormat();
             df.setMaximumFractionDigits(2);
             for(Integer list : lists.keySet()){
-                System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos ("+df.format(lists.get(list).right*100/total+"%)"));
+                System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos ("+df.format(lists.get(list).right*100/total)+"%)");
             }
         }
         System.out.println("Press enter to continue...");

@@ -102,6 +102,8 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	private static String enckey = "cenabuesegura";
 	private static Thread current;
 	private static HashMap<String,HashMap<String,Integer>> rtstations;
+	private static HashMap<Integer,String> rtdepartamentos;
+	private static HashMap<Integer,Pair<Integer,Integer>> rtterminais;
 	public RMIServer() throws RemoteException {
 		super();
 	}
@@ -111,6 +113,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			//Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://ba5bfd4cfc576d:f93b7db6@eu-cdbr-west-03.cleardb.net/heroku_5e154400fde3501?reconnect=true");
 			rtstations = NumberVotesPerStation();
+			rtdepartamentos = privateGetDepartments();
 			isworking = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -190,6 +193,27 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return getDepartments();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	private static HashMap<Integer,String> privateGetDepartments(){ // {faculdade: [(ndep,dep)]}
+		try {
+			HashMap<Integer,String>  deps = new HashMap<Integer,String>();
+			String query = "SELECT * FROM departamentos;";
+			System.out.println(query);
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			while(rs.next()){
+				deps.put(rs.getInt("ndep"), rs.getString("nome"));
+			}
+			return deps;
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
+			connectToBD();
+			return privateGetDepartments();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -655,6 +679,12 @@ public class RMIServer extends UnicastRemoteObject implements database{
 						rs.updateString("estado", "open");
 						rs.updateRow();	
 					}
+					else{
+						rs.deleteRow();
+						while(rs2.previous()){
+							rs2.deleteRow();
+						}
+					}
 				}
 				else{
 					break;
@@ -807,5 +837,23 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 
 	}
-
+	public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException{
+		if(availableTerms > 0){
+			rtterminais.put(ndep, new Pair<Integer,Integer>(availableTerms, beingUsedTerms));
+		}
+		else{
+			if(rtterminais.containsKey(ndep)){
+				rtterminais.remove(ndep);
+			}
+		}
+	}
+	public HashMap<String,Pair<Integer,Integer>> getActiveStationStatus() throws java.rmi.RemoteException{
+		HashMap<String,Pair<Integer,Integer>> out = new HashMap<String,Pair<Integer,Integer>>();
+		if(rtterminais!=null){
+			for(Integer i : rtterminais.keySet()){
+				out.put(rtdepartamentos.get(i), rtterminais.get(i));
+			}
+		}
+		return out;
+	}
 }

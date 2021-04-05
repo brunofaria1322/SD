@@ -40,4 +40,6 @@ public interface database extends Remote {
     public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException;
     public HashMap<String,HashMap<String,Integer>> getNumberVotesPerStation() throws java.rmi.RemoteException;
     public boolean isWorking() throws java.rmi.RemoteException;
+    public HashMap<String,Pair<Integer,Integer>> getActiveStationStatus() throws java.rmi.RemoteException;
+    public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException;
 }
