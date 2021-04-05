@@ -40,8 +40,8 @@ import Commun.database;
 import Commun.database.Pair;
 /**
  * Thread that changes messages with a possible secondary RMI server via a Datagram Socket.
- * 
- * 
+ *
+ *
  * @author Diogo Flórido
  * @version 1.0
  */
@@ -120,7 +120,7 @@ class Heartbeat implements Runnable {
 					System.out.println("Estou conectado ao servidor secundario");
 				}
 				DatagramPacket reply = new DatagramPacket(request.getData(), request.getLength(), request.getAddress(),
-				request.getPort());
+						request.getPort());
 				socket.send(reply);
 			} catch (SocketException e) {
 				System.out.println("Socket: " + e.getMessage());
@@ -152,7 +152,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	private static Thread current;
 	/**
 	 * A structure with the votes per Voting Station for each active election being updated in real time.
-	 * 
+	 *
 	 */
 	private static HashMap<String,HashMap<String,Integer>> rtstations;
 	/**
@@ -204,7 +204,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	 */
 	private static void primary() {
 		connectToBD();
-		Timestamp ue; 
+		Timestamp ue;
 		current = Thread.currentThread();
 		while(true){
 			try {
@@ -220,7 +220,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			}
 		}
 	}
-	
+
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"' OR numcc = '"+numcc+"';";
@@ -283,9 +283,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	/**
 	 * A static version of {@link #getDepartments}
 	 * @return an {@link HashMap}<{@link Integer},{@link String}> 
-     * <ul>
-     * <li> {id_of_the_department : name_of_the_department}
-     * </ul>
+	 * <ul>
+	 * <li> {id_of_the_department : name_of_the_department}
+	 * </ul>
 	 */
 	private static HashMap<Integer,String> privateGetDepartments(){ // {faculdade: [(ndep,dep)]}
 		try {
@@ -350,29 +350,29 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			if(rs.next()){
 				ret = -1; // WARNING: Já existe uma eleição com esse título. Tem a certeza?
 			}
-				rs.moveToInsertRow();
-				rs.updateString("cargos", cargos); rs.updateString("departamentos", departamentos); rs.updateString("mesas", mesas); rs.updateString("titulo", titulo); rs.updateString("descricao", desc);rs.updateTimestamp("inicio", Timestamp.valueOf(inicio));rs.updateTimestamp("fim", Timestamp.valueOf(fim));
-				rs.updateString("estado", "waiting");
-				rs.insertRow();
-				current.interrupt();
-				ResultSet rs2 = st.executeQuery("SELECT LAST_INSERT_ID()");
-				rs2.next();
-				createOrEditList(rs2.getInt(1), "votos em branco", null, false);
-				createOrEditList(rs2.getInt(1), "votos nulos", null, false);
-				if(ret == -1){
-					return 0-rs2.getInt(1);
-				}
-				else{
-					return rs2.getInt(1);
-				}
-			} catch (CommunicationsException | SQLNonTransientConnectionException e) {
-				connectToBD();
-				return createElection(cargos, departamentos, mesas, titulo, desc, inicio, fim);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return 0;
+			rs.moveToInsertRow();
+			rs.updateString("cargos", cargos); rs.updateString("departamentos", departamentos); rs.updateString("mesas", mesas); rs.updateString("titulo", titulo); rs.updateString("descricao", desc);rs.updateTimestamp("inicio", Timestamp.valueOf(inicio));rs.updateTimestamp("fim", Timestamp.valueOf(fim));
+			rs.updateString("estado", "waiting");
+			rs.insertRow();
+			current.interrupt();
+			ResultSet rs2 = st.executeQuery("SELECT LAST_INSERT_ID()");
+			rs2.next();
+			createOrEditList(rs2.getInt(1), "votos em branco", null, false);
+			createOrEditList(rs2.getInt(1), "votos nulos", null, false);
+			if(ret == -1){
+				return 0-rs2.getInt(1);
 			}
+			else{
+				return rs2.getInt(1);
+			}
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
+			connectToBD();
+			return createElection(cargos, departamentos, mesas, titulo, desc, inicio, fim);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0;
+		}
 	}
 	public int editElection(int neleicao, boolean remove, String titulo, String descricao, LocalDateTime inicio, LocalDateTime fim, String departamentos, String mesas, Integer[] listas){
 		try {
@@ -403,14 +403,14 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					String deps = rs.getString("departamentos");
 					for (String d : departamentos.split(";")) {
 						deps = deps.replace(d+";", "");
-					} 
+					}
 					rs.updateString("departamentos",deps);
 				}
 				if(mesas!=null){
 					String me = rs.getString("mesas");
 					for (String d : mesas.split(";")) {
 						me = me.replace(d+";", "");
-					} 
+					}
 					rs.updateString("mesas",me);
 				}
 			}
@@ -429,10 +429,10 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 					System.out.println(query);
 					rs = st.executeQuery();
-						if(rs.next()){
-							rs.updateInt("neleicao",0);
-							rs.updateRow();
-						}
+					if(rs.next()){
+						rs.updateInt("neleicao",0);
+						rs.updateRow();
+					}
 				}
 			}
 			current.interrupt();
@@ -493,7 +493,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 	public String[] getUser(String usernameOrCC){
 		// (cc,nome)
@@ -517,7 +517,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-	
+
 	public int createOrEditList(int neleicao, String nome, ArrayList<Pair<String,String>> users, boolean remove){
 		//Pair(numcc,nome)
 		try{
@@ -588,7 +588,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				}
 				current.interrupt();
 			}
-			
+
 			return count;
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
@@ -605,7 +605,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			String query;
 			PreparedStatement st;
 			ResultSet rs;
-			
+
 			if(neleicao!=0){
 				query = "SELECT * FROM listas WHERE neleicao = "+neleicao+";";
 			}
@@ -639,7 +639,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 	public int vote(String username, int neleicao, int nlista, int mesa){
 		try {
@@ -683,21 +683,21 @@ public class RMIServer extends UnicastRemoteObject implements database{
 						else{
 							rtstations.get(elec).put(dep, 1);
 						}
-						
+
 					}
 					else{
-							HashMap<String,Integer> hm = new HashMap<String,Integer>();
-							hm.put(dep, 1);
-							rtstations.put(elec, hm);
+						HashMap<String,Integer> hm = new HashMap<String,Integer>();
+						hm.put(dep, 1);
+						rtstations.put(elec, hm);
 					}
-					
+
 					return 1;
 				}
 				else{
 					return -2; //Conta criada depois da eleição
 				}
 			}
-				
+
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
 			return vote(username, neleicao, nlista, mesa);
@@ -759,7 +759,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			Timestamp nextOpen = new Timestamp(System.currentTimeMillis());;
 			nextOpen.setTime(nextOpen.getTime()+TimeUnit.MINUTES.toMillis(1));
 			while(rs.next()){
-				
+
 				nextWaiting = rs.getTimestamp("inicio");
 				if(rs.getTimestamp("inicio").before(new Timestamp(System.currentTimeMillis()))){
 					String query2 = "SELECT * FROM listas WHERE neleicao = "+rs.getInt("neleicao")+";";
@@ -771,7 +771,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					}
 					if(size > 2){
 						rs.updateString("estado", "open");
-						rs.updateRow();	
+						rs.updateRow();
 					}
 					else{
 						rs.deleteRow();
@@ -813,7 +813,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 	}
 	public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException{
-		
+
 		try {
 			HashMap<Integer,Pair<Integer,String>> out = new HashMap<Integer,Pair<Integer,String>>();
 			String query = "SELECT * FROM votos WHERE username = '"+username+"';";
@@ -829,7 +829,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 	private static HashMap<String,HashMap<String,Integer>> NumberVotesPerStation(){
 		//{eleicao:{dep:votos}}
@@ -881,25 +881,25 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			int no_replies = 0;
 			DatagramSocket socket = null;
 			try {
-				socket = new DatagramSocket();   
-				socket.setSoTimeout(1000); 
+				socket = new DatagramSocket();
+				socket.setSoTimeout(1000);
 				byte [] m = "P".getBytes();
 				byte [] pass = "Sou eu, o secundario".getBytes();
 				byte[] buffer = new byte[12];
-				InetAddress aHost = InetAddress.getByName("localhost");                                 
+				InetAddress aHost = InetAddress.getByName("localhost");
 				DatagramPacket request = new DatagramPacket(m,m.length,aHost,6789);
 				DatagramPacket requestpass = new DatagramPacket(pass,pass.length,aHost,6789);
-				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);	
+				DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 				socket.send(requestpass);
-				socket.receive(reply);	
+				socket.receive(reply);
 				if(!new String(reply.getData(), 0, reply.getLength()).equals("gosto de ti")){
 					System.out.println("Ja existem servidores primario e secundario logo sou inutil. Adeus!");
 					System.exit(0);
 				}
 				System.out.println("Sou o servidor secundario!");
 				while(true){
-					socket.send(request);	
-					try{		                        
+					socket.send(request);
+					try{
 						socket.receive(reply);
 						no_replies = 0;
 					}
@@ -930,7 +930,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 						}
 					}
 				}
-			
+
 			}catch (SocketException e){System.out.println("Socket: " + e.getMessage());
 			}catch (IOException e){System.out.println("IO: " + e.getMessage());
 			}

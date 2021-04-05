@@ -52,6 +52,8 @@ public class MulticastServer extends Thread {
 
     /**
      * Constructor for the Polling Station
+     * <p>
+     * Will try to read the configuration file
      */
     public MulticastServer() {
         try {
@@ -68,6 +70,12 @@ public class MulticastServer extends Thread {
 
     /**
      * Run Function for the Thread start
+     * <p>
+     * Will start by trying to connect to the RMI server and then to the Multicast, then it will start the
+     * interface thread, passing as arguments the group, port, RMI connector and number of department. After that it will try to
+     * keep up with the terminal ids that ate already in the group (this oly happens when Polling Station had a problem
+     * and had to be rebooted) and if it receives a message from a Polling Station it will exit. after going through
+     * all the mentioned the main thread will start to listen to the group and responding to the messages that are for him.
      */
     public void run() {
         MulticastSocket socket = null;
@@ -561,6 +569,7 @@ class PollingStationInterface extends Thread{
 
     /**
      * Tries to reconnect to db in the next 30s
+     * If 30s has passed it will exit, turning off the Polling Station
      */
     public database reconnect(database db){
         long until = System.currentTimeMillis()+30000;
@@ -580,7 +589,19 @@ class PollingStationInterface extends Thread{
         return null;
     }
 
-    public void updateStatus(MulticastSocket socket) throws NumberFormatException, RemoteException{
+    /**
+     * Function for updating Voting Terminal Status
+     * <p>
+     * This function is called whenever a Voting Terminal is Locked or Unlocked and his purpose is to
+     * update the Terminals status for the real time updated status in the admin console
+     * This function starts by requesting the status for everyone in the Multicast group. Then, while receiving
+     * responses, will increment to the locked or unlocked counters. After 1 second without any response it
+     * will update the values on the RMI server side
+     *
+     * @param socket                    the Mulicast Socket for reading
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    public void updateStatus(MulticastSocket socket) throws RemoteException{
         /* Sends message to Multicast Group toget the states from all the 
         voting terminals on this group */
         String message = "type | whosthere";
@@ -603,15 +624,14 @@ class PollingStationInterface extends Thread{
 
                 hash_map = this.packetToHashMap(packet);
 
-                if(hash_map.get("type").equals("imhere")){
-                    if (hash_map.get("id") != null){
-                        if (hash_map.get("status").equals("locked")){
-                            lockedTerminals ++;
+                if (hash_map.get("type").equals("imhere")) {
+                    if (hash_map.get("id") != null) {
+                        if (hash_map.get("status").equals("locked")) {
+                            lockedTerminals++;
+                        } else {
+                            availableTerminals++;
                         }
-                        else{
-                            availableTerminals ++;
-                        }
-                        
+
                     }
                 }
             }
