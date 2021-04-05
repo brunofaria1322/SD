@@ -162,7 +162,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	/**
 	 * A structure with the number of available and active voting terminals being updated in real time.
 	 */
-	private static HashMap<Integer,Pair<Integer,Integer>> rtterminais;
+	private static HashMap<Integer,Pair<Integer,Integer>> rtterminais = new HashMap<>();
 	/**
 	 * The constructor of the class.
 	 * @throws RemoteException if failed to export object.
@@ -219,6 +219,10 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				; //nova eleicao ou alteração de datas
 			}
 		}
+	}
+
+	public static void setRtterminais(HashMap<Integer, Pair<Integer, Integer>> rtterminais) {
+		RMIServer.rtterminais = rtterminais;
 	}
 
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
@@ -942,7 +946,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	}
 	public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException{
 		if(availableTerms > 0){
-			rtterminais.put(ndep, new Pair<Integer,Integer>(availableTerms, beingUsedTerms));
+			rtterminais.put(ndep, new Pair<>(availableTerms, beingUsedTerms));
 		}
 		else{
 			if(rtterminais.containsKey(ndep)){

@@ -1,6 +1,7 @@
 package Multicast;
 
 import java.net.MulticastSocket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -636,6 +637,12 @@ class PollingStationInterface extends Thread{
                 }
             }
         } catch (SocketTimeoutException ignored) {
+            try {
+                socket.setSoTimeout(0);
+            } catch (SocketException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             //No more requests to catch
             //leaves
         } catch (IOException e){
