@@ -71,7 +71,7 @@ public class MulticastServer extends Thread {
     /**
      * Run Function for the Thread start
      * <p>
-     * Will start by trying to connect to the RMI server and then to the Multicast, then it will start the
+     * Will start by trying to connect to the RMI server and then to the Multicast. Then it will start the
      * interface thread, passing as arguments the group, port, RMI connector and number of department. After that it will try to
      * keep up with the terminal ids that ate already in the group (this oly happens when Polling Station had a problem
      * and had to be rebooted) and if it receives a message from a Polling Station it will exit. after going through

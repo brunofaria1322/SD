@@ -38,6 +38,8 @@ public class VotingTerminal extends Thread {
 
     /**
      * Main Function
+     * <p>
+     * Will start the thread
      *
      * @param args      Arguments
      */
@@ -48,6 +50,8 @@ public class VotingTerminal extends Thread {
 
     /**
      * Constructor for the Voting Terminal
+     * <p>
+     * Will try to read the configuration file
      */
     public VotingTerminal(){
         try {
@@ -64,6 +68,13 @@ public class VotingTerminal extends Thread {
 
     /**
      * Run Function for the Thread start
+     * <p>
+     * Will start by trying to connect to the Multicast and then it will start the
+     * interface thread, passing as arguments the group and port of the Multicast.
+     * After those connections it will ask to the Polling Station for an id, having a time out
+     * of 1 second. If it doesn't receives a response the program will exit.
+     * After receiving his ID te thread will start to listen to the group and responding to the
+     * mseesages that are for him.
      */
     public void run() {
         MulticastSocket socket = null;
@@ -293,6 +304,9 @@ class VotingInterface extends Thread{
 
     /**
      * Constructor for the Voting Terminal Interface
+     * <p>
+     * In this Function will be initialized a semaphore (used on login request to wait for a response)
+     * and a Timer. This Timer is a thread that will count the time where the Voting Terminal is not being used.
      *
      * @param group     the Multicast group
      * @param PORT      the Multicast Port
@@ -319,6 +333,9 @@ class VotingInterface extends Thread{
 
     /**
      * Run Function for the Thread start
+     * <p>
+     * The Thread starts only when Voting Terminal is unlocked.
+     * With the starting of this Thread is also started the timer.
      */
     public void run() {
         this.timer.start();
@@ -326,10 +343,10 @@ class VotingInterface extends Thread{
     }
 
     /**
-     * Unlocks terminal
+     * Unlocks terminal and starts the thread
      *
-     * @param cc        CC number
-     * @param name      User name
+     * @param cc        CC number of user
+     * @param name      User name of usee
      */
     public void unlock(String cc, String name){
         this.u_name = name;
@@ -344,6 +361,8 @@ class VotingInterface extends Thread{
 
     /**
      * Locks terminal
+     * <p>
+     * Locks the terminal and interrupts the Timer thread as well as the Vinting Interface Thread
      */
     public void lock(){
         this.locked = true;
@@ -375,7 +394,7 @@ class VotingInterface extends Thread{
     }
 
     /**
-     * Makes Thread leave while loop
+     * Closes all sockets and input Scanner
      */
     public void leave(){
         
@@ -405,7 +424,10 @@ class VotingInterface extends Thread{
     }
 
     /**
-     * Reads login credentials from input and sends it to the Multicast group
+     * Interface used for user login
+     * <p>
+     * Reads login credentials from input and sends it to the Multicast group. After that it will wait on
+     * the smaphore till main thread receives the response, updates logged state and does signal to the semafore
      */
     private void login(){
         System.out.println("\nHi " + u_name + "\nPlease Log in");
@@ -662,7 +684,7 @@ class Timer extends Thread{
     long init;
 
     /**
-     * Voting Interface - used for interruption after passing the 120 seconds
+     * Voting Interface - used for locking the Voting Terminal after passing the 120 seconds
      */
     VotingInterface vi;
 
@@ -677,6 +699,8 @@ class Timer extends Thread{
 
     /**
      * Run Function for the Thread start
+     * <p>
+     * Will count time and if it reaches 120 seconds without use will lock the Voting Terminal
      */
     public void run() {
         this.init = System.currentTimeMillis();
