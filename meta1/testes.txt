@@ -25,11 +25,13 @@ Responder pedidos feitos pelos terminais de forma correta   [PASSED]
 VOTING TERMINAL:
 Fazer Login                                                 [PASSED]
 Listar e escolher eleiçoes em que o utilizador pode votar   [PASSED]
-Listar e escolher listas e voto                             [PASSED]
+Listar listas e opçoes de voto                              [PASSED]
+Efetuar voto                                                [PASSED]
 Não permitir voto duplo                                     [PASSED]
 Bloquear passados 120 segundos de inatividade               [PASSED]
 
 RMI SERVER:
 Contactar a base de dados e efetuar operaçoes pedidas       [PASSED]
 Verificar se já existe um servidor principal                [PASSED]
-Ocupar lugar do servidor principal em caso de falhas        [PASSED]
+Envio de "Heartbeats" do secundario para o principal        [PASSED]
+Secundario ocupa lugar do principal em caso de falha        [PASSED]
