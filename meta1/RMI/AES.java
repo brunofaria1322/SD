@@ -16,6 +16,10 @@ public class AES {
     private static SecretKeySpec secretKey;
     private static byte[] key;
  
+    
+    /** 
+     * @param myKey
+     */
     public static void setKey(String myKey) 
     {
         MessageDigest sha = null;
@@ -34,6 +38,12 @@ public class AES {
         }
     }
  
+    
+    /** 
+     * @param strToEncrypt
+     * @param secret
+     * @return String
+     */
     public static String encrypt(String strToEncrypt, String secret) 
     {
         try
@@ -50,6 +60,12 @@ public class AES {
         return null;
     }
  
+    
+    /** 
+     * @param strToDecrypt
+     * @param secret
+     * @return String
+     */
     public static String decrypt(String strToDecrypt, String secret) 
     {
         try

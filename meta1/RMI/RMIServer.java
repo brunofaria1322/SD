@@ -1,3 +1,7 @@
+//Bruno Ricardo Leitão Faria
+//Diogo Alves Almeida Flórido <-- autor do ficheiro
+
+
 package RMI;
 
 import java.rmi.*;
@@ -34,14 +38,41 @@ import java.rmi.registry.Registry;
 
 import Commun.database;
 import Commun.database.Pair;
-
+/**
+ * Thread that changes messages with a possible secondary RMI server via a Datagram Socket.
+ * 
+ * 
+ * @author Diogo Flórido
+ * @version 1.0
+ */
 class Heartbeat implements Runnable {
+	/**
+	 * Buffer for holding the datagrams sent to the datagram socket.
+	 */
 	private byte[] buffer;
+	/**
+	 * The last datagram packet received.
+	 */
 	private DatagramPacket request;
+	/**
+	 * The datagram socket.
+	 */
 	private DatagramSocket socket;
+	/**
+	 * A Countdown Latch used to block the Primary RMI Server's main thread until a password is received by
+	 * a Secondary RMI Server.
+	 */
 	CountDownLatch latch;
+	/**
+	 * Set to 1 when the Primary RMI Server starts changing messages with the secondary one. Set back to 0 when
+	 * the secondary server stops sending messages.
+	 */
 	private int connections;
-
+	/**
+	 * Constructor of the thread.
+	 * @param wait_for_sec if true, the Primary RMI Server will wait for a secondary server before connecting
+	 * to the database.
+	 */
 	public Heartbeat(boolean wait_for_sec) {
 		buffer = new byte[20];
 		request = new DatagramPacket(buffer, buffer.length);
@@ -61,7 +92,14 @@ class Heartbeat implements Runnable {
 			System.out.println("interruptedException caught");
 		}
 	}
-
+	/**
+	 * Method called when the thread is created. 
+	 * <p>
+	 * The thread starts listening for messages sent via the datagram {@link  #socket}. If a specific password is received,
+	 * the primary server acknowledges it was sent by a secondary server and will reply back if it is not already
+	 * changing messages with another one. If no messages are received, the primary server will assume the secondary
+	 * one has stopped working and will be listening for the password again but not stopping the main thread {@link RMIServer}
+	 */
 	public synchronized void run() {
 		while (true) {
 			try {
@@ -92,25 +130,61 @@ class Heartbeat implements Runnable {
 		}
 	}
 }
-
+/**
+ * The main class for the RMI Servers.~
+ * @author Diogo Flórido
+ * @version 1.0
+ */
 public class RMIServer extends UnicastRemoteObject implements database{
-	/**
-	 *
-	 */
+
 	private static final long serialVersionUID = -5368081680660901104L;
+	/**
+	 * The session with the database.
+	 */
 	public static Connection conn;
+	/**
+	 * A key used for password encryption.
+	 */
 	private static String enckey = "cenabuesegura";
+	/**
+	 * A reference to the server's main thread.
+	 */
 	private static Thread current;
+	/**
+	 * A structure with the votes per Voting Station for each active election being updated in real time.
+	 * 
+	 */
 	private static HashMap<String,HashMap<String,Integer>> rtstations;
+	/**
+	 * A structure with the names of all the departments with a voting station.
+	 */
 	private static HashMap<Integer,String> rtdepartamentos;
+	/**
+	 * A structure with the number of available and active voting terminals being updated in real time.
+	 */
 	private static HashMap<Integer,Pair<Integer,Integer>> rtterminais;
+	/**
+	 * The constructor of the class.
+	 * @throws RemoteException if failed to export object.
+	 */
 	public RMIServer() throws RemoteException {
 		super();
 	}
+	/**
+	 * A boolean which tells if the Server is connected to the database or not.
+	 */
 	private static boolean isworking = false;
+	/**
+	 * Starts a session with the database.
+	 * <ul>
+	 * <li>All data is stored in an external database hosted in a platform called <a href= https://www.heroku.com/>Heroku</a>. See the database's 
+	 * diagram in database.png 
+	 * <li>This method is called in the beginning of the execution and everytime an operation in the database
+	 * throws a {@link CommunicationsException}. It initializes all the real time structures by reading data from the database.
+	 * </ul>
+	 */
 	private static void connectToBD(){
 		try {
-			//Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
 			conn = DriverManager.getConnection("jdbc:mysql://ba5bfd4cfc576d:f93b7db6@eu-cdbr-west-03.cleardb.net/heroku_5e154400fde3501?reconnect=true");
 			rtstations = NumberVotesPerStation();
 			rtdepartamentos = privateGetDepartments();
@@ -119,11 +193,17 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * Starts the job as the Primary RMI Server.
+	 * <ul>
+	 * <li>The server connects to the database with {@link #connectToBD}.
+	 * <li>It calls {@link #updateElections} to update the status ("waiting","open","closed") of the elections, if needed, and makes the main thread
+	 * {@link Thread#sleep} until the next exact {@link Timestamp} when an election needs to be updated.
+	 * <li>If there are no elections to watch, the server will wait 1 minute and check again.
+	 * </ul>
+	 */
 	private static void primary() {
-		// create our mysql database connection
 		connectToBD();
-		//createUser("testador",0,"teste","testelandia","123456789","testecc",new Date(1970,1,1),"teste","passparatestes");
 		Timestamp ue; 
 		current = Thread.currentThread();
 		while(true){
@@ -140,6 +220,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			}
 		}
 	}
+	
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password){
 		try {
 			String query = "SELECT * FROM users WHERE username = '"+username+"' OR numcc = '"+numcc+"';";
@@ -199,6 +280,13 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
+	/**
+	 * A static version of {@link #getDepartments}
+	 * @return an {@link HashMap}<{@link Integer},{@link String}> 
+     * <ul>
+     * <li> {id_of_the_department : name_of_the_department}
+     * </ul>
+	 */
 	private static HashMap<Integer,String> privateGetDepartments(){ // {faculdade: [(ndep,dep)]}
 		try {
 			HashMap<Integer,String>  deps = new HashMap<Integer,String>();
@@ -566,7 +654,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			rs.next();
 			String dep = rs.getString("nome");
 			query = "SELECT * FROM votos WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
-			System.out.println(query);
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
 			if(rs.next()){
@@ -655,7 +742,14 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-	public static Timestamp updateElections(){
+	/**
+	 * Updates the status of all the elections in need.
+	 * <ul>
+	 * <li>If an election with no lists starts, it gets deleted
+	 * </ul>
+	 * @return the {@link Timestamp} of the next update.
+	 */
+	public static synchronized Timestamp updateElections(){
 		try{
 			String query = "SELECT * FROM eleicoes WHERE estado = 'waiting' ORDER BY inicio ASC;";
 			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -719,7 +813,6 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		}
 	}
 	public HashMap<Integer,Pair<Integer,String>> getUserVotes(String username) throws java.rmi.RemoteException{
-		//{eleicao:mesa}
 		
 		try {
 			HashMap<Integer,Pair<Integer,String>> out = new HashMap<Integer,Pair<Integer,String>>();
@@ -764,6 +857,16 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	public boolean isWorking() throws java.rmi.RemoteException{
 		return isworking;
 	}
+	/**
+	 * The main method of the RMIServer class.
+	 * <ul>
+	 * <li>If a registry has not been created in the port yet, the server becomes the Primary RMI Server and starts a {@link Heartbeat} thread.
+	 * <li>If the Primary RMI Server starts changing messages with a secondary one, it will execute the {@link #primary} method.
+	 * <li>If a registry has already been created in the port, the server sends a message to the Primary RMI Server indicating that it is willing to become a Secondary RMI Server then waits for a response.
+	 * <li>If a server willing to become a Secondary RMI Server gets an approval message it becomes one else it exits.
+	 * <li>If a Secondary RMI Server doesn't receive 5 replies in a row, it will assume the Primary RMI Server has crashed and will assume it's role.
+	 * </ul>
+	 */
 	public static void main(String args[]) {
 
 		try {
