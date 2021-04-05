@@ -4,10 +4,7 @@ import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.FileInputStream;
@@ -164,7 +161,18 @@ public class MulticastServer extends Thread {
                     // Sends response to login request
                     case "login":
                         if(hash_map.get("id") != null){
-                            if(db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"))){
+                            boolean res;
+
+                            try {
+                                res = db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"));
+
+                            } catch (RemoteException e) {
+                                //tries to reconnect to RMI Server
+                                db = it.reconnect(db);
+                                res = db.login(hash_map.get("username"), hash_map.get("cc"), hash_map.get("password"));
+                            }
+
+                            if(res){
                                 it.sendMessage("type | login; status | success; to | " + hash_map.get("id"));
                             } else{
                                 it.sendMessage("type | login; status | unsuccess; to | " + hash_map.get("id"));
@@ -184,7 +192,12 @@ public class MulticastServer extends Thread {
                             }
                             catch(NullPointerException e){
                                 elections = null;
+                            } catch (RemoteException e) {
+                                //tries to reconnect to RMI Server
+                                db = it.reconnect(db);
+                                elections = db.getElections(hash_map.get("username"), this.NDEP);
                             }
+
                             StringBuilder out = new StringBuilder("type | electionsList; to | " + hash_map.get("id"));
                             
                             if(elections != null){
@@ -204,9 +217,14 @@ public class MulticastServer extends Thread {
                             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists;
                             try{
                                 lists = db.getLists(Integer.parseInt(hash_map.get("nelec")));
-                            }
-                            catch(NullPointerException e){
+
+                            } catch(NullPointerException e){
                                 lists = null;
+
+                            } catch (RemoteException e) {
+                                //tries to reconnect to RMI Server
+                                db = it.reconnect(db);
+                                lists = db.getLists(Integer.parseInt(hash_map.get("nelec")));
                             }
                             
                             StringBuilder out = new StringBuilder("type | candidatsList; to | " + hash_map.get("id") + "; nelec | " + hash_map.get("nelec"));
@@ -224,7 +242,18 @@ public class MulticastServer extends Thread {
                     // sends the response to the vote request
                     case "vote":
                         if(hash_map.get("id") != null){
-                            int temp = db.vote(hash_map.get("username"), Integer.parseInt(hash_map.get("neleicao")), Integer.parseInt(hash_map.get("nlista")), Integer.parseInt(this.NDEP));
+                            int temp;
+
+                            try {
+                                temp = db.vote(hash_map.get("username"), Integer.parseInt(hash_map.get("neleicao")), Integer.parseInt(hash_map.get("nlista")), Integer.parseInt(this.NDEP));
+
+                            } catch (RemoteException e) {
+                                //tries to reconnect to RMI Server
+                                db = it.reconnect(db);
+                                temp = db.vote(hash_map.get("username"), Integer.parseInt(hash_map.get("neleicao")), Integer.parseInt(hash_map.get("nlista")), Integer.parseInt(this.NDEP));
+                            }
+
+
                             if(temp == 1){
                                 it.sendMessage("type | vote; status | success; to | " + hash_map.get("id"));
                             } else{
@@ -355,7 +384,12 @@ class PollingStationInterface extends Thread{
             do{
                 System.out.println("\n1 - Find Person\n0 - exit");
 
-                option = in.nextInt();
+                try{
+                    option = in.nextInt();
+                } catch (InputMismatchException e){
+                    option = -1;
+                }
+
                 in.nextLine();
                 
                 switch (option){
@@ -370,8 +404,7 @@ class PollingStationInterface extends Thread{
                 }
             }while (option != 0);
         } catch (IOException e) {
-            //TODO
-            e.printStackTrace();
+            System.out.println("Couldn't connect to multicast!");
         } finally {
             if (in != null) {
                 in.close();
@@ -379,6 +412,7 @@ class PollingStationInterface extends Thread{
             System.out.println("Bye!");
             this.socket.close();
             this.read_socket.close();
+            System.exit(0);
         }
     }
 
@@ -425,16 +459,18 @@ class PollingStationInterface extends Thread{
      *
      * @param in    the input Scanner
      */
-    private void findPersonByUsernameOrCC(Scanner in){
+    private void findPersonByUsernameOrCC(Scanner in) throws RemoteException {
 
         System.out.print("\nCC number or username: ");
         String aux = in.nextLine();
         String[] user = null;
         try {
             user = db.getUser(aux);
+
         } catch (RemoteException e) {
-            //TODO
-            e.printStackTrace();
+            //tries to reconnect to RMI Server
+            db = this.reconnect(db);
+            user = db.getUser(aux);
         }
 
         if (user == null){
@@ -445,11 +481,14 @@ class PollingStationInterface extends Thread{
             HashMap<Integer,HashMap<String,String>> elections = null;
             try{
                 elections = db.getElections(user[2], this.NDEP);
-            }
-            catch(NullPointerException ignored){
+
+            } catch(NullPointerException ignored){
                 //ignored because elections is already initialized as null
+
             } catch (RemoteException e) {
-                e.printStackTrace();
+                //tries to reconnect to RMI Server
+                db = this.reconnect(db);
+                elections = db.getElections(user[2], this.NDEP);
             }
 
             //if there are no elections for this user to vote in the current Polling Station
@@ -508,5 +547,27 @@ class PollingStationInterface extends Thread{
             }
             
         }
+    }
+
+
+    /**
+     * Tries to reconnect to db in the next 30s
+     */
+    public database reconnect(database db){
+        long until = System.currentTimeMillis()+30000;
+        
+        while(System.currentTimeMillis() <= until){
+            try {
+                db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+                if(db.isWorking()){
+                    return db;
+                }
+            } catch (Exception e) {
+                //Couldn't connect
+            }
+        }
+        System.out.println("Server is closed");
+        System.exit(0);
+        return null;
     }
 }

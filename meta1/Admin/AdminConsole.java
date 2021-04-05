@@ -1582,7 +1582,7 @@ public class AdminConsole {
         //asks for username
         System.out.print("\nUsername: ");
         String username = in.nextLine();
-        
+
         HashMap<Integer,Pair<Integer,String>> votes = db.getUserVotes(username);
         HashMap<Integer,String> deps = db.getDepartments();
         HashMap<Integer,HashMap<String,String>> elecs = db.getElections(username, null);
