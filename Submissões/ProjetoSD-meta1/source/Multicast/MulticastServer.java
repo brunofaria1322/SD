@@ -62,9 +62,21 @@ public class MulticastServer extends Thread {
             readConfig();
         } catch (FileNotFoundException f) {
             System.out.println("Couldn't find config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+            
             System.exit(-1);
         } catch (IOException f) {
             System.out.println("Couldn't read config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(-1);
         }
     }
@@ -138,6 +150,12 @@ public class MulticastServer extends Thread {
                             //Response from a Polling Station
                             System.out.println("There is already a Polling Station in this group\nLeaving...");
                             it.interrupt();
+
+                            System.out.println("Press enter to continue...");
+                            Scanner n = new Scanner(System.in);
+                            n.nextLine();
+                            n.close();
+
                             System.exit(0);
                         }
                     }
@@ -329,7 +347,7 @@ public class MulticastServer extends Thread {
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
-        InputStream is = new FileInputStream("meta1/Multicast/station.config");
+        InputStream is = new FileInputStream("config/station.config");
         prop.load(is);
        
         this.NDEP= prop.getProperty("station.NDEP");
@@ -428,12 +446,15 @@ class PollingStationInterface extends Thread{
         } catch (IOException e) {
             System.out.println("Couldn't connect to multicast!");
         } finally {
-            if (in != null) {
-                in.close();
-            }
+
             System.out.println("Bye!");
             this.socket.close();
             this.read_socket.close();
+
+            System.out.println("Press enter to continue...");
+            in.nextLine();
+            in.close();
+
             System.exit(0);
         }
     }
@@ -592,6 +613,13 @@ class PollingStationInterface extends Thread{
             }
         }
         System.out.println("Server is closed");
+
+        
+        System.out.println("Press enter to continue...");
+        Scanner n = new Scanner(System.in);
+        n.nextLine();
+        n.close();
+
         System.exit(0);
         return null;
     }

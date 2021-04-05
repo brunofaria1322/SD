@@ -59,9 +59,21 @@ public class VotingTerminal extends Thread {
             readConfig();
         } catch (FileNotFoundException f) {
             System.out.println("Couldn't find config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(-1);
         } catch (IOException f) {
             System.out.println("Couldn't read config file");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(-1);
         }
     }
@@ -204,6 +216,12 @@ public class VotingTerminal extends Thread {
                 socket.close();
             }
             System.out.println("Exiting...");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             if(it != null){
                 it.leave();
             }
@@ -219,7 +237,7 @@ public class VotingTerminal extends Thread {
     private void readConfig() throws FileNotFoundException, IOException{
         Properties prop = new Properties();
 
-        prop.load(new FileInputStream("meta1/Voting/terminal.config"));
+        prop.load(new FileInputStream("config/terminal.config"));
 
         //reads the variables
         this.MULTICAST_ADDRESS = prop.getProperty("terminal.MULTICAST_ADDRESS");
@@ -540,6 +558,8 @@ class VotingInterface extends Thread{
                 break;
             }
         }while (nelec!=0);
+
+        this.lock();
     }
 
     /**

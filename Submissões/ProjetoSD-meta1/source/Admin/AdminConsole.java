@@ -183,6 +183,12 @@ public class AdminConsole {
         }
         if(!ok){
             System.out.println("Server is closed");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+            
             System.exit(0);
         }
     }
@@ -202,10 +208,22 @@ public class AdminConsole {
             db= (database) LocateRegistry.getRegistry(1099).lookup("central");
             if(!db.isWorking()){
                 System.out.println("Server closed. Sorry...");
+                
+                System.out.println("Press enter to continue...");
+                Scanner n = new Scanner(System.in);
+                n.nextLine();
+                n.close();
+
                 System.exit(0);
             }
         } catch (Exception e) {
             System.out.println("Server closed. Sorry...");
+
+            System.out.println("Press enter to continue...");
+            Scanner n = new Scanner(System.in);
+            n.nextLine();
+            n.close();
+
             System.exit(0);
         }
 
@@ -227,6 +245,10 @@ public class AdminConsole {
                     case 0 -> {
                         System.out.println("Bye!");
                         tat.stop();
+                        
+                        System.out.println("Press enter to continue...");
+                        in.nextLine();
+
                         System.exit(0);
                     }
 
@@ -283,6 +305,10 @@ public class AdminConsole {
                 reconnect();
             }
             catch(java.util.NoSuchElementException e){
+                
+                System.out.println("Press enter to continue...");
+                in.nextLine();
+
                 System.exit(0);
             }
         }while (option != 0);
