@@ -124,7 +124,7 @@ public class VotingTerminal extends Thread {
 
                     // when Polling Station asks who's connected to the multicast group
                     case "whosthere":
-                        it.sendMessage("type | imhere; id | " + this.id);
+                        it.sendMessage("type | imhere; id | " + this.id + "; status | " + (it.locked ? "locked" : "unlocked"));
                         break;
 
                     // Sends this terminal to work
@@ -349,6 +349,8 @@ class VotingInterface extends Thread{
         this.locked = true;
         this.logged = false;
         System.out.println("\nLOCKED!");
+
+        this.sendMessage("type | updateStatus");
 
         this.timer.interrupt();
         this.interrupt();

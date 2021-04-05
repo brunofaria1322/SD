@@ -158,6 +158,13 @@ public class MulticastServer extends Thread {
                         }
                         break;
 
+                    
+
+                    // when Voting Terminal asks for an ID
+                    case "updateStatus":
+                        it.updateStatus(socket);
+                        break;
+
                     // Sends response to login request
                     case "login":
                         if(hash_map.get("id") != null){
@@ -529,6 +536,7 @@ class PollingStationInterface extends Thread{
 
 
                 this.sendMessage("type | work; cc | "+ user[0] +"; name | "+ user[1] +"; to | "+ id);
+                this.sendMessage("type | updateStatus");
                 System.out.println("Terminal id = "+id+" was ulocked!");
 
             } catch (SocketTimeoutException e) {
@@ -547,6 +555,7 @@ class PollingStationInterface extends Thread{
             }
             
         }
+
     }
 
 
@@ -569,5 +578,58 @@ class PollingStationInterface extends Thread{
         System.out.println("Server is closed");
         System.exit(0);
         return null;
+    }
+
+    public void updateStatus(MulticastSocket socket) throws NumberFormatException, RemoteException{
+        /* Sends message to Multicast Group toget the states from all the 
+        voting terminals on this group */
+        String message = "type | whosthere";
+        this.sendMessage(message);
+
+        byte[] buffer;
+        DatagramPacket packet;
+
+        HashMap<String,String> hash_map;
+        
+        // Captures the messages from the Voting terminals receiving his id and status
+        
+        int availableTerminals = 0, lockedTerminals = 0;
+        try {
+            socket.setSoTimeout(1000);
+            while (true) {
+                buffer = new byte[256];
+                packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+
+                hash_map = this.packetToHashMap(packet);
+
+                if(hash_map.get("type").equals("imhere")){
+                    if (hash_map.get("id") != null){
+                        if (hash_map.get("status").equals("locked")){
+                            lockedTerminals ++;
+                        }
+                        else{
+                            availableTerminals ++;
+                        }
+                        
+                    }
+                }
+            }
+        } catch (SocketTimeoutException ignored) {
+            //No more requests to catch
+            //leaves
+        } catch (IOException e){
+            //TODO
+        }
+
+        try {
+            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), availableTerminals, lockedTerminals);
+
+        } catch (RemoteException e) {
+            //tries to reconnect to RMI Server
+            this.reconnect(db);
+            db.changeActiveStationStatus(Integer.parseInt(this.NDEP), availableTerminals, lockedTerminals);
+        }
+
     }
 }
