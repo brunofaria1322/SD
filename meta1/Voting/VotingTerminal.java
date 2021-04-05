@@ -149,39 +149,6 @@ public class VotingTerminal extends Thread {
                         }
                         break;
 
-                    // response to getElections (list of elections)
-                    case "electionsList":
-                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
-                            hash_map.remove("type");
-                            hash_map.remove("to");
-
-                            //after removes hash_map will only have the elections {elec_num : elec_name}
-                            if (hash_map.isEmpty()){
-                                System.out.println("There are no elections for you to vote here");
-                                it.lock();
-                            }
-                            else {
-
-                                it.chooseElection(hash_map);
-                            }
-                        }
-                        break;
-
-                    // response to getCandidates
-                    case "candidatsList":
-                        if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
-                            hash_map.remove("type");
-                            hash_map.remove("to");
-                            String nelec = hash_map.get("nelec");
-                            hash_map.remove("nelec");
-
-                            //after removes hash_map will only have the candidates {c_num : c_name}
-
-                            it.vote(hash_map, nelec);
-                            
-                        }
-                        break;
-
                     // Response to vote request
                     case "vote":
                         if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
@@ -259,6 +226,11 @@ class VotingInterface extends Thread{
     private MulticastSocket socket;
 
     /**
+     * The Multicast socket for reading
+     */
+    private MulticastSocket read_socket;
+
+    /**
      * The Multicast group
      */
     private final InetAddress group;
@@ -330,7 +302,8 @@ class VotingInterface extends Thread{
     public void run() {
         try {
             this.socket = new MulticastSocket();  // create socket without binding it (only for sending)
-            
+            this.read_socket = new MulticastSocket(this.PORT);   // create socket and bind it (only for reading)
+
             System.out.println("\nLOCKED!");
             while(this.running){
                 if (!this.locked){
@@ -339,12 +312,13 @@ class VotingInterface extends Thread{
                 //waits for signal
                 sem.doWait();
             }
-                
+
         } catch (Exception e) {
             //TODO
             e.printStackTrace();
         } finally {
             this.socket.close();
+            this.read_socket.close();
             this.in.close();
         }
     }
@@ -433,6 +407,57 @@ class VotingInterface extends Thread{
         String password = new String( System.console().readPassword() );
 
         this.sendMessage("type | login; username | " + this.u_username + "; password | " + password + "; cc | " + this.u_cc + "; id | " + this.id);
+    
+        this.getElections();
+    }
+
+    /**
+     * reads Multicast group till it receives response to his request
+     */
+    private void getElections(){
+        try{
+            this.read_socket.joinGroup(group);
+
+            byte[] buffer;
+            DatagramPacket packet;
+
+            HashMap<String,String> hash_map = null;
+
+            boolean canLeave = false;
+
+            while (!canLeave) {
+                buffer = new byte[256];
+                packet = new DatagramPacket(buffer, buffer.length);
+                this.read_socket.receive(packet);
+
+                hash_map = this.packetToHashMap(packet);
+
+                // response to getElections (list of elections)
+                if(hash_map.get("type").equals("electionsList")){
+                    if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                        
+                        this.read_socket.leaveGroup(group);
+                        canLeave = true;
+
+                        hash_map.remove("type");
+                        hash_map.remove("to");
+
+                        //after removes hash_map will only have the elections {elec_num : elec_name}
+                        if (hash_map.isEmpty()){
+                            System.out.println("There are no elections for you to vote here");
+                            this.lock();
+                        }
+                        else {
+                            this.chooseElection(hash_map);
+                        }
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            // TODO
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -441,7 +466,7 @@ class VotingInterface extends Thread{
      *
      * @param elections HashMap containing number of election : election name
      */
-    public void chooseElection(HashMap<String, String> elections) {
+    private void chooseElection(HashMap<String, String> elections) {
         System.out.println("\nChoose an election:");
 
         int nelec;
@@ -468,9 +493,56 @@ class VotingInterface extends Thread{
             else {
                 // Asks for the Candidates Lists in this election
                 this.sendMessage("type | getLists; id | " + this.id + "; nelec | " + elections.keySet().toArray()[nelec-1]);
+                this.getCandidats();
+                
                 break;
             }
         }while (nelec!=0);
+    }
+
+    /**
+     * reads Multicast group till it receives response to his request
+     */
+    private void getCandidats(){
+        try{
+            this.read_socket.joinGroup(group);
+
+            byte[] buffer;
+            DatagramPacket packet;
+
+            HashMap<String,String> hash_map = null;
+
+            boolean canLeave = false;
+
+            while (!canLeave) {
+                buffer = new byte[256];
+                packet = new DatagramPacket(buffer, buffer.length);
+                this.read_socket.receive(packet);
+
+                hash_map = this.packetToHashMap(packet);
+
+                // response to getElections (list of elections)
+                if(hash_map.get("type").equals("candidatsList")){
+                    if (hash_map.get("to") != null && Integer.parseInt(hash_map.get("to")) == this.id) {
+                        this.read_socket.leaveGroup(group);
+                        canLeave = true;
+
+                        hash_map.remove("type");
+                        hash_map.remove("to");
+                        String nelec = hash_map.get("nelec");
+                        hash_map.remove("nelec");
+
+                        //after removes hash_map will only have the candidates {c_num : c_name}
+
+                        this.vote(hash_map, nelec);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            // TODO
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -514,6 +586,7 @@ class VotingInterface extends Thread{
             else{
                 // Sends vote to the Multicast group
                 this.sendMessage("type | vote; id | " + this.id + "; nlista | " + lists.keySet().toArray()[nlist-1] + "; username | " + this.u_username + "; neleicao | " + nelec);
+                this.getElections();
                 break;
             }
         }while (nlist!=0);
@@ -545,7 +618,6 @@ class Semaphore {
 
     }
 
-
     /**
      * Signal to continue
      */
@@ -553,4 +625,14 @@ class Semaphore {
         waiting = false;
         notify();
     }
+}
+
+/**
+ * Timer class for blocking Voting Terminal after 120s of no use
+ *
+ * @author Bruno Faria
+ * @version 1.0
+ */
+class Timer {
+
 }
