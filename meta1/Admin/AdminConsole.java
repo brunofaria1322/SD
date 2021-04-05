@@ -37,7 +37,7 @@ public class AdminConsole {
     static textAreaTest tat;
 
     /**
-     * Class for the update Thread
+     * Thread that updates the content displayed in the realtime frame.
      *
      * @author Diogo Flórido
      * @since 1.0
@@ -45,30 +45,34 @@ public class AdminConsole {
     static class updateThread extends Thread{
 
         /**
-         * TODO
+         * The {@link javax.swing.JFrame} class to be updated.
          */
         textAreaTest aa;
 
         /**
-         * TODO
+         * A reference to the main thread.
          */
         Thread princ;
 
 
         /**
-         * TODO
+         * Constructor of the updateThread.
          *
-         * @param abc
-         * @param princ
+         * @param abc The {@link javax.swing.JFrame} class to be updated.
+         * @param princ A reference to the main thread {@link AdminConsole}.
          */
         public updateThread(textAreaTest abc,Thread princ)
         {
             aa = abc;
             this.princ = princ;
         }
-
         /**
-         * TODO
+         * Method called when the thread is created.
+         * <ul>
+         * <li>The method calls {@link database#getActiveStationStatus} and {@link database#getActiveStationStatus} in periods of 100 ms.
+         * <li>The method displays the status of all voting terminals and the number of votes per voting station for each active election.
+         * <li>If the thread fails to connect to the RMI Server it pauses the execution of the main thread until it is able to connect again changing the value of {@link database db}.
+         * </ul>
          */
         @Override
         public void run(){
@@ -97,7 +101,7 @@ public class AdminConsole {
                     aa.setText(display.toString());
                 }
                 catch (InterruptedException e){
-                    //e.printStackTrace();
+                    ;
                 }
                 catch (RemoteException e) {
                     princ.suspend();
@@ -112,7 +116,7 @@ public class AdminConsole {
 
 
     /**
-     * TODO
+     * Frame where the real time information is displayed
      *
      * @author Diogo Flórido
      * @since 1.0
@@ -120,17 +124,17 @@ public class AdminConsole {
     static class textAreaTest extends javax.swing.JFrame
     {
         /**
-         * TODO
+         * A TextArea.
          */
         JTextArea area = new JTextArea();
 
         /**
-         * TODO
+         * the thread that updates the frame.
          */
         updateThread thread;
 
         /**
-         * TODO
+         * A reference to the main thread {@link AdminConsole}.
          *
          * @param princ
          */
@@ -147,9 +151,9 @@ public class AdminConsole {
         }
 
         /**
-         * TODO
+         * replaces the text in {@link JTextArea area}.
          *
-         * @param text
+         * @param text text to be displayed.
          */
         public void setText(String text)
         {
@@ -157,7 +161,7 @@ public class AdminConsole {
         }
 
         /**
-         * TODO
+         * Stops the updating thread.
          */
         public void stop(){
             thread.stop();
@@ -166,6 +170,9 @@ public class AdminConsole {
 
     /**
      * Tries to reconnect to db in the next 30s
+     * <ul>
+     * <li> If not able to reconnect, the program exits.
+     * </ul>
      */
     private static synchronized void reconnect(){
         long until = System.currentTimeMillis()+30000;
@@ -178,7 +185,7 @@ public class AdminConsole {
                     break;
                 }
             } catch (Exception e) {
-                //TODO
+                ;
             }
         }
         if(!ok){
@@ -1154,8 +1161,7 @@ public class AdminConsole {
                         System.out.println("." + deps.get(Integer.parseInt(mesa)));
                     }
                     catch(NumberFormatException e){
-                        // Couldn't parse
-                        // TODO
+                        ;
                     }
                 }
             }
@@ -1245,7 +1251,7 @@ public class AdminConsole {
                         i++;
                     }
                     catch(NumberFormatException e){
-                        //TODO
+                        ;
                     }
                 }
 
@@ -1422,8 +1428,7 @@ public class AdminConsole {
                     System.out.println("." + deps.get(Integer.parseInt(dep)));
                 }
                 catch(NumberFormatException e){
-                    // TODO
-                    // Couldn't parse int
+                    ;
                 }
             }
             System.out.println("\n1 - Add department\n2 - Remove department\n0 - Back\noption: ");
@@ -1518,8 +1523,7 @@ public class AdminConsole {
                         i++;
                     }
                     catch(NumberFormatException e){
-                        // TODO
-                        // Can't parse to int
+                        ;
                     }
 
                 }
