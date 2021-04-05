@@ -1,24 +1,14 @@
 package Admin;
 
 import java.awt.Container;
-import java.io.Console;
-import java.io.Serializable;
-import java.net.ConnectException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.sql.Date;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
 
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -27,95 +17,156 @@ import Commun.database;
 import Commun.database.Pair;
 
 
-                
-          
-
+/**
+ * Main Class for the Admin Console
+ *
+ * @author Bruno Faria
+ * @author Diogo Flórido
+ * @version 1.0
+ */
 public class AdminConsole {
+
+    /**
+     * connector to the RMI server
+     */
     static database db;
+
+    /**
+     * Frame for the realtime updates
+     */
     static textAreaTest tat;
 
+    /**
+     * Class for the update Thread
+     *
+     * @author Diogo Flórido
+     * @since 1.0
+     */
     static class updateThread extends Thread{
-        textAreaTest aa;
-        Integer i;
-        Thread princ;
-    
 
+        /**
+         * TODO
+         */
+        textAreaTest aa;
+
+        /**
+         * TODO
+         */
+        Thread princ;
+
+
+        /**
+         * TODO
+         *
+         * @param abc
+         * @param princ
+         */
         public updateThread(textAreaTest abc,Thread princ)
         {
-                    aa = abc;
-                    this.princ = princ;
+            aa = abc;
+            this.princ = princ;
         }
 
+        /**
+         * TODO
+         */
         @Override
         public void run(){
-                while(true){  
-                    try{ 
-                        HashMap<String,Pair<Integer,Integer>> stations = db.getActiveStationStatus();
-                        HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
-                        String display = "";
-                        if(stations != null){
-                            for(String mesa : stations.keySet()){
-                                display+=mesa+": ("+stations.get(mesa).right+"/"+stations.get(mesa).left+") active voting terminals\n";
-                            }
+            while(true){
+                try{
+                    HashMap<String,Pair<Integer,Integer>> stations = db.getActiveStationStatus();
+                    HashMap<String,HashMap<String,Integer>> results = db.getNumberVotesPerStation();
+                    StringBuilder display = new StringBuilder();
+                    if(stations != null){
+                        for(String mesa : stations.keySet()){
+                            display.append(mesa).append(": (").append(stations.get(mesa).right).append("/").append(stations.get(mesa).left).append(") active voting terminals\n");
                         }
-                        display+="\n\n";
-                        if(results != null){
-                            
-                            for(String el : results.keySet()){
-                                display+="---"+ el + "---\n";
-                                for (String mesa : results.get(el).keySet()){
-                                    display+=mesa+":\t" + results.get(el).get(mesa) + " votes\n";
-                                }
-                            }
-                                
-                                sleep(100);
-                        }
-                        aa.setText(display);
                     }
-                    catch (InterruptedException e){
-                        //e.printStackTrace();
-                    } 
-                    catch (RemoteException e) {
-                        princ.suspend();
-                        reconnect();
-                        princ.resume();
-                    }
+                    display.append("\n\n");
+                    if(results != null){
 
+                        for(String el : results.keySet()){
+                            display.append("---").append(el).append("---\n");
+                            for (String mesa : results.get(el).keySet()){
+                                display.append(mesa).append(":\t").append(results.get(el).get(mesa)).append(" votes\n");
+                            }
+                        }
+
+                        sleep(100);
+                    }
+                    aa.setText(display.toString());
                 }
-        }
-            
-    }        
-    
+                catch (InterruptedException e){
+                    //e.printStackTrace();
+                }
+                catch (RemoteException e) {
+                    princ.suspend();
+                    reconnect();
+                    princ.resume();
+                }
 
+            }
+        }
+
+    }
+
+
+    /**
+     * TODO
+     *
+     * @author Diogo Flórido
+     * @since 1.0
+     */
     static class textAreaTest extends javax.swing.JFrame
     {
+        /**
+         * TODO
+         */
         JTextArea area = new JTextArea();
+
+        /**
+         * TODO
+         */
         updateThread thread;
 
+        /**
+         * TODO
+         *
+         * @param princ
+         */
         public textAreaTest(Thread princ)
-            {
-                thread = new updateThread(this, princ);
-                JPanel panel = new JPanel();
-                panel.add(area);
-                this.setSize(1000, 500);
-                Container c = this.getContentPane();
-                c.add(area);
-                this.setVisible(true);
-                thread.start();
-            }
+        {
+            thread = new updateThread(this, princ);
+            JPanel panel = new JPanel();
+            panel.add(area);
+            this.setSize(1000, 500);
+            Container c = this.getContentPane();
+            c.add(area);
+            this.setVisible(true);
+            thread.start();
+        }
 
+        /**
+         * TODO
+         *
+         * @param text
+         */
         public void setText(String text)
-            {
-                area.setText(text);
-            }
+        {
+            area.setText(text);
+        }
+
+        /**
+         * TODO
+         */
         public void stop(){
             thread.stop();
         }
-        public void resume(){
-            thread.resume();
-        }
     }
 
+    /**
+     * Tries to reconnect to db in the next 30s
+     */
     private static synchronized void reconnect(){
         long until = System.currentTimeMillis()+30000;
         boolean ok = false;
@@ -126,8 +177,8 @@ public class AdminConsole {
                     ok = true;
                     break;
                 }
-            } catch (Exception e1) {
-                ;
+            } catch (Exception e) {
+                //TODO
             }
         }
         if(!ok){
@@ -135,89 +186,100 @@ public class AdminConsole {
             System.exit(0);
         }
     }
-    public static void main(String[] args) throws RemoteException, InterruptedException {
-    
-        
+
+    /**
+     * Main Function
+     * Runs the Admin Console interface
+     *
+     * @param args                      Arguments
+     * @throws InterruptedException     when thread is interrupted
+     */
+    public static void main(String[] args) throws InterruptedException {
+
+
         try {
-			db= (database) LocateRegistry.getRegistry(1099).lookup("central");
+            //connects to RMI server
+            db= (database) LocateRegistry.getRegistry(1099).lookup("central");
             if(!db.isWorking()){
                 System.out.println("Server closed. Sorry...");
                 System.exit(0);
             }
-		} catch (Exception e) {
-			System.out.println("Server closed. Sorry...");
+        } catch (Exception e) {
+            System.out.println("Server closed. Sorry...");
             System.exit(0);
-		}
-        
+        }
+
         System.out.println("Welcome to Admin Console");
         tat = new textAreaTest(Thread.currentThread());
 
         int option = -1;
         Scanner in = new Scanner(System.in);
+        //Starts printing the initial interface
         do{
             try{
-            System.out.print("\n1 - Regist person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
+                System.out.print("\n1 - Register person\n2 - Create election\n3 - Manage election\n4 - Check user's voting history\n0 - Quit\noption: ");
 
-            option = in.nextInt();
-            in.nextLine();
-            
-            switch (option){
-                case 0:
-                    System.out.println("Bye!");
-                    tat.stop();
-                    System.exit(0);
-                    break;
-                case 1:
-                    int rp = registerPerson(in);
-                    if (rp == 1){
-                        System.out.println("Person registered successfully !");
-                    } else if(rp == -4){
-                        System.out.println("Registry was aborted!");
+                option = in.nextInt();
+                in.nextLine();
+
+                switch (option) {
+                    //Exits
+                    case 0 -> {
+                        System.out.println("Bye!");
+                        tat.stop();
+                        System.exit(0);
                     }
-                    else if (rp == -3){
-                        System.out.println("Sorry, something went wrong with our server. Please contact us!");
+
+                    // Register Person
+                    case 1 -> {
+                        int rp = registerPerson(in);
+                        if (rp == 1) {
+                            System.out.println("Person registered successfully !");
+                        } else if (rp == -4) {
+                            System.out.println("Registry was aborted!");
+                        } else if (rp == -3) {
+                            System.out.println("Sorry, something went wrong with our server. Please contact us!");
+                        } else if (rp == -2) {
+                            System.out.println("There's already an account with that CC number!");
+                        } else {
+                            System.out.println("There's already an account with that username!");
+                        }
                     }
-                    else if(rp == -2){
-                        System.out.println("There's already an account with that CC number!");
+
+                    //Create election
+                    case 2 -> {
+                        int ce = createElection(in);
+                        if (ce == 0) {
+                            System.out.println("Sorry, something went wrong with our server. Please contact us!");
+                        } else if (ce == -2) {
+                            System.out.println("Election was created successfully!");
+                            System.out.println("WARNING: There was already an election with the same name as the new one's");
+                            manageElection(in, -ce);
+                        } else if (ce > 0) {
+                            System.out.println("Election was created successfully!");
+                            manageElection(in, ce);
+                        } else {
+                            System.out.println("Creation was aborted!");
+                        }
                     }
-                    else{
-                        System.out.println("There's already an account with that username!");
-                    }
-                    break;
-                case 2:
-                    int ce = createElection(in);
-                    if(ce == 0){
-                        System.out.println("Sorry, something went wrong with our server. Please contact us!");
-                    }
-                    else if(ce == -2){
-                        System.out.println("Election was created successfully!");
-                        System.out.println("WARNING: There was already an election with the same name as the new one's");
-                        manageElection(in,-ce);
-                    }
-                    else if(ce > 0){
-                        System.out.println("Election was created successfully!");
-                        manageElection(in,ce);
-                    }
-                    else{
-                        System.out.println("Creation was aborted!"); 
-                    }
-                    break;
-                case 3:
-                    chooseElection(in);
-                    break;
-                case 4:
-                    getUserVotes(in);
-                    break;
-                default:
-                    System.out.println("Wrong option!");
-                    break;
-            }
+
+                    //Manage election
+                    case 3 -> chooseElection(in);
+
+                    //Checks user's voting history
+                    case 4 -> getUserVotes(in);
+
+                    //Wrong option
+                    default -> System.out.println("Wrong option!");
+                }
             }
             catch(InputMismatchException e){
+                //when a int is asked and is given a String
                 System.out.println("Invalid input!");
                 in.nextLine();
             }
             catch(RemoteException e){
+                //tries to reconnect to RMI Server
                 reconnect();
             }
             catch(java.util.NoSuchElementException e){
@@ -226,114 +288,178 @@ public class AdminConsole {
         }while (option != 0);
         in.close();
     }
-    
-    
 
+
+    /**
+     * Register Person interface
+     *
+     * @param in                    input Scanner
+     * @return                      int containing the result of the register
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static int registerPerson(Scanner in) throws RemoteException{
-        int type, ndep;
+        int type;
         String cargo = "all";
         boolean isValid = false;
+
+
+        //Type of person to be registered
         do{
-            System.out.print("\n1 - Regist student\n2 - Regist professor\n3 - Regist employee\n0 - Abort\noption: ");
+            System.out.print("\n1 - Register student\n2 - Register professor\n3 - Register employee\n0 - Abort\noption: ");
 
             type = in.nextInt();
             in.nextLine();
+
             switch (type){
+                //Abort register
                 case 0:
                     return -4;
+
+                //Register Student
                 case 1:
                     cargo = "aluno";
                     isValid = true;
                     break;
+
+                //Register Professor
                 case 2:
                     cargo = "docente";
                     isValid = true;
                     break;
+
+                //Register Employee
                 case 3:
                     isValid = true;
                     cargo = "funcionario";
                     break;
+
+                //Wrong option
                 default:
                     System.out.println("Wrong option!");
                     break;
             }
         }while (!isValid);
 
-        HashMap<Integer,String> deps = db.getDepartments();
 
+        //department of the person
+        HashMap<Integer,String> deps = db.getDepartments();
         isValid = false;
-        System.out.println("\nSelect the user's department");
+        int ndep;
         do{
+            System.out.println("\nSelect the user's department");
             int i = 1;
             for (Integer key : deps.keySet()){
-               System.out.println(i + " - " + deps.get(key));
-               i++;
+                System.out.println(i + " - " + deps.get(key));
+                i++;
             }
             System.out.print("0 - Abort\noption: ");
             ndep = in.nextInt();
             in.nextLine();
-            
+
+            //ABORT
             if (ndep == 0){
                 return -4;
             }
-
-            else if (ndep< 0 || ndep > deps.keySet().size()){     
+            //Wrong option
+            else if (ndep< 0 || ndep > deps.keySet().size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
+            //Valid option
             else{
-                isValid=true;
+                isValid = true;
                 ndep = deps.keySet().toArray(new Integer[deps.keySet().size()])[ndep-1];
             }
         }while (!isValid);
 
-        System.out.print("\nName: ");
-        String name = in.nextLine();
-        if(name.equals("0")){
-            return -4;
-        }
-        if(name.length()>64){
-            System.out.println("Please make the name shorter than 64 characters. You can replace the middle names for their initials."); 
-        }
-        System.out.print("\nAddress: ");
-        String address = in.nextLine();
-        if(address.equals("0")){
-            return -4;
-        }
-        if(address.length()>64){
-            System.out.println("Please make the address shorter than 64 characters. Sorry..."); 
-        }
-        System.out.print("\nPhone number: ");
-        String phone_number = in.nextLine();
-        if(phone_number.equals("0")){
-            return -4;
-        }
-        try{
-            Integer.parseInt(phone_number);
-        }
-        catch(Exception e){
-            System.out.println("A phone number can only have digits!"); 
-            return -4;
-        }
-        if(phone_number.length() < 7 || phone_number.length() > 16){
-            System.out.println("That is not a valid phone number!"); 
-            return -4;
-        }
-        System.out.print("\nCC number: ");
-        String cc_number = in.nextLine();
-        if(cc_number.equals("0")){
-            return -4;
-        }
-        try{
-            Integer.parseInt(cc_number);
-        }
-        catch(Exception e){
-            System.out.println("An ID must only have digits!");
-            return -4;
-        }
-        if(cc_number.length()>16 || cc_number.length() < 8){
-        System.out.println("That is not a valid ID!");
-        }
+
+        //Person Name
+        String name;
+        isValid = false;
+        do {
+            System.out.print("\nName: ");
+            name = in.nextLine();
+            if (name.equals("0")) {
+                return -4;
+            }
+            if (name.length() > 64) {
+                System.out.println("Please make the name shorter than 64 characters. You can replace the middle names for their initials.");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+
+        //Person Address
+        isValid = false;
+        String address;
+        do {
+            System.out.print("\nAddress: ");
+            address = in.nextLine();
+            if (address.equals("0")) {
+                return -4;
+            }
+            if (address.length() > 64) {
+                System.out.println("Please make the address shorter than 64 characters. Sorry...");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+
+        //Person Phone's number
+        isValid = false;
+        String phone_number;
+        do {
+            System.out.print("\nPhone number: ");
+            phone_number = in.nextLine();
+            if(phone_number.equals("0")){
+                return -4;
+            }
+            try{
+                Integer.parseInt(phone_number);
+            }
+            catch(Exception e){
+                System.out.println("A phone number can only have digits!");
+                return -4;
+            }
+            if(phone_number.length() < 7 || phone_number.length() > 16){
+                System.out.println("That is not a valid phone number!");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+
+        //Person CC's number
+        isValid = false;
+        String cc_number;
+        do {
+
+            System.out.print("\nCC number: ");
+            cc_number = in.nextLine();
+            if(cc_number.equals("0")){
+                return -4;
+            }
+            try{
+                Integer.parseInt(cc_number);
+            }
+            catch(Exception e){
+                System.out.println("An ID must only have digits!");
+                return -4;
+            }
+            if(cc_number.length()>16 || cc_number.length() < 8){
+                System.out.println("That is not a valid ID!");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+        //CC's Expiration Date
         isValid=false;
         Date cc_expiration_date = new Date(1970, 1, 1);
         do{
@@ -346,31 +472,42 @@ public class AdminConsole {
                 cc_expiration_date = new Date(new SimpleDateFormat("MM/yyyy").parse(aux).getTime());
                 isValid = true;
             }catch(Exception e){
-                System.out.print(e);
-                System.out.print("Invalid date! Date should be in format (mm/yyyy). Try Again...");
+               //e.printStackTrace();
+               System.out.print("Invalid date! Date should be in format (mm/yyyy). Try Again...");
             }
 
         }while(!isValid);
 
-        System.out.print("\nUsername: ");
-        String username = in.nextLine();
-        if(username.equals("0")){
-            return -4;
-        }
-        if(username.length() > 16 || username.length() < 3){
-            System.out.println("username must have between 3 and 16 characters.");
-            return -4;
-        }
 
+        //Person's username
+        isValid = false;
+        String username;
+        do {
+
+            System.out.print("\nUsername: ");
+            username = in.nextLine();
+            if(username.equals("0")){
+                return -4;
+            }
+            if(username.length() > 16 || username.length() < 3){
+                System.out.println("username must have between 3 and 16 characters.");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+
+        //Person's Password
         isValid = false;
         String password;
-        do{ 
+        do{
             System.out.print("\nPassword: ");
             password = new String(System.console().readPassword());
             if(password.equals("0")){
                 return -4;
             }
-            if(password.length()>=4 || password.length() > 16){
+            if(password.length()>=4 && password.length() < 16){
                 System.out.print("Confirm password: ");
                 String pv = new String(System.console().readPassword());
                 if(pv.equals("0")){
@@ -385,8 +522,10 @@ public class AdminConsole {
                 System.out.print("\nPassword requires a minimum of 4 characters and a maximum of 16 characters! Try Again...");
             }
         }while(!isValid);
-         //DEBUG
-        /*System.out.println(
+
+        /*
+        DEBUG
+        System.out.println(
             "\ntype: " + cargo +
             "\nndep: " + ndep +
             "\nname: " + name +
@@ -396,23 +535,33 @@ public class AdminConsole {
             "\nCC val: " + cc_expiration_date.toString() +
             "\nusername: " + username +
             "\npassword: " + password
-        );*/
+        );
+        */
+
         return db.createUser(cargo, ndep, name, address, phone_number, cc_number, cc_expiration_date, username, password);
-       
-        
-        
+
     }
 
+    /**
+     * Create Election interface
+     *
+     * @param in                    input Scanner
+     * @return                      int containing the result of the register
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static int createElection(Scanner in) throws RemoteException{
-        int voters, ndep;
+        int voters;
         boolean isValid = false;
-        String cargos = new String();
+        String cargos = "all";
+
+
+        //Type of voters of the election
         do{
             System.out.print("\nWho are the voters?\n1 - Students\n2 - Professors\n3 - Employees\n4 - Everyone\n0 - Abort\noption: ");
 
             voters = in.nextInt();
             in.nextLine();
-            
+
             switch (voters){
                 case 0:
                     return -1;
@@ -439,26 +588,28 @@ public class AdminConsole {
         }while (!isValid);
 
 
+        //departments of the election
+        HashMap<Integer,String> deps = db.getDepartments();
+        int ndep;
         isValid = false;
-        System.out.println("\nWhat is the voters' department?");
         do{
-            HashMap<Integer,String> deps = db.getDepartments();
+            System.out.println("\nWhat is the voters' department?");
             int i = 1;
             for (Integer key : deps.keySet()){
-               System.out.println(i + " - " + deps.get(key));
-               i++;
+                System.out.println(i + " - " + deps.get(key));
+                i++;
             }
             System.out.println(i + " - all" );
             System.out.print("0 - Abort\noption: ");
 
             ndep = in.nextInt();
             in.nextLine();
-            
+
             if (ndep == 0){
                 return -2;
             }
 
-            else if (ndep< 0 || ndep > deps.keySet().size()+1){     
+            else if (ndep< 0 || ndep > deps.keySet().size()+1){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
@@ -473,21 +624,34 @@ public class AdminConsole {
             }
         }while (!isValid);
 
-        System.out.print("\nElection title: ");
-        String title = in.nextLine();
-        if(title.equals("0") || title.equals("votos nulos") || title.equals("votos em branco")){
-            return -1;
-        }
-        if(title.length()>64){
-            System.out.println("Please make the title shorter than 64 characters. You can write more details of the election in the description!"); 
-            return -1;
-        }
 
+        //Election's Title
+        String title;
+        isValid = false;
+        do {
+            System.out.print("\nElection title: ");
+            title = in.nextLine();
+            if(title.equals("0") || title.equals("votos nulos") || title.equals("votos em branco")){
+                return -1;
+            }
+            if(title.length()>64){
+                System.out.println("Please make the title shorter than 64 characters. You can write more details of the election in the description!");
+            }
+            else{
+                isValid=true;
+            }
+        }while (!isValid);
+
+
+        //Election's Description
         System.out.print("\nElection description: ");
         String description = in.nextLine();
         if(description.equals("0")){
             return -1;
         }
+
+
+        //Election's Starting Date and Time
         isValid=false;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         LocalDateTime start_time = LocalDateTime.now();
@@ -510,6 +674,8 @@ public class AdminConsole {
 
         }while(!isValid);
 
+
+        //Election's Ending Date and Time
         isValid=false;
         LocalDateTime end_time = LocalDateTime.now();
         do{
@@ -533,8 +699,8 @@ public class AdminConsole {
 
         }while(!isValid);
 
-        //DEBUG
         /*
+        DEBUG
         System.out.println(
             "\ntype: " + voters +
             "\nndep: " + ndep +
@@ -545,24 +711,29 @@ public class AdminConsole {
         );
         */
 
-        
         return db.createElection(cargos, ";" + ndep + ";", ";"+ ndep + ";", title, description, start_time, end_time);
 
-            //TODO: maanage election em causa.
-            //manageElection(in);
-        
     }
 
+    /**
+     * interface to pick an election to manage
+     *
+     * @param in                        input Scanner
+     * @throws RemoteException          when is not able to connect to RMI Server
+     * @throws InterruptedException     when interrupted
+     */
     private static void chooseElection(Scanner in) throws RemoteException, InterruptedException{
         System.out.println("\nChoose an election:");
         HashMap<Integer,HashMap<String,String>> elections;
+
+        //tries to get all elections from RMI Server
         try{
             elections = db.getElections(null, null);
         }
         catch(NullPointerException e){
             elections = null;
         }
-        
+
         int i, nelec;
         do{
             i= 1;
@@ -576,67 +747,86 @@ public class AdminConsole {
 
             nelec = in.nextInt();
             in.nextLine();
-            if(nelec == 0){
-                break;
-            }
-            if (nelec< 0 || (nelec>0 && elections == null) || nelec > elections.keySet().size()){     
+
+            if (nelec< 0 || (nelec>0 && elections == null) || nelec > Objects.requireNonNull(elections).keySet().size()){
                 System.out.println("Wrong option! Try Again...");
             }
             else if(nelec>0) {
+                //manages the selected election
                 manageElection(in, elections.keySet().toArray(new Integer[elections.keySet().size()])[nelec-1]);
             }
         }while (nelec!=0);
 
     }
 
+    /**
+     * interface for managing an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @throws RemoteException          when is not able to connect to RMI Server
+     * @throws InterruptedException     when interrupted
+     */
     private static void manageElection(Scanner in, int nelec) throws RemoteException, InterruptedException{
         HashMap<Integer,HashMap<String,String>> elections = db.getElections(null, null);
-        int option;
-        int estado;
-            do{
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                if(LocalDateTime.parse(elections.get(nelec).get("inicio"), formatter).isAfter(LocalDateTime.now())){
-                    estado = 1;
-                    System.out.print("Election hasn't started yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
-                }
-                else if(LocalDateTime.parse(elections.get(nelec).get("fim"), formatter).isAfter(LocalDateTime.now())){
-                    estado = 2;
-                    System.out.print("Election is currently active\n1 - Manage polling stations\n0 - Back\noption: ");
-                }
-                else{
-                    estado = 3;
-                    System.out.print("Election has finished \n1 - Check Results\n0 - Back\noption: ");
-                }
-                
+        int option, estado;
+        do{
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 
-                option = in.nextInt();
-                in.nextLine();
+            //if Election hasn't started yet
+            if(LocalDateTime.parse(elections.get(nelec).get("inicio"), formatter).isAfter(LocalDateTime.now())){
+                estado = 1;
+                System.out.print("Election hasn't started yet\n1 - Manage candidate list\n2 - Manage polling stations\n3 - Change properties\n0 - Back\noption: ");
+            }
+            //if Election is currently active
+            else if(LocalDateTime.parse(elections.get(nelec).get("fim"), formatter).isAfter(LocalDateTime.now())){
+                estado = 2;
+                System.out.print("Election is currently active\n1 - Manage polling stations\n0 - Back\noption: ");
+            }
+            //if election has finished
+            else{
+                estado = 3;
+                System.out.print("Election has finished \n1 - Check Results\n0 - Back\noption: ");
+            }
 
-            
-                if (option == 1 && estado == 1){
-                    manageCandidateLists(in,nelec);
-                }
-                else if ((option == 2 && estado == 1) || option == 1 && estado == 2){
-                     managePollingStations(in, nelec);
-                }        
-                else if (option == 3 && estado == 1){
-                    changeProperties(in, nelec);
-                }
-                else if (option == 1 && estado == 3){
-                    checkResults(in, nelec);
-                }        
-                else{
-                    System.out.println("Wrong option!");
-                }              
-            }while (option!=0);
+            option = in.nextInt();
+            in.nextLine();
+
+            if (option == 1 && estado == 1){
+                manageCandidateLists(in,nelec);
+            }
+            else if ((option == 2 && estado == 1) || option == 1 && estado == 2){
+                managePollingStations(in, nelec);
+            }
+            else if (option == 3 && estado == 1){
+                changeProperties(in, nelec);
+            }
+            else if (option == 1){  // and estado 3
+                checkResults(in, nelec);
+            }
+            else{
+                System.out.println("Wrong option!");
+            }
+        }while (option!=0);
     }
-    
+
+    /**
+     * interface to manage candidate lists to a certain election
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void manageCandidateLists(Scanner in, int nelec) throws RemoteException{
         int option;
         do{
-            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
             System.out.println("Current candidate lists in the election:\n");
-            ArrayList<Integer> toremove = new ArrayList<Integer>();
+
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
+
+            ArrayList<Integer> toremove = new ArrayList<>();
+            // white votes and null votes will be removed because they are not lists
+
             if(lists != null){
                 for (Integer key : lists.keySet()){
                     if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
@@ -647,6 +837,7 @@ public class AdminConsole {
                     }
                 }
                 for(Integer i : toremove){
+                    //removes the lists "votos em branco" and " votos nulos"
                     lists.remove(i);
                 }
             }
@@ -659,33 +850,38 @@ public class AdminConsole {
                 case 0:
                     break;
                 case 1:
-                    //TODO: manageCandidates(in, election_id);
                     addCandidateList(in,nelec);
                     break;
                 case 2:
-                    //TODO: removeCandidateList(in, election_id);
                     removeCandidateList(in,nelec);
                     break;
                 case 3:
-                    //TODO: manageCandidates(in, election_id);  
                     chooseCandidateList(in, nelec);
                     break;
                 default:
                     System.out.println("Wrong option!");
                     break;
             }
-            
-            
+
+
         }while (option!=0);
     }
 
+    /**
+     * interface to add a candidate list to a certain election
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void addCandidateList(Scanner in, int nelec) throws RemoteException{
 
         System.out.print("\nList Name: ");
         String name = in.nextLine();
+
         int cl;
         if(name.length()<64){
-           cl = db.createOrEditList(nelec, name, null,false);
+            cl = db.createOrEditList(nelec, name, null,false);
         }
         else{
             cl = -1;
@@ -704,17 +900,24 @@ public class AdminConsole {
         }
     }
 
+    /**
+     * interface to remove a candidate list to a certain election
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void removeCandidateList(Scanner in, int nelec) throws RemoteException{
 
-        
-        
         int nlist;
         System.out.println("\nWhich list do you want to remove?");
         do{
-            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
             int i = 1;
             if(lists != null){
-                ArrayList<Integer> toremove = new ArrayList<Integer>();
+                ArrayList<Integer> toremove = new ArrayList<>();
+                // white votes and null votes will be removed because they are not lists
+
                 for (Integer key : lists.keySet()){
                     if(!lists.get(key).left.equals("votos em branco") && !lists.get(key).left.equals("votos nulos")){
                         System.out.println(i + " - " +lists.get(key).left);
@@ -725,37 +928,42 @@ public class AdminConsole {
                     }
                 }
                 for(Integer j : toremove){
+                    //removes the lists "votos em branco" and " votos nulos"
                     lists.remove(j);
                 }
-                
+
             }
             System.out.print("0 - Back\noption: ");
 
             nlist = in.nextInt();
             in.nextLine();
-            if(nlist == 0){
-                break;
-            }
-            if (nlist< 0 || (nlist > 0 && lists == null) || nlist > lists.keySet().size()){     
+            if (nlist< 0 || (nlist > 0 && lists == null) || nlist > Objects.requireNonNull(lists).keySet().size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
             else if(nlist>0) {
-                Integer a[] = {lists.keySet().toArray(new Integer[lists.keySet().size()])[nlist-1]};
+                Integer[] a = {lists.keySet().toArray(new Integer[lists.keySet().size()])[nlist-1]};
                 db.editElection(nelec, true, null, null, null, null, null, null, a);
             }
         }while (nlist!=0);
 
     }
+
+    /**
+     * interface to pick a candidate list to manage
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void chooseCandidateList(Scanner in, int nelec) throws RemoteException{
 
-        
-        
         int nlist;
         System.out.println("\nWhich list do you want to edit?");
         do{
-            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec); 
+            HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
             int i = 1;
+            //prints candidate lists
             if(lists != null){
                 for (Integer key : lists.keySet()){
                     System.out.println(i + " - " +lists.get(key).left);
@@ -767,7 +975,7 @@ public class AdminConsole {
             nlist = in.nextInt();
             in.nextLine();
 
-            if (nlist< 0 || nlist > lists.keySet().size()){     
+            if (nlist< 0 || nlist > Objects.requireNonNull(lists).keySet().size()){
                 System.out.println("Wrong option! Try Again...\n");
                 break;
             }
@@ -777,6 +985,15 @@ public class AdminConsole {
         }while (nlist!=0);
 
     }
+
+    /**
+     * interface for managing candidates in a list
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election in cause
+     * @param nlista                number of candidate list in cause
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void manageCandidates(Scanner in, int nelec, int nlista) throws RemoteException{
         int option;
         do{
@@ -789,7 +1006,8 @@ public class AdminConsole {
             catch(NullPointerException e){
                 candis = null;
             }
-             
+
+            //prints candidates in list
             System.out.println("Candidates in the list:\n");
             if(candis != null){
                 for(Pair<String,String> p : candis){
@@ -808,17 +1026,24 @@ public class AdminConsole {
                     addCandidate(in, nelec, nlista);
                     break;
                 case 2:
-                    //TODO: removeCandidate(in, list_id);
                     removeCandidate(in, nelec, nlista);
                     break;
                 default:
                     System.out.println("Wrong option!");
                     break;
             }
-            
+
         }while (option!=0);
     }
 
+    /**
+     * interface to add a candidate to a certain list
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election in cause
+     * @param nlista                number of candidate list in cause
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void addCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
         HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists = db.getLists(nelec);
         System.out.print("\nCC number: ");
@@ -826,21 +1051,31 @@ public class AdminConsole {
 
         System.out.print("\nName: ");
         String name = in.nextLine();
-        ArrayList<Pair<String,String>> al = new ArrayList<Pair<String,String>>();
-        al.add(new Pair<String,String>(cc_number,name));
+
+        ArrayList<Pair<String,String>> al = new ArrayList<>();
+        al.add(new Pair<>(cc_number, name));
+
         if(db.createOrEditList(nelec, lists.get(nlista).left, al,false) == -2){
             System.out.println("That user does not have the requirements to be a candidate in that election");
         }
     }
 
+    /**
+     * interface to remove a candidate to a certain list
+     *
+     * @param in                    input Scanner
+     * @param nelec                 number of election in cause
+     * @param nlista                number of candidate list in cause
+     * @throws RemoteException      when is not able to connect to RMI Server
+     */
     private static void removeCandidate(Scanner in, int nelec, int nlista) throws RemoteException{
-        
-        
+
         int nmember;
         System.out.println("\nWhat candidate do you wish to remove?");
         do{
             HashMap<Integer,Pair<String,ArrayList<Pair<String,String>>>> lists;
             ArrayList<Pair<String,String>> candis;
+
             try{
                 lists = db.getLists(nelec);
                 candis = lists.get(nlista).right;
@@ -849,8 +1084,10 @@ public class AdminConsole {
                 lists = null;
                 candis = null;
             }
+
             int i= 1;
             if(candis != null){
+                //prints candidates
                 for(Pair<String,String> p : candis){
                     System.out.println(i+" - " + p.right + " ("+ p.left + ")");
                     i++;
@@ -861,12 +1098,11 @@ public class AdminConsole {
             nmember = in.nextInt();
             in.nextLine();
 
-            if (nmember< 0 || nmember > candis.size()){     //TODO: nmember > num de membros
+            if (nmember< 0 || nmember > Objects.requireNonNull(candis).size()){
                 System.out.println("Wrong option! Try Again...");
-                break;
             }
             else if(nmember>0) {
-                ArrayList<Pair<String,String>> a =  new ArrayList<Pair<String,String>>();
+                ArrayList<Pair<String,String>> a = new ArrayList<>();
                 a.add(candis.get(nmember-1));
                 db.createOrEditList(nelec, lists.get(nlista).left,a, true);
             }
@@ -874,26 +1110,41 @@ public class AdminConsole {
 
     }
 
+    /**
+     * interface for managing polling stations associated to a certain election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @throws RemoteException          when is not able to connect to RMI Server
+     * @throws InterruptedException     when interrupted
+     */
     private static void managePollingStations(Scanner in, int nelec) throws RemoteException, InterruptedException{
         int option;
-       
+
         do{
-            HashMap<Integer,HashMap<String,String>> elecs; 
-            HashMap<Integer,String> deps; 
+            HashMap<Integer,HashMap<String,String>> elecs;
+            HashMap<Integer,String> deps;
             try{
+                //gets all elections
                 elecs = db.getElections(null, null);
+                //gets all departments
                 deps = db.getDepartments();
             }
             catch(NullPointerException e){
                 elecs = null;
                 deps = null;
             }
-            String mesas = elecs.get(nelec).get("mesas");
-            List<String> amesas = new ArrayList<String>(Arrays.asList(mesas.split(";")));
-            if(amesas.contains(new String("0"))){
-                amesas = new ArrayList<String>();
-                for(Integer key: deps.keySet()){
-                    amesas.add(key.toString());
+            String mesas;
+            List<String> amesas = null;
+            if (elecs != null) {
+                mesas = elecs.get(nelec).get("mesas");
+                amesas = new ArrayList<>(Arrays.asList(mesas.split(";")));
+
+                if(amesas.contains("0")){
+                    amesas = new ArrayList<>();
+                    for(Integer key: deps.keySet()){
+                        amesas.add(key.toString());
+                    }
                 }
             }
             System.out.println("PollingStations associated to the election:\n");
@@ -903,7 +1154,8 @@ public class AdminConsole {
                         System.out.println("." + deps.get(Integer.parseInt(mesa)));
                     }
                     catch(NumberFormatException e){
-                        ;
+                        // Couldn't parse
+                        // TODO
                     }
                 }
             }
@@ -915,29 +1167,36 @@ public class AdminConsole {
                 case 0:
                     break;
                 case 1:
-                    //TODO: addPollingStation(in, list_id);
                     addPollingStation(in, nelec, amesas);
                     break;
                 case 2:
-                    //TODO: removePollingStation(in, list_id);
                     removePollingStation(in, nelec, amesas);
                     break;
                 default:
                     System.out.println("Wrong option!");
                     break;
             }
-            
+
         }while (option!=0);
 
     }
 
-    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, InterruptedException{
+    /**
+     * interface to add a polling station to an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @param stations                  polling stations associated to the election
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    private static void addPollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException {
         int option;
         do{
-            
+
             HashMap<Integer,String> deps = db.getDepartments();
-            ArrayList<Integer> amesas = new ArrayList<Integer>();
+            ArrayList<Integer> amesas = new ArrayList<>();
             System.out.println("Which polling station would you like to associate to the election?");
+
             int i = 1;
             if(deps != null){
                 for(Integer key : deps.keySet()){
@@ -951,7 +1210,7 @@ public class AdminConsole {
             System.out.print("0 - Back\noption: ");
             option = in.nextInt();
             in.nextLine();
-            if (option< 0 || option > amesas.size()){     //TODO: nmember > num de membros
+            if (option< 0 || option > amesas.size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
@@ -963,10 +1222,19 @@ public class AdminConsole {
 
     }
 
-    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException, InterruptedException{  
+
+    /**
+     * interface to add a polling station to an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @param stations                  polling stations associated to the election
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    private static void removePollingStation(Scanner in, int nelec,List<String> stations) throws RemoteException {
         int option;
         do{
-            
+
             HashMap<Integer,String> deps = db.getDepartments();
             int i = 1;
             System.out.println("Which polling station would you like to remove from the election?");
@@ -977,15 +1245,15 @@ public class AdminConsole {
                         i++;
                     }
                     catch(NumberFormatException e){
-                        ;
+                        //TODO
                     }
                 }
-                
+
             }
             System.out.print("0 - Back\noption: ");
             option = in.nextInt();
             in.nextLine();
-            if (option< 0 || option > stations.size()){     //TODO: nmember > num de membros
+            if (option< 0 || option > Objects.requireNonNull(stations).size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
@@ -998,10 +1266,20 @@ public class AdminConsole {
 
     }
 
+    /**
+     * interface to change properties of an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @throws RemoteException          when is not able to connect to RMI Server
+     * @throws InterruptedException     when interrupted
+     */
     private static void changeProperties(Scanner in, int nelec) throws RemoteException, InterruptedException{
-        
-        boolean isValid  = false;
+
+        boolean isValid;
         int option;
+
+        //gets info of election
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         HashMap<Integer,HashMap<String,String>> elecs = db.getElections(null, null);
         HashMap<String,String> elec = elecs.get(nelec);
@@ -1014,20 +1292,24 @@ public class AdminConsole {
 
         do{
             System.out.println(
-            "\ntitle: " + title +
-            "\ndescription: " + description +
-            "\nstart: " + start_time.toString() +
-            "\nend: " + end_time.toString()
+                    "\ntitle: " + title +
+                    "\ndescription: " + description +
+                    "\nstart: " + start_time.toString() +
+                    "\nend: " + end_time.toString()
             );
 
-            System.out.print("1 - Change Title\n2 - Change Description\n3 - Change Start Date\n4- Change End Date\n5- Change who is able to vote\n0 - Back\noption: ");
+            System.out.print("1 - Change Title\n2 - Change Description\n3 - Change Start Date and Time\n4- Change End Date and Time\n5- Change who is able to vote\n0 - Back\noption: ");
 
             option = in.nextInt();
             in.nextLine();
 
             switch (option){
+
+                //Back
                 case 0:
                     break;
+
+                //Change Title
                 case 1:
                     System.out.print("\nNew election title: ");
                     title = in.nextLine();
@@ -1036,6 +1318,8 @@ public class AdminConsole {
                     }
                     db.editElection(nelec, false, title, null, null, null, null, null, null);
                     break;
+
+                //Change Description
                 case 2:
                     System.out.print("\nElection description: ");
                     description = in.nextLine();
@@ -1044,6 +1328,8 @@ public class AdminConsole {
                     }
                     db.editElection(nelec, false, null, description, null, null, null, null, null);
                     break;
+
+                //Change Start Date and Time
                 case 3:
                     isValid = false;
                     do{
@@ -1066,6 +1352,8 @@ public class AdminConsole {
                     }while(!isValid);
                     db.editElection(nelec, false, null, null, start_time, null, null, null, null);
                     break;
+
+                //Change End Date and Time
                 case 4:
                     isValid = false;
                     do{
@@ -1090,9 +1378,12 @@ public class AdminConsole {
                     }while(!isValid);
                     db.editElection(nelec, false, null, null, null, end_time, null, null, null);
                     break;
+
+                //Manage Voters
                 case 5:
                     manageVoters(in, nelec);
                     break;
+
                 default:
                     System.out.println("Wrong option!");
                     break;
@@ -1102,29 +1393,37 @@ public class AdminConsole {
 
     }
 
-    private static void manageVoters(Scanner in, int nelec) throws RemoteException, InterruptedException{
+    /**
+     * interface to manage who can vote in a certain election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    private static void manageVoters(Scanner in, int nelec) throws RemoteException {
         int option;
-       
+
         do{
+            //gets election
             HashMap<Integer,HashMap<String,String>> elecs = db.getElections(null, null);
             HashMap<Integer,String> deps = db.getDepartments();
             String depars = elecs.get(nelec).get("departamentos");
-            List<String> adeps= new ArrayList<String>(Arrays.asList(depars.split(";")));
-            if(adeps.contains(new String("0"))){
-                adeps = new ArrayList<String>();
+            // departments able to vote in election
+            List<String> adeps= new ArrayList<>(Arrays.asList(depars.split(";")));
+            if(adeps.contains("0")){
+                adeps = new ArrayList<>();
                 for(Integer key: deps.keySet()){
                     adeps.add(key.toString());
                 }
             }
             System.out.println("You can vote if you belong to one of the following departments:\n");
-            if(adeps != null){
-                for(String dep : adeps){
-                    try{
-                        System.out.println("." + deps.get(Integer.parseInt(dep)));
-                    }
-                    catch(NumberFormatException e){
-                        ;
-                    }
+            for(String dep : adeps){
+                try{
+                    System.out.println("." + deps.get(Integer.parseInt(dep)));
+                }
+                catch(NumberFormatException e){
+                    // TODO
+                    // Couldn't parse int
                 }
             }
             System.out.println("\n1 - Add department\n2 - Remove department\n0 - Back\noption: ");
@@ -1135,29 +1434,37 @@ public class AdminConsole {
                 case 0:
                     break;
                 case 1:
-                    //TODO: addPollingStation(in, list_id);
                     addDepartment(in, nelec, adeps);
                     break;
                 case 2:
-                    //TODO: removePollingStation(in, list_id);
                     removeDepartment(in, nelec, adeps);
                     break;
                 default:
                     System.out.println("Wrong option!");
                     break;
             }
-            
+
         }while (option!=0);
 
     }
 
-    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, InterruptedException{
+    /**
+     * interface to add a department to be able to vote in an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @param departments               departments able to vote in election
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    private static void addDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException {
         int option;
         do{
-            
+
             HashMap<Integer,String> deps = db.getDepartments();
-            ArrayList<Integer> adeps = new ArrayList<Integer>();
+            ArrayList<Integer> adeps = new ArrayList<>();
             System.out.println("Which department do you wish to add to the election?");
+
+            //prints departments
             int i = 1;
             if(deps != null){
                 for(Integer key : deps.keySet()){
@@ -1169,9 +1476,12 @@ public class AdminConsole {
                 }
             }
             System.out.print("0 - Back\noption: ");
+
+            //reads inputted option
             option = in.nextInt();
             in.nextLine();
-            if (option< 0 || option > adeps.size()){     
+
+            if (option< 0 || option > adeps.size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
@@ -1183,13 +1493,24 @@ public class AdminConsole {
 
     }
 
-    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException, InterruptedException{  
+    /**
+     * interface to remove a department from the list of departments
+     * that are able to vote in an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @param departments               departments able to vote in election
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
+    private static void removeDepartment(Scanner in, int nelec,List<String> departments) throws RemoteException {
         int option;
         do{
-            
+            //gets departments
             HashMap<Integer,String> deps = db.getDepartments();
             int i = 1;
             System.out.println("Which department do you wish to remove from the election?");
+
+            //Prints departments that are able to vote in this election
             if(departments != null){
                 for(String station : departments){
                     try{
@@ -1197,16 +1518,17 @@ public class AdminConsole {
                         i++;
                     }
                     catch(NumberFormatException e){
-                        ;
+                        // TODO
+                        // Can't parse to int
                     }
-                    
+
                 }
-                
+
             }
             System.out.print("0 - Back\noption: ");
             option = in.nextInt();
             in.nextLine();
-            if (option< 0 || option > departments.size()){     //TODO: nmember > num de membros
+            if (option< 0 || option > Objects.requireNonNull(departments).size()){
                 System.out.println("Wrong option! Try Again...");
                 break;
             }
@@ -1219,9 +1541,16 @@ public class AdminConsole {
 
     }
 
+    /**
+     * Prints the results of an election
+     *
+     * @param in                        input Scanner
+     * @param nelec                     number of election in cause
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
     private static void checkResults(Scanner in, int nelec) throws RemoteException{
         HashMap<Integer,Pair<String,HashMap<Integer,Pair<String,Integer>>>> results = db.getResults(nelec);
-        
+
         if(results != null){
             int total = 0;
             HashMap<Integer,Pair<String,Integer>> lists = results.get(nelec).right;
@@ -1233,6 +1562,8 @@ public class AdminConsole {
             }
             DecimalFormat df = new DecimalFormat();
             df.setMaximumFractionDigits(2);
+
+            // Prints results
             for(Integer list : lists.keySet()){
                 System.out.println(lists.get(list).left + ": " + lists.get(list).right + " votos ("+df.format(lists.get(list).right*100/total)+"%)");
             }
@@ -1240,10 +1571,18 @@ public class AdminConsole {
         System.out.println("Press enter to continue...");
         in.nextLine();
     }
-    
+
+    /**
+     * Interface to print an user's voting history
+     *
+     * @param in                        input Scanner
+     * @throws RemoteException          when is not able to connect to RMI Server
+     */
     private static void getUserVotes(Scanner in) throws RemoteException{
+        //asks for username
         System.out.print("\nUsername: ");
         String username = in.nextLine();
+        
         HashMap<Integer,Pair<Integer,String>> votes = db.getUserVotes(username);
         HashMap<Integer,String> deps = db.getDepartments();
         HashMap<Integer,HashMap<String,String>> elecs = db.getElections(username, null);
