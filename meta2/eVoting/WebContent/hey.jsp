@@ -20,7 +20,8 @@
 	</c:choose>
 
 	<c:forEach items="${heyBean.allUsers}" var="value">
-		<c:out value="${value}" /><br>
+		<c:out value="${value}" />
+		<a href="<s:url action="sayHey" />">Say Hey!</a>
 	</c:forEach>
 
 	<p><a href="<s:url action="index" />">Start</a></p>

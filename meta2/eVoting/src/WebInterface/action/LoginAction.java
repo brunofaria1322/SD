@@ -5,6 +5,8 @@ package hey.action;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
+
+import java.rmi.RemoteException;
 import java.util.Map;
 import hey.model.HeyBean;
 
@@ -14,17 +16,19 @@ public class LoginAction extends ActionSupport implements SessionAware {
 	private String username = null, password = null;
 
 	@Override
-	public String execute() {
-		// any username is accepted without confirmation (should check using RMI)
-		if(this.username != null && !username.equals("")) {
+	public String execute() throws RemoteException {
+
+		if(this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
 			this.getHeyBean().setUsername(this.username);
 			this.getHeyBean().setPassword(this.password);
-			session.put("username", username);
-			session.put("loggedin", true); // this marks the user as logged in
-			return SUCCESS;
+
+			if(this.getHeyBean().getUserMatchesPassword()){
+				session.put("username", username);
+				session.put("loggedin", true); // this marks the user as logged in
+				return SUCCESS;
+			}
 		}
-		else
-			return LOGIN;
+		return LOGIN;
 	}
 	
 	public void setUsername(String username) {

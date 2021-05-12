@@ -12,14 +12,15 @@ import rmiserver.RMIServerInterface;
 
 public class HeyBean {
 	private RMIServerInterface server;
-	private String username; // username and password supplied by the user
-	private String password;
+	private String username;	// username supplied by the user
+	private String password;	// password supplied by the user
 
 	public HeyBean() {
 		try {
-			server = (RMIServerInterface) Naming.lookup("server");
+			server = (RMIServerInterface) Naming.lookup("//localhost:8000/server");
 		}
 		catch(NotBoundException|MalformedURLException|RemoteException e) {
+
 			e.printStackTrace(); // what happens *after* we reach this line?
 		}
 	}

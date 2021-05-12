@@ -1,0 +1,2 @@
+javac RMIServer.java
+java -cp *:. RMIServer
