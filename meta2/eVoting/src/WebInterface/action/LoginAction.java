@@ -1,16 +1,18 @@
 /**
  * Raul Barbosa 2014-11-07
  */
-package hey.action;
+package WebInterface.action;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
+import java.io.Serial;
 import java.rmi.RemoteException;
 import java.util.Map;
-import hey.model.HeyBean;
+import WebInterface.model.HeyBean;
 
 public class LoginAction extends ActionSupport implements SessionAware {
+	@Serial
 	private static final long serialVersionUID = 4L;
 	private Map<String, Object> session;
 	private String username = null, password = null;
