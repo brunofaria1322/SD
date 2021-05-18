@@ -9,7 +9,7 @@ import org.apache.struts2.interceptor.SessionAware;
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.util.Map;
-import WebInterface.model.HeyBean;
+import WebInterface.model.WebServer;
 
 public class LoginAction extends ActionSupport implements SessionAware {
 	@Serial
@@ -19,18 +19,23 @@ public class LoginAction extends ActionSupport implements SessionAware {
 
 	@Override
 	public String execute() throws RemoteException {
+		try {
+			if (this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
 
-		if(this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
-			this.getHeyBean().setUsername(this.username);
-			this.getHeyBean().setPassword(this.password);
-
-			if(this.getHeyBean().getUserMatchesPassword()){
-				session.put("username", username);
-				session.put("loggedin", true); // this marks the user as logged in
-				return SUCCESS;
+				if (this.getWebServer().getUserMatchesPassword(username, null, password)) {
+					session.put("username", username);
+					session.put("loggedin", true); // this marks the user as logged in
+					return SUCCESS;
+				}
 			}
+			return LOGIN;
 		}
-		return LOGIN;
+		catch (RemoteException e){
+			if(!getWebServer().connect()){
+				return ERROR;
+			}
+			return this.execute();
+		}
 	}
 	
 	public void setUsername(String username) {
@@ -41,14 +46,14 @@ public class LoginAction extends ActionSupport implements SessionAware {
 		this.password = password; // what about this input? 
 	}
 	
-	public HeyBean getHeyBean() {
-		if(!session.containsKey("heyBean"))
-			this.setHeyBean(new HeyBean());
-		return (HeyBean) session.get("heyBean");
+	public WebServer getWebServer() {
+		if(!session.containsKey("WebServer"))
+			this.setWebServer(new WebServer());
+		return (WebServer) session.get("WebServer");
 	}
 
-	public void setHeyBean(HeyBean heyBean) {
-		this.session.put("heyBean", heyBean);
+	public void setWebServer(WebServer WebServer) {
+		this.session.put("WebServer", WebServer);
 	}
 
 	@Override
