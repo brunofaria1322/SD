@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD-meta1.iml" filepath="$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD-meta1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/ProjetoSD_Final2.iml" filepath="$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/ProjetoSD_Final2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SD.iml" filepath="$PROJECT_DIR$/SD.iml" />
+    </modules>
+  </component>
+</project>

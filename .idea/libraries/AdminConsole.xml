@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="AdminConsole">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/meta1/AdminConsole.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

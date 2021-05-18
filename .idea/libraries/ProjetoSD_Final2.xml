@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="ProjetoSD_Final2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/MulticastServer.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/AdminConsole.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/VotingTerminal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Submissões/ProjetoSD-meta1/ProjetoSD_Final2/RMIServer.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
