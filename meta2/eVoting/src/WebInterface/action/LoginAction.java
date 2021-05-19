@@ -21,11 +21,17 @@ public class LoginAction extends ActionSupport implements SessionAware {
 	public String execute() throws RemoteException {
 		try {
 			if (this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
-
-				if (this.getWebServer().getUserMatchesPassword(username, null, password)) {
+				int login = this.getWebServer().login(username, password);
+				if (login == 1) {
 					session.put("username", username);
 					session.put("loggedin", true); // this marks the user as logged in
-					return SUCCESS;
+					return "voter";
+				}
+				else if(login == 2){
+					session.put("username", username);
+					session.put("loggedin", true); // this marks the user as logged in
+					session.put("admin",true);
+					return "admin";
 				}
 			}
 			//DEBUG
@@ -35,6 +41,7 @@ public class LoginAction extends ActionSupport implements SessionAware {
 		}
 		catch (RemoteException e){
 			if(!getWebServer().connect()){
+				System.out.println(e);
 				return ERROR;
 			}
 			return this.execute();
@@ -56,6 +63,7 @@ public class LoginAction extends ActionSupport implements SessionAware {
 	}
 
 	public void setWebServer(WebServer WebServer) {
+		WebServer.connect();
 		this.session.put("WebServer", WebServer);
 	}
 

@@ -29,7 +29,8 @@ public class WebServer {
 			readConfig();
 		}
 		catch (Exception e){
-			System.out.println("Unable to read config file");
+			System.out.println(e);
+			System.out.println(System.getProperty("user.dir"));
 		}
 	}
 
@@ -61,8 +62,8 @@ public class WebServer {
 	}
 
 
-	public boolean getUserMatchesPassword(String username, String num_cc, String password) throws RemoteException {
-		return db.login(username, num_cc, password);
+	public int login(String username, String password) throws RemoteException {
+		return db.login(username, password);
 	}
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password) throws java.rmi.RemoteException{
 		return db.createUser(cargo, ndep, nome, morada, telefone, numcc, valcc, username, password);

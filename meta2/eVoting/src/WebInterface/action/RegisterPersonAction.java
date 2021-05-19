@@ -46,6 +46,7 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	}
 
 	public void setWebServer(WebServer WebServer) {
+		WebServer.connect();
 		this.session.put("WebServer", WebServer);
 	}
 
