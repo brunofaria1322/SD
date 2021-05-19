@@ -21,7 +21,7 @@ body {
     z-index: 2;
 }
 
-.form-signin input, select {
+.form-signin input, select, textarea {
     margin-bottom: -1px;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;

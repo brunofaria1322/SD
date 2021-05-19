@@ -76,7 +76,6 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 		this.session.put("WebServer", WebServer);
 	}
 
-
 	public void setPersonType(String personType){
 		this.personType = personType;
 	}

@@ -1,13 +1,13 @@
 
 package WebInterface.action;
 
+import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.util.Map;
-import WebInterface.model.WebServer;
 
 public class LoginAction extends ActionSupport implements SessionAware {
 	@Serial

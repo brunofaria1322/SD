@@ -41,11 +41,21 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/registerPerson.jsp</result>
         </action>
 
-        <action name="createElectionAction">
-            <result>/jsp/logIn.jsp</result>
+        <action name="registerPersonAction" class="WebInterface.action.RegisterPersonAction" method="execute">
+            <result name="success" >/jsp/adminIndex.jsp</result>
+            <result name="none" >/jsp/createElection.jsp</result>
         </action>
 
-        <action name="manageElectionAction">
+        <action name="createElection" class="WebInterface.action.CreateElectionAction" method="display">
+            <result name="none" >/jsp/createElection.jsp</result>
+        </action>
+
+        <action name="createElectionAction">
+            <result name="success" >/jsp/adminIndex.jsp</result>
+            <result name="none" >/jsp/createElection.jsp</result>
+        </action>
+
+        <action name="manageElection">
             <result>/jsp/logIn.jsp</result>
         </action>
 

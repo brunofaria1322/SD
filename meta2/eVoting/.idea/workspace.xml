@@ -6,7 +6,18 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="" />
+    <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WebContent/jsp/createElection.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WebInterface/action/CreateElectionAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/styles/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/styles/forms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/struts.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,28 +45,25 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebContent/WEB-INF/lib" />
-    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebContent/jsp" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.23444444" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.applicationServers" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="F:\GitHub\SD\meta2\eVoting\WebContent\jsp" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="WebInterface.action" />
+    </key>
+  </component>
   <component name="RunManager">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Tomcat 8.5.65" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 8.5.65" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
-      <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/WebInterface/" />
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
         <artifact name="WebInterface">
@@ -66,6 +74,7 @@
       </deployment>
       <server-settings>
         <option name="BASE_DIRECTORY_NAME" value="11cddf0d-e7e2-444d-b699-2cfc25a5fa1d" />
+        <option name="DEPLOY_TOMCAT_APPS" value="true" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -151,7 +160,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1621395566971</updated>
-      <workItem from="1621395569274" duration="10159000" />
+      <workItem from="1621395569274" duration="11745000" />
+      <workItem from="1621438270479" duration="12343000" />
     </task>
     <servers />
   </component>
@@ -168,5 +178,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
