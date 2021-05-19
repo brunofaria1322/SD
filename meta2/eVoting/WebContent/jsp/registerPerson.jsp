@@ -14,18 +14,20 @@
 		<s:form action="registerPersonAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Register Person</h1>
 			<s:div cssClass="form-floating">
-				<s:select headerKey="-1" headerValue="Select Statute"
+				<s:select
 						  list="personTypes"
 						  name="personType"
-						  cssClass="form-select"/>
+						  cssClass="form-select"
+						  required="required"/>
 				<label class="floatingInput">What's the person's statute</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
-				<s:select headerKey="-1" headerValue="Select Department"
+				<s:select
 						  list="departments"
 						  name="department"
-						  cssClass="form-select"/>
+						  cssClass="form-select"
+						  required="required"/>
 				<label class="floatingInput">What's the person's department</label>
 			</s:div>
 
@@ -33,7 +35,8 @@
 				<s:textfield
 						placeholder="Name"
 						name="name"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingInput">Name</label>
 			</s:div>
 
@@ -41,31 +44,39 @@
 				<s:textfield
 						placeholder="Address"
 						name="address"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingInput">Address</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
 				<s:textfield
+						type="number"
 						placeholder="Phone Number"
 						name="phoneNo"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingInput">Phone Number</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
 				<s:textfield
+						type="number"
 						placeholder="CC Number"
 						name="ccNo"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingInput">CC Number</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
 				<s:textfield
+						type="date"
 						placeholder="CC Expiration Date"
 						name="ccExpDate"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
+
 				<label class="floatingInput">CC Expiration Date</label>
 			</s:div>
 
@@ -73,7 +84,8 @@
 				<s:textfield
 						placeholder="Username"
 						name="username"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingInput">Username</label>
 			</s:div>
 
@@ -81,7 +93,8 @@
 				<s:password
 						placeholder="Password"
 						name="password"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingPassword">Password</label>
 			</s:div>
 
@@ -89,7 +102,8 @@
 				<s:password
 						placeholder="repeat Password"
 						name="repeatedPassword"
-						cssClass="form-control"/>
+						cssClass="form-control"
+						required="required"/>
 				<label class="floatingPassword">Repeat Password</label>
 			</s:div>
 			<s:submit cssClass="w-100 btn btn-lg btn-primary"/>
