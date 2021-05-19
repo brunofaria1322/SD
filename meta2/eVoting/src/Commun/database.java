@@ -73,7 +73,7 @@ public interface database extends Remote {
      * @return Whether a user was found for the given parameters or not.
      * @throws java.rmi.RemoteException if a communication-related exception occurs.
      */
-    public boolean login(String username, String num_cc, String password) throws java.rmi.RemoteException;
+    public int login(String username, String password) throws java.rmi.RemoteException;
     /**
      * Inserts a new election into the database.
      * <ul>
@@ -250,4 +250,5 @@ public interface database extends Remote {
      * @throws java.rmi.RemoteException if a communication-related exception occurs.
      */
     public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException;
+    public void setAdmin(Admin admin)throws java.rmi.RemoteException;
 }

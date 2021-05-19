@@ -17,7 +17,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         <default-action-ref name="signIn" />
 
         <global-results>
-            <result name="error">/error.jsp</result>
+            <result name="error">/jsp/error.jsp</result>
         </global-results>
 
         <!-- all exceptions not caught by the application will lead to error.jsp -->
@@ -34,7 +34,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         <action name="login" class="WebInterface.action.LoginAction" method="execute">
             <result name="admin">/jsp/adminIndex.jsp</result>
             <result name="voter">/jsp/adminIndex.jsp</result>
-            <result name="login">/signIn.jsp</result>
+            <result name="login">jsp/signIn.jsp</result>
         </action>
 
         <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
