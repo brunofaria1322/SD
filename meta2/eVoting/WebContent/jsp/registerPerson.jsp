@@ -17,7 +17,7 @@
 				<s:select headerKey="-1" headerValue="Select Statute"
 						  list="personTypes"
 						  name="personType"
-						  value="defaultPersonType"/>
+						  cssClass="form-select"/>
 				<label class="floatingInput">What's the person's statute</label>
 			</s:div>
 
@@ -25,7 +25,7 @@
 				<s:select headerKey="-1" headerValue="Select Department"
 						  list="departments"
 						  name="department"
-						  value="defaultdepartment"/>
+						  cssClass="form-select"/>
 				<label class="floatingInput">What's the person's department</label>
 			</s:div>
 
@@ -51,14 +51,6 @@
 						name="phoneNo"
 						cssClass="form-control"/>
 				<label class="floatingInput">Phone Number</label>
-			</s:div>
-
-			<s:div cssClass="form-floating">
-				<s:textfield
-						placeholder="CC Number"
-						name="ccNo"
-						cssClass="form-control"/>
-				<label class="floatingInput">CC Number</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">

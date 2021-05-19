@@ -6,22 +6,28 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="36d6f62f-bf17-454a-80dc-5e325313c2bc" name="Default Changelist" comment="" />
+    <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/registPerson.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/registerPerson.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/styles/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/styles/forms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eVoting.iml" beforeDir="false" afterPath="$PROJECT_DIR$/eVoting.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/LoginAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/LoginAction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/struts.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
-  </component>
-  <component name="GitSEFilterConfiguration">
-    <file-type-list>
-      <filtered-out-file-type name="LOCAL_BRANCH" />
-      <filtered-out-file-type name="REMOTE_BRANCH" />
-      <filtered-out-file-type name="TAG" />
-      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
-    </file-type-list>
   </component>
   <component name="LogFilters">
     <option name="FILTER_ERRORS" value="false" />
@@ -30,7 +36,7 @@
     <option name="FILTER_DEBUG" value="true" />
     <option name="CUSTOM_FILTER" />
   </component>
-  <component name="ProjectId" id="1sQfqrFSiP5aEuMNPQsA1A4AUul" />
+  <component name="ProjectId" id="1sjosGF1XKSk1K8g03g1TEdlRVD" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -41,32 +47,20 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebContent/jsp" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/WebContent/WEB-INF/lib" />
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.applicationServers" />
   </component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="F:\GitHub\SD\meta2\eVoting\WebContent\jsp" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="F:\GitHub\SD\meta2\eVoting\WebContent\styles" />
-      <recent name="F:\GitHub\SD\meta2\eVoting\WebContent\jsp" />
-      <recent name="F:\GitHub\SD\meta2\eVoting\WebContent" />
-    </key>
-  </component>
   <component name="RunManager">
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -82,7 +76,7 @@
         </artifact>
       </deployment>
       <server-settings>
-        <option name="BASE_DIRECTORY_NAME" value="632a9ead-368a-43c1-ad4b-6c6f84e78eb1" />
+        <option name="BASE_DIRECTORY_NAME" value="11cddf0d-e7e2-444d-b699-2cfc25a5fa1d" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -90,7 +84,7 @@
       <predefined_log_file id="Tomcat Host Manager" />
       <predefined_log_file id="Tomcat Localhost Access" />
       <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="65517" />
+        <option name="DEBUG_PORT" value="55636" />
       </RunnerSettings>
       <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Cover">
         <option name="USE_ENV_VARIABLES" value="true" />
@@ -163,13 +157,12 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="36d6f62f-bf17-454a-80dc-5e325313c2bc" name="Default Changelist" comment="" />
-      <created>1620809930138</created>
+      <changelist id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="" />
+      <created>1621395566971</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1620809930138</updated>
-      <workItem from="1620809931376" duration="19547000" />
-      <workItem from="1621347512513" duration="11328000" />
+      <updated>1621395566971</updated>
+      <workItem from="1621395569274" duration="6444000" />
     </task>
     <servers />
   </component>
@@ -186,6 +179,5 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

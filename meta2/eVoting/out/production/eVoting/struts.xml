@@ -37,7 +37,8 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="login">/jsp/logIn.jsp</result>
         </action>
 
-        <action name="registerPersonAction">
+        <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
+            <result name="none" >/jsp/registerPerson.jsp</result>
         </action>
 
         <action name="createElectionAction">
