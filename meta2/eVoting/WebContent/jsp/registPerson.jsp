@@ -11,7 +11,7 @@
 </head>
 <body class = "text-center">
 	<main class="form-signin">
-		<s:form action="registerPerson" method="post">
+		<s:form action="registerPersonAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Register Person</h1>
 			<s:div cssClass="form-floating">
 				<s:select headerKey="-1" headerValue="Select Statute"
@@ -19,6 +19,62 @@
 						  name="personType"
 						  value="defaultPersonType"/>
 				<label class="floatingInput">What's the person's statute</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:select headerKey="-1" headerValue="Select Department"
+						  list="departments"
+						  name="department"
+						  value="defaultdepartment"/>
+				<label class="floatingInput">What's the person's department</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="Name"
+						name="name"
+						cssClass="form-control"/>
+				<label class="floatingInput">Name</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="Address"
+						name="address"
+						cssClass="form-control"/>
+				<label class="floatingInput">Address</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="Phone Number"
+						name="phoneNo"
+						cssClass="form-control"/>
+				<label class="floatingInput">Phone Number</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="CC Number"
+						name="ccNo"
+						cssClass="form-control"/>
+				<label class="floatingInput">CC Number</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="CC Number"
+						name="ccNo"
+						cssClass="form-control"/>
+				<label class="floatingInput">CC Number</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:textfield
+						placeholder="CC Expiration Date"
+						name="ccExpDate"
+						cssClass="form-control"/>
+				<label class="floatingInput">CC Expiration Date</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
@@ -35,6 +91,14 @@
 						name="password"
 						cssClass="form-control"/>
 				<label class="floatingPassword">Password</label>
+			</s:div>
+
+			<s:div cssClass="form-floating">
+				<s:password
+						placeholder="repeat Password"
+						name="repeatedPassword"
+						cssClass="form-control"/>
+				<label class="floatingPassword">Repeat Password</label>
 			</s:div>
 			<s:submit cssClass="w-100 btn btn-lg btn-primary"/>
 		</s:form>

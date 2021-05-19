@@ -4,45 +4,54 @@
 and should reside on the classpath of the webapp (generally /WEB-INF/classes). -->
 
 <!DOCTYPE struts PUBLIC
-    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
-    "http://struts.apache.org/dtds/struts-2.0.dtd">
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
 
 <struts>
+    <!-- devMode equals debug information and reload everything for every request -->
+    <constant name="struts.devMode" value="true" />
+    <constant name="struts.ui.theme" value="simple" />
 
-  <!-- devMode equals debug information and reload everything for every request -->
-  <constant name="struts.devMode" value="true" />
-  <constant name="struts.ui.theme" value="simple" />
+    <package name="WebInterface" extends="struts-default">
 
-  <package name="WebInterface" extends="struts-default">
-	
-	<default-action-ref name="index" />
-	
-	<global-results>
-		<result name="error">/error.jsp</result>
-	</global-results>
+        <default-action-ref name="logIn" />
 
-	<!-- all exceptions not caught by the application will lead to error.jsp -->
-	<global-exception-mappings>
-		<exception-mapping exception="java.lang.Exception" result="error" />
-	</global-exception-mappings>
+        <global-results>
+            <result name="error">/jsp/error.jsp</result>
+        </global-results>
 
-	<!-- 'index' action leads to the view provided by signIn.jsp -->
-    <action name="index">
-      <result>/jsp/signIn.jsp</result>
-    </action>
+        <!-- all exceptions not caught by the application will lead to error.jsp -->
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error" />
+        </global-exception-mappings>
 
-	<!-- 'login' action calls 'execute' in 'LoginAction' -->
-    <action name="login" class="WebInterface.action.LoginAction" method="execute">
-      <result name="success">/hey.jsp</result>
-      <result name="login">/index.jsp</result>
-    </action>
+        <!-- 'logIn' action leads to the view provided by logIn.jsp -->
+        <action name="logIn">
+            <result>/jsp/logIn.jsp</result>
+        </action>
 
-      <!-- 'sayHey' action calls 'execute' in 'SayHeyAction' -->
-      <action name="sayHey" class="WebInterface.action.SayHeyAction" method="execute">
-          <result name="success">/hey.jsp</result>
-          <result name="login">/index.jsp</result>
-      </action>
+        <!-- 'signInAction' action calls 'execute' in 'LoginAction' -->
+        <action name="logInAction" class="WebInterface.action.LoginAction" method="execute">
+            <result name="admin">/jsp/adminIndex.jsp</result>
+            <result name="voter">/jsp/adminIndex.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
+        </action>
 
-  </package>
+        <action name="registerPersonAction">
+        </action>
+
+        <action name="createElectionAction">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="manageElectionAction">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="checkUsersVotingHistoryAction">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+    </package>
 
 </struts>

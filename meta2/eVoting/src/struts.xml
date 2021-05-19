@@ -14,10 +14,10 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
     <package name="WebInterface" extends="struts-default">
 
-        <default-action-ref name="signIn" />
+        <default-action-ref name="logIn" />
 
         <global-results>
-            <result name="error">/error.jsp</result>
+            <result name="error">/jsp/error.jsp</result>
         </global-results>
 
         <!-- all exceptions not caught by the application will lead to error.jsp -->
@@ -25,20 +25,31 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <exception-mapping exception="java.lang.Exception" result="error" />
         </global-exception-mappings>
 
-        <!-- 'signIn' action leads to the view provided by signIn.jsp -->
-        <action name="signIn">
-            <result>/jsp/signIn.jsp</result>
+        <!-- 'logIn' action leads to the view provided by logIn.jsp -->
+        <action name="logIn">
+            <result>/jsp/logIn.jsp</result>
         </action>
 
-        <!-- 'login' action calls 'execute' in 'LoginAction' -->
-        <action name="login" class="WebInterface.action.LoginAction" method="execute">
+        <!-- 'signInAction' action calls 'execute' in 'LoginAction' -->
+        <action name="logInAction" class="WebInterface.action.LoginAction" method="execute">
             <result name="admin">/jsp/adminIndex.jsp</result>
             <result name="voter">/jsp/adminIndex.jsp</result>
-            <result name="login">/signIn.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
-        <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
-            <result name="none">pages/select.jsp</result>
+        <action name="registerPersonAction">
+        </action>
+
+        <action name="createElectionAction">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="manageElectionAction">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="checkUsersVotingHistoryAction">
+            <result>/jsp/logIn.jsp</result>
         </action>
 
     </package>

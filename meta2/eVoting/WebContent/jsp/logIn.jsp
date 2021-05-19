@@ -11,7 +11,7 @@
 </head>
 <body class = "text-center">
 	<main class="form-signin">
-		<s:form action="login" method="post">
+		<s:form action="logInAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 			<s:div cssClass="form-floating">
 				<s:textfield

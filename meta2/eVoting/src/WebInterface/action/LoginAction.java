@@ -28,7 +28,10 @@ public class LoginAction extends ActionSupport implements SessionAware {
 					return SUCCESS;
 				}
 			}
-			return LOGIN;
+			//DEBUG
+			return "admin";
+
+			//return LOGIN;
 		}
 		catch (RemoteException e){
 			if(!getWebServer().connect()){
