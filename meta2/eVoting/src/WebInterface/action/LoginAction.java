@@ -1,13 +1,17 @@
-
+/**
+ * Raul Barbosa 2014-11-07
+ */
 package WebInterface.action;
 
-import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.util.Map;
+import WebInterface.model.WebServer;
 
 public class LoginAction extends ActionSupport implements SessionAware {
 	@Serial
@@ -18,6 +22,8 @@ public class LoginAction extends ActionSupport implements SessionAware {
 	@Override
 	public String execute() throws RemoteException {
 		try {
+			getWebServer().readConfig();
+			getWebServer().connect();
 			if (this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
 				int login = this.getWebServer().login(username, password);
 				if (login == 1) {
@@ -37,10 +43,11 @@ public class LoginAction extends ActionSupport implements SessionAware {
 
 			//return LOGIN;
 		}
-		catch (RemoteException e){
+		catch (Exception e){
 			if(!getWebServer().connect()){
 				System.out.println(e);
-				return ERROR;
+				session.put("error","The server is down. Sorry...");
+				return "none";
 			}
 			return this.execute();
 		}
@@ -54,14 +61,13 @@ public class LoginAction extends ActionSupport implements SessionAware {
 		this.password = password; // what about this input? 
 	}
 	
-	public WebServer getWebServer() {
+	public WebServer getWebServer() throws RemoteException {
 		if(!session.containsKey("WebServer"))
 			this.setWebServer(new WebServer());
 		return (WebServer) session.get("WebServer");
 	}
 
 	public void setWebServer(WebServer WebServer) {
-		WebServer.connect();
 		this.session.put("WebServer", WebServer);
 	}
 
