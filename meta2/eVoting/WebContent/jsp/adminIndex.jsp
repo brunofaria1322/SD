@@ -10,9 +10,11 @@
 	<title>Admin</title>
 </head>
 <body class="text-center">
-	<a href="<s:url action="registerPerson"/>">Register Person </a>
-	<a href="<s:url action="createElection"/>">Create Election </a>
-	<a href="<s:url action="chooseElection"/>">Manage Election </a>
-	<a href="<s:url action="checkUsersVotingHistory"/>">Check User's Voting History </a>
+	<main class="form-signin">
+		<a href="<s:url action="registerPerson"/>" class="w-100 btn btn-lg btn-secondary">Register Person</a>
+		<a href="<s:url action="createElection"/>" class="w-100 btn btn-lg btn-secondary">Create Election </a>
+		<a href="<s:url action="chooseElection"/>" class="w-100 btn btn-lg btn-secondary">Manage Election </a>
+		<a href="<s:url action="checkUsersVotingHistory"/>" class="w-100 btn btn-lg btn-secondary">Check User's Voting History </a>
+	</main>
 </body>
 </html>

@@ -43,7 +43,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <action name="registerPersonAction" class="WebInterface.action.RegisterPersonAction" method="execute">
             <result name="success" >/jsp/adminIndex.jsp</result>
-            <result name="none" >/jsp/createElection.jsp</result>
+            <result name="none" >/jsp/registerPerson.jsp</result>
         </action>
 
         <action name="createElection" class="WebInterface.action.CreateElectionAction" method="display">
@@ -55,8 +55,12 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/createElection.jsp</result>
         </action>
 
-        <action name="manageElection">
-            <result>/jsp/logIn.jsp</result>
+        <action name="chooseElection" class="WebInterface.action.ChooseElectionAction" method="display">
+            <result name="none" >/jsp/chooseElection.jsp</result>
+        </action>
+
+        <action name="manageElection" class="WebInterface.action.ManageElectionAction" method="execute">
+            <result name="none" >/jsp/chooseElection.jsp</result>
         </action>
 
         <action name="checkUsersVotingHistoryAction">
