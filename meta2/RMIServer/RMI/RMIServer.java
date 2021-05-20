@@ -18,11 +18,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +41,7 @@ import java.rmi.registry.Registry;
 import Commun.database;
 import Commun.database.Pair;
 import Commun.Admin;
+import Commun.Web;
 /**
  * Thread that changes messages with a possible secondary RMI server via a Datagram Socket.
  *
@@ -146,6 +144,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	private static String RMI_ADDRESS;
 	private static final long serialVersionUID = -5368081680660901104L;
 	private Admin admin;
+	private Set<Web> webusers = new CopyOnWriteArraySet<>();
 	/**
 	 * The session with the database.
 	 */
@@ -703,6 +702,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 					if(admin!=null){
 						admin.change();
 					}
+					for(Web web : webusers){
+						web.change();
+					}
 					return 1;
 				}
 				else{
@@ -994,6 +996,9 @@ public class RMIServer extends UnicastRemoteObject implements database{
 		if(admin!=null){
 			admin.change();
 		}
+		for(Web web : webusers){
+			web.change();
+		}
 	}
 	public HashMap<String,Pair<Integer,Integer>> getActiveStationStatus() throws java.rmi.RemoteException{
 		HashMap<String,Pair<Integer,Integer>> out = new HashMap<String,Pair<Integer,Integer>>();
@@ -1006,5 +1011,11 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	}
 	public void setAdmin(Admin admin) throws java.rmi.RemoteException{
 		this.admin = admin;
+	}
+	public void setWeb(Web web) throws java.rmi.RemoteException{
+		this.webusers.add(web);
+	}
+	public void removeWeb(Web web) throws java.rmi.RemoteException{
+		this.webusers.remove(web);
 	}
 }
