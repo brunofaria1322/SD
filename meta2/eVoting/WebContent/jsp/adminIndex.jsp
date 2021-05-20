@@ -12,7 +12,7 @@
 <body class="text-center">
 	<a href="<s:url action="registerPerson"/>">Register Person </a>
 	<a href="<s:url action="createElection"/>">Create Election </a>
-	<a href="<s:url action="manageElection"/>">Manage Election </a>
+	<a href="<s:url action="chooseElection"/>">Manage Election </a>
 	<a href="<s:url action="checkUsersVotingHistory"/>">Check User's Voting History </a>
 </body>
 </html>

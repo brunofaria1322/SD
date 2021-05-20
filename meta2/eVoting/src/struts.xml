@@ -55,7 +55,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/createElection.jsp</result>
         </action>
 
-        <action name="manageElection">
+        <action name="chooseElection">
             <result>/jsp/logIn.jsp</result>
         </action>
 
