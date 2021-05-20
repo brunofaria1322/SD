@@ -7,21 +7,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/WebSocket_1_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/com_google_code_gson_gson_2_8_6.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/styles/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/styles/forms.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eVoting.iml" beforeDir="false" afterPath="$PROJECT_DIR$/eVoting.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/Admin.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/database$Pair.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/database.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/LoginAction.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/model/WebServer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/struts.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +92,7 @@
       <server-settings>
         <option name="BASE_DIRECTORY_NAME" value="11cddf0d-e7e2-444d-b699-2cfc25a5fa1d" />
         <option name="DEPLOY_TOMCAT_APPS" value="true" />
+        <option name="JNDI_PORT" value="1100" />
       </server-settings>
       <predefined_log_file enabled="true" id="Tomcat" />
       <predefined_log_file enabled="true" id="Tomcat Catalina" />
@@ -193,7 +181,7 @@
       <workItem from="1621395569274" duration="11745000" />
       <workItem from="1621438270479" duration="19397000" />
       <workItem from="1621483386202" duration="423000" />
-      <workItem from="1621521311464" duration="8719000" />
+      <workItem from="1621521311464" duration="10154000" />
     </task>
     <servers />
   </component>

@@ -3,15 +3,13 @@
  */
 package WebInterface.action;
 
+import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.util.Map;
-import WebInterface.model.WebServer;
 
 public class LoginAction extends ActionSupport implements SessionAware {
 	@Serial
@@ -21,6 +19,10 @@ public class LoginAction extends ActionSupport implements SessionAware {
 
 	@Override
 	public String execute() throws RemoteException {
+		//DEBUG:
+		return "admin";
+		/*
+
 		try {
 			getWebServer().readConfig();
 			getWebServer().connect();
@@ -38,10 +40,8 @@ public class LoginAction extends ActionSupport implements SessionAware {
 					return "admin";
 				}
 			}
-			//DEBUG
-			return "admin";
 
-			//return LOGIN;
+			return LOGIN;
 		}
 		catch (Exception e){
 			if(!getWebServer().connect()){
@@ -51,6 +51,8 @@ public class LoginAction extends ActionSupport implements SessionAware {
 			}
 			return this.execute();
 		}
+
+	*/
 	}
 	
 	public void setUsername(String username) {
