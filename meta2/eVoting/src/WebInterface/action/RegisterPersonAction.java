@@ -1,12 +1,9 @@
-/**
- * Raul Barbosa 2014-11-07
- */
+
 package WebInterface.action;
 
 import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 
 import java.io.Serial;
 import java.rmi.RemoteException;

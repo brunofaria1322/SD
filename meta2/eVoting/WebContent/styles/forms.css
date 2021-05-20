@@ -27,6 +27,6 @@ body {
     border-bottom-left-radius: 0;
 }
 
-.form-signin input[type="submit"] {
+.btn, input[type="submit"] {
     margin-top: 10px;
 }

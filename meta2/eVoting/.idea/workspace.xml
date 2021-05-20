@@ -7,14 +7,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/WebContent/jsp/manageElection.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/WebInterface/action/ManageElectionAction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/WebSocket_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/com_google_code_gson_gson_2_8_6.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/chooseElection.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/chooseElection.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/styles/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/styles/forms.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eVoting.iml" beforeDir="false" afterPath="$PROJECT_DIR$/eVoting.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/Admin.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/database$Pair.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/Commun/database.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/LoginAction.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/RegisterPersonAction.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/model/WebServer.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/eVoting/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/struts.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ChooseElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ChooseElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,6 +82,17 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Tomcat 8.5.65" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 8.5.65" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
       <option name="UPDATING_POLICY" value="restart-server" />
       <deployment>
@@ -175,7 +193,7 @@
       <workItem from="1621395569274" duration="11745000" />
       <workItem from="1621438270479" duration="19397000" />
       <workItem from="1621483386202" duration="423000" />
-      <workItem from="1621521311464" duration="7726000" />
+      <workItem from="1621521311464" duration="8719000" />
     </task>
     <servers />
   </component>

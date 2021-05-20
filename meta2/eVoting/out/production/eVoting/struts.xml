@@ -60,7 +60,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         </action>
 
         <action name="manageElection" class="WebInterface.action.ManageElectionAction" method="execute">
-            <result name="none" >/jsp/chooseElection.jsp</result>
+            <result name="none" >/jsp/manageElection.jsp</result>
         </action>
 
         <action name="checkUsersVotingHistoryAction">

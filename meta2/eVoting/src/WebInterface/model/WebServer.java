@@ -3,31 +3,29 @@
  */
 package WebInterface.model;
 
+import Commun.Web;
+import Commun.database;
+import com.google.gson.Gson;
+
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.net.MalformedURLException;
-import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.websocket.server.ServerEndpoint;
-import javax.websocket.OnOpen;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnError;
-import javax.websocket.Session;
-
-import Commun.Web;
-import Commun.database;
-import com.google.gson.Gson;
 
 @ServerEndpoint(value = "/ws")
 public class WebServer extends UnicastRemoteObject implements Web {

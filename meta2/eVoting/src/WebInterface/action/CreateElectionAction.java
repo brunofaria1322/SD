@@ -50,9 +50,10 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 		return NONE;
 	}
 
-	public WebServer getWebServer() {
-		if(!session.containsKey("WebServer"))
+	public WebServer getWebServer() throws RemoteException {
+		if(!session.containsKey("WebServer")) {
 			this.setWebServer(new WebServer());
+		}
 		return (WebServer) session.get("WebServer");
 	}
 
