@@ -7,34 +7,43 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.websocket.server.ServerEndpoint;
+import javax.websocket.OnOpen;
+import javax.websocket.OnClose;
+import javax.websocket.OnMessage;
+import javax.websocket.OnError;
+import javax.websocket.Session;
+
+import Commun.Web;
 import Commun.database;
+import com.google.gson.Gson;
 
-public class WebServer {
+@ServerEndpoint(value = "/ws")
+public class WebServer extends UnicastRemoteObject implements Web {
 	private static String RMI_PORT;
 	private static String RMI_ADDRESS;
 	static database db;
+	private HashMap<String, database.Pair<Integer,Integer>> stationsStatus;
+	private HashMap<String,HashMap<String,Integer>> votesPerStation;
+	private static final Set<WebServer> users = new CopyOnWriteArraySet<>();
+	private Session wsSession;
 
-	public WebServer() {
-		try {
-			readConfig();
-		}
-		catch (Exception e){
-			System.out.println(e);
-			System.out.println(System.getProperty("user.dir"));
-		}
+	public WebServer() throws RemoteException{
+		super();
 	}
 
-	private void readConfig() throws FileNotFoundException, IOException {
+	public void readConfig() throws FileNotFoundException, IOException {
 		Properties prop = new Properties();
 
 		InputStream is = new FileInputStream("config/Admin.config");
@@ -61,6 +70,10 @@ public class WebServer {
 		return ok;
 	}
 
+	public void callback() throws RemoteException {
+		WebServer wb = new WebServer();
+		db.setWeb(wb);
+	}
 
 	public int login(String username, String password) throws RemoteException {
 		return db.login(username, password);
@@ -107,4 +120,48 @@ public class WebServer {
 	public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException{
 		db.changeActiveStationStatus(ndep, availableTerms, beingUsedTerms);
 	}
+
+	public void change() throws RemoteException{
+		try{
+			this.stationsStatus = db.getActiveStationStatus();
+			this.votesPerStation = db.getNumberVotesPerStation();
+			HashMap<String,Object> hm = new HashMap<String,Object>();
+			hm.put("stations",stationsStatus);
+			hm.put("votes",votesPerStation);
+			for(WebServer web: users){
+				try {
+					web.wsSession.getBasicRemote().sendText(new Gson().toJson(hm));
+				} catch (IOException e) {
+					// clean up once the WebSocket connection is closed
+					try {
+						this.wsSession.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		}
+		catch (RemoteException e) {
+			connect();
+		}
+
+	}
+
+	@OnOpen
+	public void start(Session session) {
+		this.wsSession = session;
+		users.add(this);
+	}
+
+	@OnClose
+	public void end() {
+		// clean up once the WebSocket connection is closed
+		users.remove(this);
+	}
+
+	@OnError
+	public void handleError(Throwable t) {
+		t.printStackTrace();
+	}
+
 }

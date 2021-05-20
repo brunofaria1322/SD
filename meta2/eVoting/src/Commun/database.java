@@ -251,4 +251,6 @@ public interface database extends Remote {
      */
     public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException;
     public void setAdmin(Admin admin)throws java.rmi.RemoteException;
+    public void setWeb(Web web)throws java.rmi.RemoteException;
+    public void removeWeb(Web web)throws java.rmi.RemoteException;
 }
