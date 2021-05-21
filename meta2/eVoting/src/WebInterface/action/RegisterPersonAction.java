@@ -84,7 +84,7 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 
 	public void setPersonTypes(List<String> personTypes) { this.personTypes = personTypes; }
 	public List<String> getPersonTypes() { return personTypes; }
-	
+
 	public void setNdep(int ndep){ this.ndep = ndep;}
 	public int getNdep(){ return ndep;}
 

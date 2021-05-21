@@ -41,21 +41,21 @@
 					</s:form>
 					<s:form action="changeElectionPropreties" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Change properties"/>
+						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
 					</s:form>
 				</s:if>
 				<!-- Election is currently active -->
 				<s:elseif test="%{#estado==2}">
 					<s:form action="changeElectionPropreties" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="btn btn-primary" value="Change properties"/>
+						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
 					</s:form>
 				</s:elseif>
 				<!-- Election has finished -->
 				<s:elseif test="%{#estado==3}">
 					<s:form action="checkElectionResults" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="btn btn-primary" value="Check Results"/>
+						<s:submit cssClass="list-group-item list-group-item-action" value="Check Results"/>
 					</s:form>
 				</s:elseif>
 			</div>
