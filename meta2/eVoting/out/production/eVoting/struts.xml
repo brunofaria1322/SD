@@ -39,6 +39,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
             <result name="none" >/jsp/registerPerson.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="registerPersonAction" class="WebInterface.action.RegisterPersonAction" method="execute">
@@ -48,6 +49,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <action name="createElection" class="WebInterface.action.CreateElectionAction" method="display">
             <result name="none" >/jsp/createElection.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="createElectionAction">
@@ -57,14 +59,27 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <action name="chooseElection" class="WebInterface.action.ChooseElectionAction" method="display">
             <result name="none" >/jsp/chooseElection.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="manageElection" class="WebInterface.action.ManageElectionAction" method="execute">
             <result name="success" >/jsp/manageElection.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="changeElectionProperties" class="WebInterface.action.ChangeElectionPropertiesAction" method="display">
+            <result name="none" >/jsp/changeElectionProperties.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
+        </action>
+
+        <action name="changeElectionPropertiesAction" class="WebInterface.action.ChangeElectionPropertiesAction" method="execute">
+            <result name="success" >/jsp/manageElection.jsp</result>
+            <result name="none" >/jsp/changeElectionProperties.jsp</result>
         </action>
 
         <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
-            <result>/jsp/checkUsersVotingHistory.jsp</result>
+            <result name="none">/jsp/checkUsersVotingHistory.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
     </package>

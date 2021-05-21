@@ -7,32 +7,26 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title>Create Election</title>
+	<title>Change Election Properties</title>
 </head>
 <body class = "text-center">
 	<main class="form-signin">
 		<s:form action="createElectionAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Create Election</h1>
 			<s:div cssClass="form-floating">
+
 				<s:select
-						  list="votersTypes"
-						  name="votersType"
-						  cssClass="form-select"
-						  required="required"/>
+						headValue="votersType"
+						list="votersTypes"
+						name="votersType"
+						cssClass="form-select"
+						required="required"/>
 				<label class="floatingInput">Who are the voters</label>
 			</s:div>
 
 			<s:div cssClass="form-floating">
-				<s:select
-						  list="departments"
-						  name="department"
-						  cssClass="form-select"
-						  required="required"/>
-				<label class="floatingInput">What's the person's department</label>
-			</s:div>
-
-			<s:div cssClass="form-floating">
 				<s:textfield
+						headValue="title"
 						placeholder="Title"
 						name="title"
 						cssClass="form-control"
@@ -42,6 +36,7 @@
 
 			<s:div cssClass="form-floating">
 				<s:textarea
+						headValue="description"
 						placeholder="Description"
 						name="description"
 						cssClass="form-control"
@@ -51,6 +46,7 @@
 
 			<s:div cssClass="form-floating">
 				<s:textfield
+						headValue="starting_datetime"
 						type="datetime-local"
 						placeholder="Starting Date and Time"
 						name="starting_datetime"
@@ -62,6 +58,7 @@
 
 			<s:div cssClass="form-floating">
 				<s:textfield
+						headValue="ending_datetime"
 						type="datetime-local"
 						placeholder="Ending Date and Time"
 						name="ending_datetime"

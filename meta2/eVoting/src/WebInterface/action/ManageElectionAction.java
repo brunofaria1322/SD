@@ -26,29 +26,53 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 	@Override
 	public String execute() {
 
+		//elections
+		HashMap<Integer, HashMap<String,String>> electionsList = new HashMap<>();
+		//TODO: get lista de eleições
+		HashMap<String, String> temp = new HashMap<>();
+		temp.put("titulo", "Por começar");
+		temp.put("descricao", "esta eleiçai ainda nem começou....");
+		temp.put("inicio", "2021-06-21 17:15:00");
+		temp.put("fim", "2021-06-26 21:30:00");
+		temp.put("departamentos", ";4;1;");
+		temp.put("mesas", ";4;");
+
+		electionsList.put(1, temp);
+
+		temp = new HashMap<>();
+		temp.put("titulo", "Ativa");
+		temp.put("descricao", "esta eleição está ativa e a decorrer...");
+		temp.put("inicio", "2021-05-20 17:15:00");
+		temp.put("fim", "2021-06-23 21:30:00");
+		temp.put("departamentos", ";4;1;");
+		temp.put("mesas", ";4;");
+		electionsList.put(3, temp);
+
+		temp = new HashMap<>();
+		temp.put("titulo", "Terminada");
+		temp.put("descricao", "esta eleição está terminada...");
+		temp.put("inicio", "2021-04-20 17:15:00");
+		temp.put("fim", "2021-04-23 21:30:00");
+		temp.put("departamentos", ";4;1;");
+		temp.put("mesas", ";4;");
+		electionsList.put(2, temp);
+
 		//election
 		//TODO: get eleição a partir do id;
-		election = new HashMap<>();
-		election.put("title", "titulo bué fixe");
-		election.put("description", "dasc desc disc dosc dusc");
-		election.put("start_date", "2020-05-21 17:15:00");
-		election.put("end_date", "2020-05-26 21:30:00");
-		election.put("ids_of_the_departments", ";4;1;");
-		election.put("ids_of_the_voting_stations", ";4;");
+		election = electionsList.get(electionId);
 
 		results = new ArrayList<>();
-
-		this.session.put("electionId", electionId);
+		session.put("electionId", electionId);
 
 		try {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 			//Election hasn't started yet
-			if(LocalDateTime.parse(election.get("start_date"), formatter).isAfter(LocalDateTime.now())){
+			if(LocalDateTime.parse(election.get("inicio"), formatter).isAfter(LocalDateTime.now())){
 				estado = 1;
 			}
 			//Election is currently active
-			else if(LocalDateTime.parse(election.get("end_date"), formatter).isAfter(LocalDateTime.now())){
+			else if(LocalDateTime.parse(election.get("fim"), formatter).isAfter(LocalDateTime.now())){
 				estado = 2;
 			}
 			//Election has finished

@@ -18,10 +18,10 @@
 			<div class="card">
 				<div class="card-body">
 					<h5 class="card-title">
-						<c:out value="${election.value.title}"/>
+						<c:out value="${election.value.titulo}"/>
 					</h5>
 					<p class="card-text">
-						<c:out value="${election.value.description}"/>
+						<c:out value="${election.value.descricao}"/>
 					</p>
 
 					<s:form action="manageElection" method="post">

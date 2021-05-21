@@ -9,23 +9,23 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title><c:out value="${election.title}"/></title>
+	<title><c:out value="${election.titulo}"/></title>
 </head>
 <body class = "justify-content-center">
 
 	<div class="container">
-		<h3 class = "text-center"><c:out value="${election.title}"/></h3>
+		<h3 class = "text-center"><c:out value="${election.titulo}"/></h3>
 		<div class="card">
 			<div class="card-body">
 				<h4 class="card-title">Description:</h4>
-				<p class="card-text text-justify"><c:out value="${election.description}"/></p>
+				<p class="card-text text-justify"><c:out value="${election.descricao}"/></p>
 			</div>
 			<div class="card-body">
 				<h4 class="card-title">Times:</h4>
 				<h6 class="card-subtitle text-muted">Start:</h6>
-				<p class="card-text"><c:out value="${election.start_date}"/></p>
+				<p class="card-text"><c:out value="${election.inicio}"/></p>
 				<h6 class="card-subtitle text-muted">End:</h6>
-				<p class="card-text"><c:out value="${election.end_date}"/></p>
+				<p class="card-text"><c:out value="${election.fim}"/></p>
 			</div>
 			<div class="card-body">
 				<s:set name="estado" value="estado"/>
@@ -39,14 +39,14 @@
 						<input type="hidden" name="electionId" value="${electionId}">
 						<s:submit cssClass="list-group-item list-group-item-action" value="Manage polling stations"/>
 					</s:form>
-					<s:form action="changeElectionPropreties" method="post">
+					<s:form action="changeElectionProperties" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
 						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
 					</s:form>
 				</s:if>
 				<!-- Election is currently active -->
 				<s:elseif test="%{#estado==2}">
-					<s:form action="changeElectionPropreties" method="post">
+					<s:form action="changeElectionProperties" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
 						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
 					</s:form>
