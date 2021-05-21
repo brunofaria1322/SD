@@ -18,6 +18,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <global-results>
             <result name="error">/jsp/error.jsp</result>
+            <result name="logIn">/jsp/logIn.jsp</result>
         </global-results>
 
         <!-- all exceptions not caught by the application will lead to error.jsp -->
@@ -34,12 +35,12 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         <action name="logInAction" class="WebInterface.action.LoginAction" method="execute">
             <result name="admin">/jsp/adminIndex.jsp</result>
             <result name="voter">/jsp/adminIndex.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
+        <!-- Admin Index Options -->
+        <!-- Register Person -->
         <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
             <result name="none" >/jsp/registerPerson.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="registerPersonAction" class="WebInterface.action.RegisterPersonAction" method="execute">
@@ -47,9 +48,9 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/registerPerson.jsp</result>
         </action>
 
+        <!-- Create Election -->
         <action name="createElection" class="WebInterface.action.CreateElectionAction" method="display">
             <result name="none" >/jsp/createElection.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="createElectionAction">
@@ -57,19 +58,18 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/createElection.jsp</result>
         </action>
 
+        <!-- Manage Election -->
         <action name="chooseElection" class="WebInterface.action.ChooseElectionAction" method="display">
             <result name="none" >/jsp/chooseElection.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="manageElection" class="WebInterface.action.ManageElectionAction" method="execute">
             <result name="success" >/jsp/manageElection.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
+        <!-- Change Election Properties -->
         <action name="changeElectionProperties" class="WebInterface.action.ChangeElectionPropertiesAction" method="display">
             <result name="none" >/jsp/changeElectionProperties.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
         <action name="changeElectionPropertiesAction" class="WebInterface.action.ChangeElectionPropertiesAction" method="execute">
@@ -77,9 +77,22 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/changeElectionProperties.jsp</result>
         </action>
 
+        <!-- Manage Election Candidate Lists -->
+        <action name="manageCandidateLists" class="WebInterface.action.ManageCandidateListsAction" method="execute">
+            <result name="success" >/jsp/manageCandidateLists.jsp</result>
+        </action>
+
+        <action name="addCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="addCandidateList">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <action name="removeCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="removeCandidateList">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <!-- Check Users Voting History -->
         <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
             <result name="none">/jsp/checkUsersVotingHistory.jsp</result>
-            <result name="login">/jsp/logIn.jsp</result>
         </action>
 
     </package>
