@@ -90,9 +90,22 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="success" type="redirectAction">manageCandidateLists</result>
         </action>
 
+        <!-- Manage Polling Stations -->
+        <action name="managePollingStations" class="WebInterface.action.ManagePollingStationsAction" method="execute">
+            <result name="success" >/jsp/managePollingStations.jsp</result>
+        </action>
+
+        <action name="addPollingStation" class="WebInterface.action.ManagePollingStationsAction" method="addPollingStation">
+            <result name="success" type="redirectAction">managePollingStations</result>
+        </action>
+
+        <action name="removePollingStation" class="WebInterface.action.ManagePollingStationsAction" method="removePollingStation">
+            <result name="success" type="redirectAction">managePollingStations</result>
+        </action>
+
         <!-- Check Users Voting History -->
         <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
-            <result name="none">/jsp/checkUsersVotingHistory.jsp</result>
+            <result name="success">/jsp/checkUsersVotingHistory.jsp</result>
         </action>
 
     </package>
