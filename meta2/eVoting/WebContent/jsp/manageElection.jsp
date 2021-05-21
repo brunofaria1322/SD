@@ -9,7 +9,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title>Choose Election</title>
+	<title><c:out value="${election.title}"/></title>
 </head>
 <body class = "justify-content-center">
 
@@ -27,17 +27,17 @@
 				<h6 class="card-subtitle text-muted">End:</h6>
 				<p class="card-text"><c:out value="${election.end_date}"/></p>
 			</div>
-			<div class="card-body justify-content-center list-group">
+			<div class="card-body">
 				<s:set name="estado" value="estado"/>
 				<!-- Election hasn't started yet -->
 				<s:if test="%{#estado==1}">
 					<s:form action="manageCandidateLists" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Manage candidate lists"/>
+						<s:submit cssClass="list-group-item list-group-item-action" value="Manage candidate lists"/>
 					</s:form>
 					<s:form action="managePollingStations" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Manage polling stations"/>
+						<s:submit cssClass="list-group-item list-group-item-action" value="Manage polling stations"/>
 					</s:form>
 					<s:form action="changeElectionPropreties" method="post">
 						<input type="hidden" name="electionId" value="${electionId}">
@@ -53,10 +53,16 @@
 				</s:elseif>
 				<!-- Election has finished -->
 				<s:elseif test="%{#estado==3}">
-					<s:form action="checkElectionResults" method="post">
-						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="list-group-item list-group-item-action" value="Check Results"/>
-					</s:form>
+					<ul class="list-group">
+						<c:forEach items="${results}" var="result" >
+							<li class="list-group-item d-flex justify-content-between align-items-center">
+								<c:out value="${result[0]}"/>
+								<span class="badge" style="background-color: #0d6efd">
+									<c:out value="${result[1]}"/>
+								</span>
+							</li>
+						</c:forEach>
+					</ul>
 				</s:elseif>
 			</div>
 

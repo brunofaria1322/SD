@@ -14,7 +14,6 @@
 <body class = "text-center">
 	<main class="form-signin">
 
-
 		<c:forEach items="${electionsList}" var="election" >
 			<div class="card">
 				<div class="card-body">

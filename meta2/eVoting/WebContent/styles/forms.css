@@ -23,8 +23,6 @@ body {
 
 .form-signin input, select, textarea {
     margin-bottom: -1px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
 }
 
 .btn, input[type="submit"] {
