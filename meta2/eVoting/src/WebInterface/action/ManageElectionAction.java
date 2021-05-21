@@ -5,6 +5,8 @@ import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.Serial;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,24 +17,45 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 
 	private HashMap<String,String> election;
 	private Integer electionId;
+	private int estado;
 
 	@Override
 	public String execute() {
-		//elections
-		election = new HashMap<>();
+
+		//election
 		//TODO: get eleição a partir do id;
-		HashMap<String, String> temp = new HashMap<>();
-		temp.put("title", "titulo fixe");
-		temp.put("description", "dasc");
-		temp.put("start_date", "start");
-		temp.put("end_date", "end");
-		temp.put("ids_of_the_departments", "all");
-		temp.put("ids_of_the_voting_stations", "all");
+		election = new HashMap<>();
+		election.put("title", "titulo bué fixe");
+		election.put("description", "dasc desc disc dosc dusc");
+		election.put("start_date", "2021-05-21 17:15:00");
+		election.put("end_date", "2021-05-26 21:30:00");
+		election.put("ids_of_the_departments", ";4;1;");
+		election.put("ids_of_the_voting_stations", ";4;");
 
 
 		this.session.put("electionId", electionId);
-		return SUCCESS;
 
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+			//Election hasn't started yet
+			if(LocalDateTime.parse(election.get("start_date"), formatter).isAfter(LocalDateTime.now())){
+				estado = 1;
+			}
+			//Election is currently active
+			else if(LocalDateTime.parse(election.get("end_date"), formatter).isAfter(LocalDateTime.now())){
+				estado = 2;
+			}
+			//Election has finished
+			else{
+				estado = 3;
+			}
+
+		}catch (Exception e){
+			estado = -1;
+		}
+
+		return SUCCESS;
 	}
 
 
@@ -41,6 +64,9 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 
 	public HashMap<String, String> getElection() { return election; }
 	public void setElection(HashMap<String, String> election) { this.election = election; }
+
+	public int getEstado() { return estado; }
+	public void setEstado(int estado) {	this.estado = estado; }
 
 
 	@Override

@@ -27,7 +27,7 @@
 						cssClass="form-control"/>
 				<label class="floatingPassword">Password</label>
 			</s:div>
-			<s:submit cssClass="w-100 btn btn-lg btn-primary"/>
+			<s:submit cssClass="btn btn-lg btn-primary"/>
 		</s:form>
 	</main>
 </body>

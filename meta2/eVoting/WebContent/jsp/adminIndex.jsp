@@ -9,12 +9,12 @@
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
 	<title>Admin</title>
 </head>
-<body class="text-center">
-	<main class="form-signin">
-		<a href="<s:url action="registerPerson"/>" class="w-100 btn btn-lg btn-secondary">Register Person</a>
-		<a href="<s:url action="createElection"/>" class="w-100 btn btn-lg btn-secondary">Create Election </a>
-		<a href="<s:url action="chooseElection"/>" class="w-100 btn btn-lg btn-secondary">Manage Election </a>
-		<a href="<s:url action="checkUsersVotingHistory"/>" class="w-100 btn btn-lg btn-secondary">Check User's Voting History </a>
-	</main>
+<body class="text-center justify-content-center">
+	<div class="list-group">
+		<a href="<s:url action="registerPerson"/>" class="list-group-item list-group-item-action">Register Person</a>
+		<a href="<s:url action="createElection"/>" class="list-group-item list-group-item-action">Create Election </a>
+		<a href="<s:url action="chooseElection"/>" class="list-group-item list-group-item-action">Manage Election </a>
+		<a href="<s:url action="checkUsersVotingHistory"/>" class="list-group-item list-group-item-action">Check User's Voting History </a>
+	</div>
 </body>
 </html>

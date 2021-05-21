@@ -11,29 +11,57 @@
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
 	<title>Choose Election</title>
 </head>
-<body class = "text-center">
-	<main class="form-signin">
+<body class = "justify-content-center">
 
-
-		<c:forEach items="${electionsList}" var="election" >
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">
-						<c:out value="${election.value.title}"/>
-					</h5>
-					<p class="card-text">
-						<c:out value="${election.value.description}"/>
-					</p>
-
-					<s:form action="manageElection" method="post">
-						<input type="hidden" name="electionId" value="${election.key}">
-						<s:submit cssClass="btn btn-primary" value="Manage"/>
-					</s:form>
-
-				</div>
+	<div class="container">
+		<h3 class = "text-center"><c:out value="${election.title}"/></h3>
+		<div class="card">
+			<div class="card-body">
+				<h4 class="card-title">Description:</h4>
+				<p class="card-text text-justify"><c:out value="${election.description}"/></p>
 			</div>
-		</c:forEach>
+			<div class="card-body">
+				<h4 class="card-title">Times:</h4>
+				<h6 class="card-subtitle text-muted">Start:</h6>
+				<p class="card-text"><c:out value="${election.start_date}"/></p>
+				<h6 class="card-subtitle text-muted">End:</h6>
+				<p class="card-text"><c:out value="${election.end_date}"/></p>
+			</div>
+			<div class="card-body justify-content-center list-group">
+				<s:set name="estado" value="estado"/>
+				<!-- Election hasn't started yet -->
+				<s:if test="%{#estado==1}">
+					<s:form action="manageCandidateLists" method="post">
+						<input type="hidden" name="electionId" value="${electionId}">
+						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Manage candidate lists"/>
+					</s:form>
+					<s:form action="managePollingStations" method="post">
+						<input type="hidden" name="electionId" value="${electionId}">
+						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Manage polling stations"/>
+					</s:form>
+					<s:form action="changeElectionPropreties" method="post">
+						<input type="hidden" name="electionId" value="${electionId}">
+						<s:submit cssClass="btn btn-primary list-group-item list-group-item-action" value="Change properties"/>
+					</s:form>
+				</s:if>
+				<!-- Election is currently active -->
+				<s:elseif test="%{#estado==2}">
+					<s:form action="changeElectionPropreties" method="post">
+						<input type="hidden" name="electionId" value="${electionId}">
+						<s:submit cssClass="btn btn-primary" value="Change properties"/>
+					</s:form>
+				</s:elseif>
+				<!-- Election has finished -->
+				<s:elseif test="%{#estado==3}">
+					<s:form action="checkElectionResults" method="post">
+						<input type="hidden" name="electionId" value="${electionId}">
+						<s:submit cssClass="btn btn-primary" value="Check Results"/>
+					</s:form>
+				</s:elseif>
+			</div>
 
-	</main>
+		</div>
+	</div>
+
 </body>
 </html>
