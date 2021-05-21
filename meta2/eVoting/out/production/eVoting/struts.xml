@@ -63,8 +63,8 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="success" >/jsp/manageElection.jsp</result>
         </action>
 
-        <action name="checkUsersVotingHistoryAction">
-            <result>/jsp/logIn.jsp</result>
+        <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
+            <result>/jsp/checkUsersVotingHistory.jsp</result>
         </action>
 
     </package>

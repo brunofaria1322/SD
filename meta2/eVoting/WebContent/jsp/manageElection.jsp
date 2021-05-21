@@ -53,6 +53,7 @@
 				</s:elseif>
 				<!-- Election has finished -->
 				<s:elseif test="%{#estado==3}">
+					<h4 class="card-title">Results:</h4>
 					<ul class="list-group">
 						<c:forEach items="${results}" var="result" >
 							<li class="list-group-item d-flex justify-content-between align-items-center">
