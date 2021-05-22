@@ -130,6 +130,12 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="success">/jsp/checkUsersVotingHistory.jsp</result>
         </action>
 
+        <!-- Facebook -->
+        <action name="addFacebookAction" class="WebInterface.action.AddFacebookAction" method="execute">
+            <result name="admin">/jsp/adminIndex.jsp</result>
+            <result name="voter" type="redirectAction">voterIndex</result>
+        </action>
+
     </package>
 
 </struts>

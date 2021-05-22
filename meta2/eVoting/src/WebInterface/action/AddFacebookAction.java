@@ -64,7 +64,7 @@ public class AddFacebookAction extends ActionSupport implements SessionAware {
 			if(!getWebServer().connect()){
 				System.out.println(e);
 				session.put("error","The server is down. Sorry...");
-				return "none";
+				return ERROR;
 			}
 			return this.execute();
 		}

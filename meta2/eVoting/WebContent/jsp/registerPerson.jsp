@@ -11,10 +11,10 @@
 	<title>Register Person</title>
 </head>
 <body class = "text-center">
-<p>${session.error}</p>
 	<main class="form-signin">
 		<s:form action="registerPersonAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Register Person</h1>
+			<p class="text-danger"> <c:out value="${session.error}"/> </p>
 			<s:div cssClass="form-floating">
 				<s:select
 						  list="personTypes"

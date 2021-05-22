@@ -17,21 +17,24 @@
 <main class="form-signin">
 	<s:form action="logInAction" method="post">
 		<h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+		<p class="text-danger"> <c:out value="${session.error}"/> </p>
 		<s:div cssClass="form-floating">
 			<s:textfield
 					placeholder="Username"
 					name="username"
-					cssClass="form-control"/>
+					cssClass="form-control"
+					required="required"/>
 			<label class="floatingInput">Username</label>
 		</s:div>
 		<s:div cssClass="form-floating">
 			<s:password
 					placeholder="Password"
 					name="password"
-					cssClass="form-control"/>
+					cssClass="form-control"
+					required="required"/>
 			<label class="floatingPassword">Password</label>
 		</s:div>
-		<s:submit cssClass="btn btn-lg btn-primary"/>
+		<s:submit cssClass="btn btn-lg btn-primary" value="LogIn"/>
 	</s:form>
 	<a class="btn btn-primary"
 			href="https://www.facebook.com/v3.2/dialog/oauth?response_type=code&client_id=2913897935402035&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2FeVoting%2FlogInAction&state=secret494658">

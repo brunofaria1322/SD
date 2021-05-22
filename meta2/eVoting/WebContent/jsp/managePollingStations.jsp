@@ -10,7 +10,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title><c:out value="Manage Polling Stations"/></title>
+	<title>Manage Polling Stations</title>
 </head>
 <body class = "justify-content-center">
 
@@ -18,6 +18,7 @@
 		<div class="card">
 			<div class="card-body">
 				<h4 class="card-title">Polling Stations:</h4>
+				<p class="text-danger"> <c:out value="${session.error}"/> </p>
 				<ul class="list-group">
 					<c:forEach items="${results}" var="list" >
 						<li class="list-group-item d-flex justify-content-between align-items-center">

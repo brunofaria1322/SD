@@ -16,6 +16,7 @@
 
 	<div class="container">
 		<h3 class = "text-center"><c:out value="${election.titulo}"/></h3>
+		<p class="text-danger"> <c:out value="${session.error}"/> </p>
 		<div class="card">
 			<div class="card-body">
 				<h4 class="card-title">Description:</h4>

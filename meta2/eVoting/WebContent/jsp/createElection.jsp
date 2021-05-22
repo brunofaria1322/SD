@@ -12,10 +12,10 @@
 	<title>Create Election</title>
 </head>
 <body class = "text-center">
-	<p class="text-danger"> <c:out value="${session.error}"/> </p>
 	<main class="form-signin">
 		<s:form action="createElectionAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Create Election</h1>
+			<p class="text-danger"> <c:out value="${session.error}"/> </p>
 			<s:div cssClass="form-floating">
 				<s:select
 						  list="votersTypes"
