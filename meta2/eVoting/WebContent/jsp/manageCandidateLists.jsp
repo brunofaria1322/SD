@@ -13,12 +13,13 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	<title><c:out value="Manage Candidat Lists"/></title>
+	<title>Manage Candidate Lists</title>
 </head>
 <body class = "justify-content-center">
-	<p>${session.error}</p>
+
 	<div class="container">
 		<h3 class="card-title">Candidate Lists:</h3>
+		<p class="text-danger"> <c:out value="${session.error}"/> </p>
 		<div class="card">
 			<div class="card-body">
 				<ul class="list-group list-group-flush">

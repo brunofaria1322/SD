@@ -7,12 +7,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/WebContent/jsp/adminPage.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/WebInterface/action/AdminPage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/createElection.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/createElection.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/error.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/error.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/manageCandidateLists.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/manageCandidateLists.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/manageElection.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/manageElection.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/managePollingStations.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/managePollingStations.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/vote.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/vote.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebContent/jsp/voterIndex.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/voterIndex.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,7 +188,7 @@
       <workItem from="1621395569274" duration="11745000" />
       <workItem from="1621438270479" duration="19397000" />
       <workItem from="1621483386202" duration="423000" />
-      <workItem from="1621521311464" duration="75827000" />
+      <workItem from="1621521311464" duration="76595000" />
     </task>
     <servers />
   </component>
