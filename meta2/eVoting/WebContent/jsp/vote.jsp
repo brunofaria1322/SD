@@ -10,10 +10,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title><c:out value="${election.titulo}"/></title>
+	<title>Vote</title>
 </head>
 <body class = "justify-content-center">
-
 	<div class="container">
 		<h3 class = "text-center"><c:out value="${election.titulo}"/></h3>
 		<div class="card">
@@ -32,24 +31,25 @@
 				<s:set name="estado" value="estado"/>
 				<!-- Election hasn't started yet -->
 				<s:if test="%{#estado==1}">
-					<s:form action="manageCandidateLists" method="post">
-						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="list-group-item list-group-item-action" value="Manage candidate lists"/>
-					</s:form>
-					<s:form action="managePollingStations" method="post">
-						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="list-group-item list-group-item-action" value="Manage polling stations"/>
-					</s:form>
-					<s:form action="changeElectionProperties" method="post">
-						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
-					</s:form>
+					<p>Election Hasn't started yet</p>
 				</s:if>
 				<!-- Election is currently active -->
 				<s:elseif test="%{#estado==2}">
-					<s:form action="changeElectionProperties" method="post">
-						<input type="hidden" name="electionId" value="${electionId}">
-						<s:submit cssClass="list-group-item list-group-item-action" value="Change properties"/>
+					<h4 class="card-title">Candidate Lists:</h4>
+					<s:form action="voteAction" method="post">
+						<ul class="list-group list-group-flush">
+
+							<c:forEach items="${candidateList}" var="candidate" >
+								<li class="list-group-item wd-100 align-items-center form-check">
+									<label class="d-flex justify-content-between wd-100">
+										<c:out value="${candidate[1]}"/>
+										<input class="form-check-input" type="radio" name="listId" value="${candidate[0]}"/>
+									</label>
+
+								</li>
+							</c:forEach>
+						</ul>
+						<s:submit cssClass="btn btn-warning" value="Vote"/>
 					</s:form>
 				</s:elseif>
 				<!-- Election has finished -->
@@ -70,6 +70,5 @@
 
 		</div>
 	</div>
-
 </body>
 </html>

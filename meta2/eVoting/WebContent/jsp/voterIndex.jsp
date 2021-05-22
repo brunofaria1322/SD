@@ -10,7 +10,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="styles/forms.css" type="text/css" rel="stylesheet">
-	<title>Choose Election</title>
+	<title>Voter</title>
 </head>
 <body class = "text-center">
 	<main class="form-signin">
@@ -25,9 +25,9 @@
 						<c:out value="${election.value.descricao}"/>
 					</p>
 
-					<s:form action="manageElection" method="post">
+					<s:form action="votePage" method="post">
 						<input type="hidden" name="electionId" value="${election.key}">
-						<s:submit cssClass="btn btn-primary" value="Manage"/>
+						<s:submit cssClass="btn btn-primary" value="Vote"/>
 					</s:form>
 
 				</div>

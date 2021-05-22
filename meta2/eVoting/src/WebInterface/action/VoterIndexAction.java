@@ -19,7 +19,7 @@ public class VoterIndexAction extends ActionSupport implements SessionAware {
 
 		//elections
 		electionsList = new HashMap<>();
-		//TODO: get lista de eleições
+		//TODO: get lista de eleições que user pode ou pôde votar
 		HashMap<String, String> temp = new HashMap<>();
 		temp.put("titulo", "Por começar");
 		temp.put("descricao", "esta eleiçai ainda nem começou....");

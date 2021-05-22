@@ -38,8 +38,16 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         </action>
 
         <!-- Voter Index Options -->
-        <action name="voterIndex" class="WebInterface.action.VoterIndexAction" method="execute">
+        <action name="voterIndex" class="WebInterface.action.VoterIndexAction" method="display">
             <result name="none">/jsp/voterIndex.jsp</result>
+        </action>
+
+        <action name="votePage" class="WebInterface.action.VoteAction" method="display">
+            <result name="none">/jsp/vote.jsp</result>
+        </action>
+
+        <action name="voteAction" class="WebInterface.action.VoteAction" method="execute">
+            <result name="success" type="redirectAction">voterIndex</result>
         </action>
 
 
