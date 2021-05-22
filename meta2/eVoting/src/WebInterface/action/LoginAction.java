@@ -16,6 +16,7 @@ import org.apache.struts2.interceptor.SessionAware;
 import java.io.IOException;
 import java.io.Serial;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;

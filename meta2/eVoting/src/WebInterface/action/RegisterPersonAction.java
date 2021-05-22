@@ -5,9 +5,13 @@ import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
+import java.io.IOException;
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.sql.Date;
+import java.text.Normalizer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +21,13 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	private static final long serialVersionUID = 4L;
 	private Map<String, Object> session;
 	private String personType = null, username = null, password = null, name = null, address = null, phone = null, ncc = null;
-	private int ndep = -1;
+	private String department = null;
 	private Date val_cc = null;
 
 	private List<String> personTypes;
 	private List<String> departments;
 
-	public RegisterPersonAction(){
+	public RegisterPersonAction() throws IOException {
 
 		//types
 		personTypes = new ArrayList<String>();
@@ -32,11 +36,12 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 		personTypes.add("Employee");
 
 		//departments
-		departments = new ArrayList<String>();
-		//TODO: get lista de departamentos
-		departments.add("DEI");
-	}
+		WebServer wb = new WebServer();
+		wb.readConfig();
+		wb.connect();
+		departments = new ArrayList<String>(wb.getDepartments().values());
 
+	}
 
 
 	public String display() {
@@ -44,13 +49,22 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	}
 
 	@Override
-	public String execute() {
+	public String execute() throws ParseException {
+		if(!session.containsKey("admin") || !(boolean) session.get("admin")){
+			return LOGIN;
+		}
+		int ndep = 0;
+		for(String dep : departments){
+			ndep++;
+			if(department.replaceAll("[^a-zA-Z0-9]", "?").equals(dep.replaceAll("[^a-zA-Z0-9]", "?"))){
+				break;
+			}
+		}
+
 		try {
-			getWebServer().readConfig();
-			getWebServer().connect();
-			int res = getWebServer().createUser(personType, ndep, name, address, phone, ncc, val_cc, username, password);
+			int res = getWebServer().createUser(personType, ndep, name, address, phone, ncc,val_cc, username, password);
 			if (res == 1) {
-				return LOGIN;
+				return SUCCESS;
 			} else if (res == -1) {
 				session.put("error", "There is already an user with the given username in the database.");
 				return "none";
@@ -68,25 +82,34 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 		}
 	}
 
-	public WebServer getWebServer() throws RemoteException {
+	public WebServer getWebServer() throws IOException {
 		if(!session.containsKey("WebServer"))
 			this.setWebServer(new WebServer());
 		return (WebServer) session.get("WebServer");
 	}
 
-	public void setWebServer(WebServer WebServer) {
-		WebServer.connect();
+	public void setWebServer(WebServer WebServer) throws IOException {
+		getWebServer().readConfig();
+		getWebServer().connect();
 		this.session.put("WebServer", WebServer);
 	}
 
-	public void setPersonType(String personType){ this.personType = personType; }
+	public void setPersonType(String personType){
+		if(personType.equals("Student")){
+			this.personType = "aluno";
+		}
+		else if(personType.equals("Professor")){
+			this.personType = "docente";
+		}
+		else{
+			this.personType = "funcionario";
+		}
+
+	}
 	public String getPersonType(){ return personType; }
 
 	public void setPersonTypes(List<String> personTypes) { this.personTypes = personTypes; }
 	public List<String> getPersonTypes() { return personTypes; }
-
-	public void setNdep(int ndep){ this.ndep = ndep;}
-	public int getNdep(){ return ndep;}
 
 	public void setDepartments(List<String> departments) { this.departments = departments; }
 	public List<String> getDepartments() { return departments; }
@@ -115,5 +138,13 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	@Override
 	public void setSession(Map<String, Object> session) {
 		this.session = session;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 }
