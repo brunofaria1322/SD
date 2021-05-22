@@ -73,7 +73,7 @@ public interface database extends Remote {
      * @return Whether a user was found for the given parameters or not.
      * @throws java.rmi.RemoteException if a communication-related exception occurs.
      */
-    public int login(String username, String password) throws java.rmi.RemoteException;
+    public int login(String username, String facebook_id,String ncc, String password) throws java.rmi.RemoteException;
     /**
      * Inserts a new election into the database.
      * <ul>
@@ -253,4 +253,5 @@ public interface database extends Remote {
     public void setAdmin(Admin admin)throws java.rmi.RemoteException;
     public void setWeb(Web web)throws java.rmi.RemoteException;
     public void removeWeb(Web web)throws java.rmi.RemoteException;
+    public boolean addFacebook(String username, String facebook_id)throws java.rmi.RemoteException;
 }

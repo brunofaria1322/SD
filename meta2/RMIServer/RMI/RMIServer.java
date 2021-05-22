@@ -319,20 +319,25 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			return null;
 		}
 	}
-	public int login(String username, String password){
+	public int login(String username, String facebook_id,String ncc, String password){
 		try {
-			String query = "SELECT * FROM users WHERE username = '"+username+"';";
+			String query = "SELECT * FROM users WHERE username = '"+username+"' OR facebook_id = '"+facebook_id+"';";
 			System.out.println(query);
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
-			rs.next();
+			if(!rs.next()||(ncc!=null && !rs.getString("numcc").equals(ncc))){
+				return 0;
+			}
+			if(facebook_id!=null){
+				return rs.getInt("admin")==1 ? 2:1; //sucesso
+			}
 			if(AES.decrypt(rs.getString("password"),enckey).equals(password)){
 				return rs.getInt("admin")==1 ? 2:1; //sucesso
 			}
 		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
 			connectToBD();
-			return login(username,password);
+			return login(username,facebook_id,ncc,password);
 		} catch (SQLException e) {
 			//TODO Auto-generated catch block
 			e.printStackTrace();
@@ -507,7 +512,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	public String[] getUser(String usernameOrCC){
 		// (cc,nome)
 		try {
-			String query = "SELECT * FROM users WHERE username = '"+usernameOrCC+"' OR numcc = '"+usernameOrCC+"';";
+			String query = "SELECT * FROM users WHERE username = '"+usernameOrCC+"' OR numcc = '"+usernameOrCC+"'"+"OR facebook_id = '"+usernameOrCC+"';";
 			System.out.println(query);
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -1017,5 +1022,27 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	}
 	public void removeWeb(Web web) throws java.rmi.RemoteException{
 		this.webusers.remove(web);
+	}
+	public boolean addFacebook(String username, String facebook_id)throws java.rmi.RemoteException{
+		try {
+			String query = "SELECT * FROM users WHERE username = '"+username+"';";
+			System.out.println(query);
+			PreparedStatement st;
+			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = st.executeQuery();
+			if(!rs.next()){
+				return false;
+			}
+			rs.updateString("facebook_id",facebook_id);
+			rs.updateRow();
+			return true;
+		} catch (CommunicationsException | SQLNonTransientConnectionException e) {
+			connectToBD();
+			return addFacebook(username,facebook_id);
+		} catch (SQLException e) {
+			//TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 	}
 }
