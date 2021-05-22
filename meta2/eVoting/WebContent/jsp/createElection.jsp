@@ -11,6 +11,7 @@
 	<title>Create Election</title>
 </head>
 <body class = "text-center">
+	<p>${session.error}</p>
 	<main class="form-signin">
 		<s:form action="createElectionAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Create Election</h1>

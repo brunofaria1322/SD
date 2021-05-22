@@ -11,6 +11,7 @@
 	<title>Register Person</title>
 </head>
 <body class = "text-center">
+<p>${session.error}</p>
 	<main class="form-signin">
 		<s:form action="registerPersonAction" method="post">
 			<h1 class="h3 mb-3 fw-normal">Register Person</h1>
@@ -54,7 +55,7 @@
 				<s:textfield
 						type="number"
 						placeholder="Phone Number"
-						name="phoneNo"
+						name="phone"
 						cssClass="form-control"
 						required="required"/>
 				<label class="floatingInput">Phone Number</label>
@@ -64,7 +65,7 @@
 				<s:textfield
 						type="number"
 						placeholder="CC Number"
-						name="ccNo"
+						name="ncc"
 						cssClass="form-control"
 						required="required"/>
 				<label class="floatingInput">CC Number</label>
@@ -74,7 +75,7 @@
 				<s:textfield
 						type="date"
 						placeholder="CC Expiration Date"
-						name="ccExpDate"
+						name="a"
 						cssClass="form-control"
 						required="required"/>
 
