@@ -73,8 +73,8 @@ public class WebServer extends UnicastRemoteObject implements Web {
 		db.setWeb(wb);
 	}
 
-	public int login(String username, String password) throws RemoteException {
-		return db.login(username, password);
+	public int login(String username, String facebook_id, String password) throws RemoteException {
+		return db.login(username,facebook_id,null,password);
 	}
 	public int createUser(String cargo, int ndep, String nome, String morada, String telefone, String numcc, Date valcc, String username, String password) throws java.rmi.RemoteException{
 		return db.createUser(cargo, ndep, nome, morada, telefone, numcc, valcc, username, password);
@@ -118,7 +118,9 @@ public class WebServer extends UnicastRemoteObject implements Web {
 	public void changeActiveStationStatus(int ndep, int availableTerms, int beingUsedTerms)throws java.rmi.RemoteException{
 		db.changeActiveStationStatus(ndep, availableTerms, beingUsedTerms);
 	}
-
+	public void addFacebook(String username, String facebook_id) throws RemoteException {
+		db.addFacebook(username, facebook_id);
+	}
 	public void change() throws RemoteException{
 		try{
 			this.stationsStatus = db.getActiveStationStatus();
