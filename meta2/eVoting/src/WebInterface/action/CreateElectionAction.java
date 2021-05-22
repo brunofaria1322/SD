@@ -59,7 +59,8 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 			LocalDateTime start = LocalDateTime.parse(starting_datetime, formatter);
 			LocalDateTime end = LocalDateTime.parse(ending_datetime, formatter);
 
-			if(start.isBefore(LocalDateTime.now()) || start.isAfter(end)){				session.put("error","Invalid starting time");
+			if(start.isBefore(LocalDateTime.now()) || start.isAfter(end)){
+				session.put("error","Invalid starting time");
 				return NONE;
 			}
 			if(end.isBefore(LocalDateTime.now())){

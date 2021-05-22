@@ -31,6 +31,14 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 		if(!session.containsKey("admin") || !(boolean) session.get("admin")){
 			return LOGIN;
 		}
+
+		if (electionId == null){
+			if(!session.containsKey("electionId")){
+				return LOGIN;
+			}
+			electionId = (Integer) session.get("electionId");
+		}
+
 		HashMap<Integer, HashMap<String,String>> electionsList;
 		electionsList = new HashMap<>();
 		HashMap<Integer, HashMap<String, String>> elecs = new HashMap<>();
@@ -47,7 +55,6 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 		}
 
 		//election
-
 		election = electionsList.get(electionId);
 
 		results = new ArrayList<>();

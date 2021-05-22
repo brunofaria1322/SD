@@ -87,8 +87,8 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         </action>
 
         <action name="changeElectionPropertiesAction" class="WebInterface.action.ChangeElectionPropertiesAction" method="execute">
-            <result name="success" >/jsp/manageElection.jsp</result>
-            <result name="none" >/jsp/changeElectionProperties.jsp</result>
+            <result name="success" type="redirectAction">manageElection</result>
+            <result name="none" type="redirectAction">changeElectionProperties</result>
         </action>
 
         <!-- Manage Election Candidate Lists -->

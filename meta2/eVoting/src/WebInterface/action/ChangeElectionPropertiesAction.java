@@ -20,7 +20,7 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 	private Map<String, Object> session;
 	private String votersType = null, title = null, description = null;
 	private int ndep = -1;
-	private LocalDateTime starting_datetime = null, ending_datetime = null;
+	private String starting_datetime = null, ending_datetime = null;
 
 	private List<String> votersTypes;
 	private List<String> departments;
@@ -67,24 +67,38 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 		HashMap<String,String> election = electionsList.get(electionId);
 		title = election.get("titulo");
 		description = election.get("descricao");
-		try {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-			starting_datetime = LocalDateTime.parse(election.get("inicio"), formatter);
-			ending_datetime = LocalDateTime.parse(election.get("fim"), formatter);
-		} catch (Exception e) {
-			return ERROR;
-		}
+		starting_datetime = election.get("inicio").replace(' ', 'T');
+		int i = starting_datetime.lastIndexOf(':');
+		starting_datetime =  starting_datetime.substring(0, i);
+
+		ending_datetime = election.get("fim").replace(' ', 'T');
+		i = ending_datetime.lastIndexOf(':');
+		ending_datetime =  ending_datetime.substring(0, i);
+
 		return NONE;
 	}
 
 	@Override
 	public String execute() throws RemoteException {
-		if(getWebServer().editElection((Integer)session.get("electionId"),false,title,description,starting_datetime,ending_datetime,null,null,null)>0) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+		LocalDateTime start = LocalDateTime.parse(starting_datetime, formatter);
+		LocalDateTime end = LocalDateTime.parse(ending_datetime, formatter);
+
+		if(start.isBefore(LocalDateTime.now()) || start.isAfter(end)){
+			session.put("error","Invalid starting time");
+			return NONE;
+		}
+		if(end.isBefore(LocalDateTime.now())){
+			session.put("error","Invalid ending time");
+			return NONE;
+		}
+		if(getWebServer().editElection((Integer)session.get("electionId"),false,title,description,start,end,null,null,null)>0) {
 			return SUCCESS;
 		}
-		else{
-			return "none";
-		}
+
+		session.put("error","Unsuccessful");
+		return NONE;
 	}
 
 	public WebServer getWebServer() throws RemoteException {
@@ -131,8 +145,8 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 	public void setTitle(String title) { this.title = title; }
 	public String getDescription() { return description; }
 	public void setDescription(String description) { this.description = description; }
-	public LocalDateTime getStarting_datetime() { return starting_datetime; }
-	public void setStarting_datetime(LocalDateTime starting_datetime) { this.starting_datetime = starting_datetime; }
-	public LocalDateTime getEnding_datetime() { return ending_datetime; }
-	public void setEnding_datetime(LocalDateTime ending_datetime) { this.ending_datetime = ending_datetime; }
+	public String getStarting_datetime() { return starting_datetime; }
+	public void setStarting_datetime(String starting_datetime) { this.starting_datetime = starting_datetime.replace('T', ' '); }
+	public String getEnding_datetime() { return ending_datetime; }
+	public void setEnding_datetime(String ending_datetime) { this.ending_datetime = ending_datetime.replace('T', ' '); }
 }
