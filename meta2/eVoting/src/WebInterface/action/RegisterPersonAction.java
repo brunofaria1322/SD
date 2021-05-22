@@ -7,11 +7,8 @@ import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.rmi.RemoteException;
 import java.sql.Date;
-import java.text.Normalizer;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +27,7 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	public RegisterPersonAction() throws IOException {
 
 		//types
-		personTypes = new ArrayList<String>();
+		personTypes = new ArrayList<>();
 		personTypes.add("Student");
 		personTypes.add("Professor");
 		personTypes.add("Employee");
@@ -39,7 +36,7 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 		WebServer wb = new WebServer();
 		wb.readConfig();
 		wb.connect();
-		departments = new ArrayList<String>(wb.getDepartments().values());
+		departments = new ArrayList<>(wb.getDepartments().values());
 
 	}
 
@@ -143,7 +140,6 @@ public class RegisterPersonAction extends ActionSupport implements SessionAware 
 	public String getDepartment() {
 		return department;
 	}
-
 	public void setDepartment(String department) {
 		this.department = department;
 	}

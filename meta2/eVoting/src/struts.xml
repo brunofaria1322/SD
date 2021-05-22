@@ -67,9 +67,9 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="none" >/jsp/createElection.jsp</result>
         </action>
 
-        <action name="createElectionAction">
+        <action name="createElectionAction" class="WebInterface.action.CreateElectionAction" method="execute">
             <result name="success" >/jsp/adminIndex.jsp</result>
-            <result name="none" >/jsp/createElection.jsp</result>
+            <result name="none" type="redirectAction">createElection</result>
         </action>
 
         <!-- Manage Election -->
