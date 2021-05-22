@@ -534,6 +534,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 
 	public int createOrEditList(int neleicao, String nome, ArrayList<Pair<String,String>> users, boolean remove){
 		//Pair(numcc,nome)
+		System.out.println(users);
 		try{
 			String query;
 			PreparedStatement st;
