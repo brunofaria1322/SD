@@ -40,13 +40,14 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 		for(Integer dep : deps.keySet()){
 			departments.add(deps.get(dep));
 		}
-		//TODO: get lista de departamentos
+
 		departments.add("Every Departments");
 
 		//elections
 		HashMap<Integer, HashMap<String,String>> electionsList = new HashMap<>();
 		HashMap<Integer, HashMap<String, String>> elecs = getWebServer().getElections(null,null);
-		//TODO: get lista de eleições
+
+
 		for(Integer key : elecs.keySet()){
 			HashMap<String, String> temp = new HashMap<>();
 			temp.put("titulo", elecs.get(key).get("titulo"));
@@ -59,8 +60,6 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 		}
 
 
-		//election
-		//TODO: get eleição a partir do id;
 		if(!session.containsKey("electionId")) {
 			return LOGIN;
 		}

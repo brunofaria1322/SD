@@ -5,11 +5,11 @@ import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
-import javax.ejb.Local;
 import java.io.IOException;
 import java.io.Serial;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,13 +20,22 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 	private Map<String, Object> session;
 	private String votersType = null, title = null, description = null, department = null;
 	private int ndep = -1;
-	private LocalDateTime starting_datetime = null, ending_datetime = null;
+	private String starting_datetime = null, ending_datetime = null;
 
 	private List<String> votersTypes;
 	private List<String> departments;
 
 
 	public CreateElectionAction() throws IOException {
+		//departments
+		WebServer wb = new WebServer();
+		wb.readConfig();
+		wb.connect();
+		departments = new ArrayList<>(wb.getDepartments().values());
+		departments.add(0,"All Departments");
+	}
+
+	public String display() {
 
 		//types
 		votersTypes = new ArrayList<>();
@@ -35,17 +44,6 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 		votersTypes.add("Employees");
 		votersTypes.add("Everyone");
 
-		//departments
-		WebServer wb = new WebServer();
-		wb.readConfig();
-		wb.connect();
-		departments = new ArrayList<String>(wb.getDepartments().values());
-		departments.add(0,"All Departments");
-	}
-
-
-
-	public String display() {
 		return NONE;
 	}
 
@@ -55,13 +53,18 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 			if(!session.containsKey("admin") || !(boolean) session.get("admin")){
 				return LOGIN;
 			}
-			if(starting_datetime.isBefore(LocalDateTime.now()) || starting_datetime.isAfter(ending_datetime)){
-				session.put("error","Invalid starting time");
-				return "none";
+
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+			LocalDateTime start = LocalDateTime.parse(starting_datetime, formatter);
+			LocalDateTime end = LocalDateTime.parse(ending_datetime, formatter);
+
+			if(start.isBefore(LocalDateTime.now()) || start.isAfter(end)){				session.put("error","Invalid starting time");
+				return NONE;
 			}
-			if(ending_datetime.isBefore(LocalDateTime.now())){
+			if(end.isBefore(LocalDateTime.now())){
 				session.put("error","Invalid ending time");
-				return "none";
+				return NONE;
 			}
 			for (String dep : departments) {
 				ndep++;
@@ -70,7 +73,7 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 				}
 			}
 			String dep = ";" + ndep + ";";
-			int res = getWebServer().createElection(votersType, dep, dep, title, description, starting_datetime, ending_datetime);
+			int res = getWebServer().createElection(votersType, dep, dep, title, description, start, end);
 			if (res == -1) {
 				session.put("error", "Added duplicated election.");
 			}
@@ -78,7 +81,7 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 		}
 		catch (Exception e){
 			System.out.println(e);
-			return "none";
+			return NONE;
 		}
 	}
 
@@ -96,17 +99,11 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 
 
 	public void setVotersType(String votersType){
-		if(votersType.equals("Students")){
-			this.votersType = "aluno";
-		}
-		else if(votersType.equals("Professors")){
-			this.votersType = "docente";
-		}
-		else if(votersType.equals("Employees")){
-			this.votersType = "funcionario";
-		}
-		else{
-			this.votersType = "all";
+		switch (votersType) {
+			case "Students" -> this.votersType = "aluno";
+			case "Professors" -> this.votersType = "docente";
+			case "Employees" -> this.votersType = "funcionario";
+			default -> this.votersType = "all";
 		}
 	}
 	public String getPersonType(){
@@ -144,8 +141,8 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 	public void setTitle(String title) { this.title = title; }
 	public String getDescription() { return description; }
 	public void setDescription(String description) { this.description = description; }
-	public LocalDateTime getStarting_datetime() { return starting_datetime; }
-	public void setStarting_datetime(LocalDateTime starting_datetime) { this.starting_datetime = starting_datetime; }
-	public LocalDateTime getEnding_datetime() { return ending_datetime; }
-	public void setEnding_datetime(LocalDateTime ending_datetime) { this.ending_datetime = ending_datetime; }
+	public String getStarting_datetime() { return starting_datetime; }
+	public void setStarting_datetime(String starting_datetime) { this.starting_datetime = starting_datetime.replace('T', ' '); }
+	public String getEnding_datetime() { return ending_datetime; }
+	public void setEnding_datetime(String ending_datetime) { this.ending_datetime = ending_datetime.replace('T', ' '); }
 }
