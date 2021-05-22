@@ -18,7 +18,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <global-results>
             <result name="error">/jsp/error.jsp</result>
-            <result name="logIn">/jsp/logIn.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
         </global-results>
 
         <!-- all exceptions not caught by the application will lead to error.jsp -->
