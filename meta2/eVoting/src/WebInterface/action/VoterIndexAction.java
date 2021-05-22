@@ -7,6 +7,8 @@ import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,11 +22,25 @@ public class VoterIndexAction extends ActionSupport implements SessionAware {
 	public VoterIndexAction() throws IOException {
 
 		//elections
+		electionsList = new HashMap<>();
 		WebServer wb = new WebServer();
 		wb.readConfig();
 		wb.connect();
-		electionsList = wb.getElections((String) session.get("username"), null);
-		//TODO: falta completar aaaaaquiiiii
+		HashMap<Integer, HashMap<String, String>> elecs;
+		elecs = wb.getElections(null,null);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+		for(Integer key : elecs.keySet()){
+
+				HashMap<String, String> temp = new HashMap<>();
+				temp.put("titulo", elecs.get(key).get("titulo"));
+				temp.put("descricao", elecs.get(key).get("descricao"));
+				temp.put("inicio", elecs.get(key).get("inicio"));
+				temp.put("fim", elecs.get(key).get("fim"));
+				temp.put("departamentos", elecs.get(key).get("departamentos"));
+				temp.put("mesas", elecs.get(key).get("mesas"));
+				electionsList.put(key, temp);
+
+		}
 	}
 
 
