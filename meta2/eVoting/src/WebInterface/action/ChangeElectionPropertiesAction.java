@@ -25,7 +25,7 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 	private List<String> votersTypes;
 	private List<String> departments;
 
-	public String display() {
+	public String display() throws RemoteException {
 
 		//types
 		votersTypes = new ArrayList<>();
@@ -35,40 +35,29 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 		votersTypes.add("Everyone");
 
 		//departments
+		HashMap<Integer, String> deps = getWebServer().getDepartments();
 		departments = new ArrayList<String>();
+		for(Integer dep : deps.keySet()){
+			departments.add(deps.get(dep));
+		}
 		//TODO: get lista de departamentos
 		departments.add("Every Departments");
 
 		//elections
 		HashMap<Integer, HashMap<String,String>> electionsList = new HashMap<>();
+		HashMap<Integer, HashMap<String, String>> elecs = getWebServer().getElections(null,null);
 		//TODO: get lista de eleições
-		HashMap<String, String> temp = new HashMap<>();
-		temp.put("titulo", "Por começar");
-		temp.put("descricao", "esta eleiçai ainda nem começou....");
-		temp.put("inicio", "2021-06-21 17:15:00");
-		temp.put("fim", "2021-06-26 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
+		for(Integer key : elecs.keySet()){
+			HashMap<String, String> temp = new HashMap<>();
+			temp.put("titulo", elecs.get(key).get("titulo"));
+			temp.put("descricao", elecs.get(key).get("descricao"));
+			temp.put("inicio", elecs.get(key).get("inicio"));
+			temp.put("fim",  elecs.get(key).get("fim"));
+			temp.put("departamentos", elecs.get(key).get("departamentos"));
+			temp.put("mesas", elecs.get(key).get("mesas"));
+			electionsList.put(key, temp);
+		}
 
-		electionsList.put(1, temp);
-
-		temp = new HashMap<>();
-		temp.put("titulo", "Ativa");
-		temp.put("descricao", "esta eleição está ativa e a decorrer...");
-		temp.put("inicio", "2021-05-20 17:15:00");
-		temp.put("fim", "2021-06-23 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
-		electionsList.put(3, temp);
-
-		temp = new HashMap<>();
-		temp.put("titulo", "Terminada");
-		temp.put("descricao", "esta eleição está terminada...");
-		temp.put("inicio", "2021-04-20 17:15:00");
-		temp.put("fim", "2021-04-23 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
-		electionsList.put(2, temp);
 
 		//election
 		//TODO: get eleição a partir do id;
@@ -80,7 +69,7 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 		title = election.get("titulo");
 		description = election.get("descricao");
 		try {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 			starting_datetime = LocalDateTime.parse(election.get("inicio"), formatter);
 			ending_datetime = LocalDateTime.parse(election.get("fim"), formatter);
 		} catch (Exception e) {
@@ -91,9 +80,12 @@ public class ChangeElectionPropertiesAction extends ActionSupport implements Ses
 
 	@Override
 	public String execute() throws RemoteException {
-
-		//TODO: alterar as propiedades;
-		return NONE;
+		if(getWebServer().editElection((Integer)session.get("electionId"),false,title,description,starting_datetime,ending_datetime,null,null,null)>0) {
+			return SUCCESS;
+		}
+		else{
+			return "none";
+		}
 	}
 
 	public WebServer getWebServer() throws RemoteException {
