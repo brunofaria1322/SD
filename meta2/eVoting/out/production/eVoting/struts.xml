@@ -34,8 +34,14 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         <!-- 'signInAction' action calls 'execute' in 'LoginAction' -->
         <action name="logInAction" class="WebInterface.action.LoginAction" method="execute">
             <result name="admin">/jsp/adminIndex.jsp</result>
-            <result name="voter">/jsp/adminIndex.jsp</result>
+            <result name="voter" type="redirectAction">voterIndex</result>
         </action>
+
+        <!-- Voter Index Options -->
+        <action name="voterIndex" class="WebInterface.action.VoterIndexAction" method="execute">
+            <result name="none">/jsp/voterIndex.jsp</result>
+        </action>
+
 
         <!-- Admin Index Options -->
         <!-- Register Person -->
