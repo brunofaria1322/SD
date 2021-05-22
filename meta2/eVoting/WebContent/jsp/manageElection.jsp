@@ -54,11 +54,11 @@
 				<!-- Election has finished -->
 				<s:elseif test="%{#estado==3}">
 					<h4 class="card-title">Results:</h4>
-					<ul class="list-group">
+					<ul class="list-group list-group-flush">
 						<c:forEach items="${results}" var="result" >
 							<li class="list-group-item d-flex justify-content-between align-items-center">
 								<c:out value="${result[0]}"/>
-								<span class="badge" style="background-color: #0d6efd">
+								<span class="badge" class="bg-primary">
 									<c:out value="${result[1]}"/>
 								</span>
 							</li>

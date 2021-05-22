@@ -43,7 +43,7 @@
 								required="required"/>
 						<label class="floatingInput">Polling Station's department</label>
 					</s:div>
-					<s:submit cssClass="btn btn-primary" value="Add Candidate List"/>
+					<s:submit cssClass="btn btn-primary" value="Add Polling Station"/>
 				</s:form>
 			</div>
 
