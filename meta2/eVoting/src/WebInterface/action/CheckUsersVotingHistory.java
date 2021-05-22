@@ -1,11 +1,15 @@
 
 package WebInterface.action;
 
+import Commun.database;
+import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.Serial;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,17 +22,20 @@ public class CheckUsersVotingHistory extends ActionSupport implements SessionAwa
 	private List<String[]> results = null;
 
 	@Override
-	public String execute() {
-
-		if (username != null){
-
-
-			//TODO: get and treat results from username!!;
-			results = new ArrayList<>();
-			//[ [title, dep, dateTime], ... ]
-			results.add(new String[] {"elec 1 title", "dep de EEC", "2020-05-21 17:15:00"});
-			results.add(new String[] {"elec 3 title", "dep de EI", "2020-04-01 15:52:00"});
-			results.add(new String[] {"elec 2 title", "dep de Math", "2020-11-19 09:40:00"});
+	public String execute() throws RemoteException {
+		if(!session.containsKey("admin") || !(boolean) session.get("admin")){
+			return LOGIN;
+		}
+		HashMap<Integer,database.Pair<Integer,String>> votes = getWebServer().getUserVotes(username);
+		HashMap<Integer,String> deps = getWebServer().getDepartments();
+		HashMap<Integer,HashMap<String,String>> elecs = getWebServer().getElections(username, null);
+		try{
+			for(Integer key: votes.keySet()){
+				results.add(new String[] {elecs.get(key).get("titulo"),deps.get(votes.get(key).left), votes.get(key).right});
+			}
+		}
+		catch( java.lang.NullPointerException e){
+			return "none";
 		}
 
 		return SUCCESS;
@@ -44,5 +51,17 @@ public class CheckUsersVotingHistory extends ActionSupport implements SessionAwa
 	@Override
 	public void setSession(Map<String, Object> session) {
 		this.session = session;
+	}
+
+	public WebServer getWebServer() throws RemoteException {
+		if(!session.containsKey("WebServer")) {
+			this.setWebServer(new WebServer());
+		}
+		return (WebServer) session.get("WebServer");
+	}
+
+	public void setWebServer(WebServer WebServer) {
+		WebServer.connect();
+		this.session.put("WebServer", WebServer);
 	}
 }
