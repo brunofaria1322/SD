@@ -1,6 +1,3 @@
-/**
- * Raul Barbosa 2014-11-07
- */
 package WebInterface.model;
 
 import Commun.Web;

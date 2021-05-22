@@ -136,6 +136,11 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="voter" type="redirectAction">voterIndex</result>
         </action>
 
+        <!-- Admin's Page -->
+        <action name="adminPage" class="WebInterface.action.AdminPageAction" method="display">
+            <result name="none">/jsp/adminPage.jsp</result>
+        </action>
+
     </package>
 
 </struts>
