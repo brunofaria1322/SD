@@ -98,18 +98,22 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
 
         <action name="addCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="addCandidateList">
             <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
         </action>
 
         <action name="removeCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="removeCandidateList">
             <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
         </action>
 
         <action name="addCandidate" class="WebInterface.action.ManageCandidateListsAction" method="addCandidate">
             <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
         </action>
 
         <action name="removeCandidate" class="WebInterface.action.ManageCandidateListsAction" method="removeCandidate">
             <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
         </action>
 
         <!-- Manage Polling Stations -->
@@ -135,6 +139,11 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
             <result name="admin">/jsp/adminIndex.jsp</result>
             <result name="voter" type="redirectAction">voterIndex</result>
         </action>
+
+        <!-- Admin's Page -->
+        <!--action name="adminPage" class="WebInterface.action.AdminPageAction" method="display">
+            <result name="none">/jsp/adminPage.jsp</result>
+        </action-->
 
     </package>
 
