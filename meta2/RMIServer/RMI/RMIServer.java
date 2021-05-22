@@ -422,8 +422,19 @@ public class RMIServer extends UnicastRemoteObject implements database{
 				}
 				if(mesas!=null){
 					String me = rs.getString("mesas");
-					for (String d : mesas.split(";")) {
-						me = me.replace(d+";", "");
+					if(me.contains(";0;")){
+						me = ";";
+						for (int i = 1; i < 13;++i){
+							if (!Arrays.asList(mesas.split(";")).contains(Integer.toString(i))){
+								me+=i+";";
+							}
+						}
+					}
+
+					else {
+						for (String d : mesas.split(";")) {
+							me = me.replace(d + ";", "");
+						}
 					}
 					rs.updateString("mesas",me);
 				}
