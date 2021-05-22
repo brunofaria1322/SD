@@ -16,8 +16,6 @@
 		<a href="<s:url action="createElection"/>" class="list-group-item list-group-item-action">Create Election </a>
 		<a href="<s:url action="chooseElection"/>" class="list-group-item list-group-item-action">Manage Election </a>
 		<a href="<s:url action="checkUsersVotingHistory"/>" class="list-group-item list-group-item-action">Check User's Voting History </a>
-
-		<a class="list-group-item list-group-item-action bg-primary text-white mt-3" href="<s:url action="addFacebookAction"/>"> Associate Facebook </a>
 	</div>
 </body>
 </html>
