@@ -14,18 +14,16 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ActionSupport;
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.IOException;
 import java.io.Serial;
 import java.lang.reflect.Type;
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class LoginAction extends ActionSupport implements SessionAware {
+public class AddFacebookAction extends ActionSupport implements SessionAware {
 	@Serial
 	private static final long serialVersionUID = 4L;
 	private Map<String, Object> session;
@@ -44,9 +42,8 @@ public class LoginAction extends ActionSupport implements SessionAware {
 				final String secretState = "secret" + new Random().nextInt(999_999);
 				final OAuth20Service service = new ServiceBuilder(appKey)
 						.apiSecret(appSecret)
-						.callback("http://localhost:8080/eVoting/logInAction")
+						.callback("http://localhost:8080/eVoting/AddFacebookAction")
 						.build(FacebookApi.instance());
-
 
 				final OAuth2AccessToken accessToken = service.getAccessToken(code);
 
@@ -55,39 +52,13 @@ public class LoginAction extends ActionSupport implements SessionAware {
 				try (Response response = service.execute(request)) {
 					Type type = new TypeToken<HashMap<String, String>>(){}.getType();
 					HashMap<String, String> body = new Gson().fromJson(response.getBody(), type);
-					System.out.println(response.getBody());
-					System.out.println(body.get("id"));
-					int login = this.getWebServer().login(null, body.get("id"),null);
-					if (login == 1) {
-						session.put("username",  body.get("id"));
-						session.put("loggedin", true); // this marks the user as logged in
-						return "voter";
-					}
-					else if(login == 2){
-						session.put("username",  body.get("id"));
-						session.put("loggedin", true); // this marks the user as logged in
-						session.put("admin",true);
-						return "admin";
-					}
-				}
-				return LOGIN;
-			}
-			if (this.username != null && !username.equals("") && this.password != null && !password.equals("")) {
-				int login = this.getWebServer().login(username, null,password);
-				if (login == 1) {
-					session.put("username", username);
-					session.put("loggedin", true); // this marks the user as logged in
-					return "voter";
-				}
-				else if(login == 2){
-					session.put("username", username);
-					session.put("loggedin", true); // this marks the user as logged in
-					session.put("admin",true);
-					return "admin";
+					getWebServer().addFacebook(username,body.get("id"));
 				}
 			}
-
-			return LOGIN;
+			if(session.containsKey("admin") && (boolean)session.get("admin")){
+				return "admin";
+			}
+			return "voter";
 		}
 		catch (Exception e){
 			if(!getWebServer().connect()){
