@@ -1,10 +1,13 @@
 
 package WebInterface.action;
 
+import Commun.database;
+import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.Serial;
+import java.rmi.RemoteException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,48 +27,34 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 	private List<String[]> results;
 
 	@Override
-	public String execute() {
-
-		//elections
-		HashMap<Integer, HashMap<String,String>> electionsList = new HashMap<>();
-		//TODO: get lista de eleições
-		HashMap<String, String> temp = new HashMap<>();
-		temp.put("titulo", "Por começar");
-		temp.put("descricao", "esta eleiçai ainda nem começou....");
-		temp.put("inicio", "2021-06-21 17:15:00");
-		temp.put("fim", "2021-06-26 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
-
-		electionsList.put(1, temp);
-
-		temp = new HashMap<>();
-		temp.put("titulo", "Ativa");
-		temp.put("descricao", "esta eleição está ativa e a decorrer...");
-		temp.put("inicio", "2021-05-20 17:15:00");
-		temp.put("fim", "2021-06-23 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
-		electionsList.put(3, temp);
-
-		temp = new HashMap<>();
-		temp.put("titulo", "Terminada");
-		temp.put("descricao", "esta eleição está terminada...");
-		temp.put("inicio", "2021-04-20 17:15:00");
-		temp.put("fim", "2021-04-23 21:30:00");
-		temp.put("departamentos", ";4;1;");
-		temp.put("mesas", ";4;");
-		electionsList.put(2, temp);
+	public String execute() throws RemoteException {
+		if(!session.containsKey("admin") || !(boolean) session.get("admin")){
+			return LOGIN;
+		}
+		HashMap<Integer, HashMap<String,String>> electionsList;
+		electionsList = new HashMap<>();
+		HashMap<Integer, HashMap<String, String>> elecs = new HashMap<>();
+		elecs = getWebServer().getElections(null,null);
+		for(Integer key : elecs.keySet()){
+			HashMap<String, String> temp = new HashMap<>();
+			temp.put("titulo", elecs.get(key).get("titulo"));
+			temp.put("descricao", elecs.get(key).get("descricao"));
+			temp.put("inicio", elecs.get(key).get("inicio"));
+			temp.put("fim",  elecs.get(key).get("fim"));
+			temp.put("departamentos", elecs.get(key).get("departamentos"));
+			temp.put("mesas", elecs.get(key).get("mesas"));
+			electionsList.put(key, temp);
+		}
 
 		//election
-		//TODO: get eleição a partir do id;
+
 		election = electionsList.get(electionId);
 
 		results = new ArrayList<>();
 		session.put("electionId", electionId);
 
 		try {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
 
 			//Election hasn't started yet
 			if(LocalDateTime.parse(election.get("inicio"), formatter).isAfter(LocalDateTime.now())){
@@ -80,19 +69,17 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 				estado = 3;
 
 				//TODO: get and treat results!!
-				//results = {election_id: (election_name, {list_id: (list_name, number_of_votes)})}
-				results.add (new String[] {"Lista A", "12"});
-				results.add( new String[] {"Lista B", "6"});
-				results.add( new String[] {"Lista CONA", "69"});
-				results.add( new String[] {"Brancos", "420"});
-				results.add( new String[] {"Pretos", "666"});
+				HashMap<Integer, database.Pair<String, HashMap<Integer, database.Pair<String, Integer>>>> lists;
+				lists = getWebServer().getResults(electionId);
+				for(Integer key : lists.get(electionId).right.keySet()){
+					results.add(new String[]{lists.get(electionId).right.get(key).left,lists.get(electionId).right.get(key).right.toString()});
+				}
 
 			}
-
 		}catch (Exception e){
+			System.out.println(e);
 			estado = -1;
 		}
-
 		return SUCCESS;
 	}
 
@@ -112,5 +99,17 @@ public class ManageElectionAction extends ActionSupport implements SessionAware 
 	@Override
 	public void setSession(Map<String, Object> session) {
 		this.session = session;
+	}
+
+	public WebServer getWebServer() throws RemoteException {
+		if(!session.containsKey("WebServer")) {
+			this.setWebServer(new WebServer());
+		}
+		return (WebServer) session.get("WebServer");
+	}
+
+	public void setWebServer(WebServer WebServer) {
+		WebServer.connect();
+		this.session.put("WebServer", WebServer);
 	}
 }

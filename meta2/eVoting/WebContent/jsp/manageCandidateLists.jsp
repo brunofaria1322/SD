@@ -13,13 +13,12 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	<title>Manage Candidate Lists</title>
+	<title><c:out value="Manage Candidat Lists"/></title>
 </head>
 <body class = "justify-content-center">
-
+	<p>${session.error}</p>
 	<div class="container">
 		<h3 class="card-title">Candidate Lists:</h3>
-		<p class="text-danger"> <c:out value="${session.error}"/> </p>
 		<div class="card">
 			<div class="card-body">
 				<ul class="list-group list-group-flush">
@@ -43,6 +42,8 @@
 										<div>
 											<s:form action="removeCandidate" method="post">
 												<input type="hidden" name="candidateId" value="${candidate[0]}">
+												<input type="hidden" name="candidateName" value="${candidate[1]}">
+												<input type="hidden" name="listName" value="${list[1]}">
 												<s:submit cssClass="btn btn-danger my-0" value="Remove"/>
 											</s:form>
 										</div>
@@ -59,6 +60,15 @@
 													required="required"/>
 											<label class="floatingInput">Candidate Name</label>
 										</s:div>
+										<s:div cssClass="form-floating">
+											<s:textfield
+													placeholder="Candidate's ID'"
+													name="candidateId"
+													cssClass="form-control"
+													required="required"/>
+											<label class="floatingInput">Candidate's ID</label>
+										</s:div>
+										<input type="hidden" name="listName" value="${list[1]}">
 										<s:submit cssClass="btn btn-primary" value="Add Candidate"/>
 									</s:form>
 								</div>
