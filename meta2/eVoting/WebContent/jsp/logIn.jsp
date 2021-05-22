@@ -32,8 +32,11 @@
 		</s:div>
 		<s:submit cssClass="btn btn-lg btn-primary"/>
 	</s:form>
-</main>
-<a href="https://www.facebook.com/v3.2/dialog/oauth?response_type=code&client_id=2913897935402035&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2FeVoting%2FlogInAction&state=secret494658
-">Login with Facebook</a>
+	<a class="btn btn-primary"
+			href="https://www.facebook.com/v3.2/dialog/oauth?response_type=code&client_id=2913897935402035&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2FeVoting%2FlogInAction&state=secret494658">
+		Login with Facebook
+	</a>
 </body>
+</main>
+
 </html>

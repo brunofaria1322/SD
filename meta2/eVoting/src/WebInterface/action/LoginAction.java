@@ -1,6 +1,3 @@
-/**
- * Raul Barbosa 2014-11-07
- */
 package WebInterface.action;
 
 import WebInterface.model.WebServer;
@@ -14,13 +11,11 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ActionSupport;
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.interceptor.SessionAware;
 
 import java.io.IOException;
 import java.io.Serial;
 import java.lang.reflect.Type;
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
