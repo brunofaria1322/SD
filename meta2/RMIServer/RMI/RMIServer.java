@@ -478,7 +478,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			PreparedStatement st;
 			ResultSet rs;
 			if(username!=null){
-				query = "SELECT * FROM users WHERE username = '"+username+"';";
+				query = "SELECT * FROM users WHERE username = '"+username+"' OR facebook_id = '"+username+"';";
 				System.out.println(query);
 				st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 				rs = st.executeQuery();
@@ -669,7 +669,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 	}
 	public int vote(String username, int neleicao, int nlista, int mesa) throws RemoteException{
 		try {
-			String query = "SELECT * FROM users WHERE username = '"+username+"';";
+			String query = "SELECT * FROM users WHERE username = '"+username+"' OR facebook_id = '"+username+"';";
 			PreparedStatement st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
 			rs.next();
@@ -679,7 +679,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 			rs = st.executeQuery();
 			rs.next();
 			String dep = rs.getString("nome");
-			query = "SELECT * FROM votos WHERE username = '"+username+"' AND neleicao = "+neleicao+";";
+			query = "SELECT * FROM votos WHERE username = '\"+username+\"' OR facebook_id = '\"+username+\"' AND neleicao = "+neleicao+";";
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			rs = st.executeQuery();
 			if(rs.next()){
@@ -847,7 +847,7 @@ public class RMIServer extends UnicastRemoteObject implements database{
 
 		try {
 			HashMap<Integer,Pair<Integer,String>> out = new HashMap<Integer,Pair<Integer,String>>();
-			String query = "SELECT * FROM votos WHERE username = '"+username+"';";
+			String query = "SELECT * FROM votos WHERE username = '"+username+"' OR facebook_id = '"+username+"';";
 			PreparedStatement st;
 			st = conn.prepareStatement(query,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet rs = st.executeQuery();
