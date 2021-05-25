@@ -8,11 +8,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ChangeElectionPropertiesAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ChangeElectionPropertiesAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/eVoting/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/struts.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/WebInterface/action/CreateElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/CreateElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ManageElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ManageElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,7 +182,7 @@
       <workItem from="1621395569274" duration="11745000" />
       <workItem from="1621438270479" duration="19397000" />
       <workItem from="1621483386202" duration="423000" />
-      <workItem from="1621521311464" duration="85010000" />
+      <workItem from="1621521311464" duration="88491000" />
     </task>
     <servers />
   </component>

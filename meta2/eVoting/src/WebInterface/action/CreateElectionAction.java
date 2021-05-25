@@ -74,7 +74,7 @@ public class CreateElectionAction extends ActionSupport implements SessionAware 
 				}
 			}
 			String dep = ";" + ndep + ";";
-			int res = getWebServer().createElection(votersType, dep, dep, title, description, start, end);
+			int res = getWebServer().createElection(votersType, dep, null, title, description, start, end);
 			if (res == -1) {
 				session.put("error", "Added duplicated election.");
 			}

@@ -1,0 +1,37 @@
+
+ADMIN CONSOLE:
+Registar novo user para qualquer um dos cargos		        [PASSED]
+Criar eleição                               		        [PASSED]
+Adicionar uma lista a uma eleição                           [PASSED]
+Remover uma lista de uma eleição                            [PASSED]
+Adicionar candidato a uma lista                             [PASSED]
+Remover candidato de uma lista                              [PASSED]
+Adicionar mesas de voto a uma eleição                       [PASSED]
+Remover mesas de voto de uma eleição                        [PASSED]
+Alterar propiedades de uma eleição                          [PASSED]
+Verificar resultados de uma eleição                         [PASSED]
+Visualisar Histórico de votos de um utilizador              [PASSED]
+
+Ver estado dos terminais e mesas de voto em tempo real      [PASSED]
+Ver votos em tempo real                                     [PASSED]
+
+MULTICAST SERVER:
+Não permitir mais que 1 mesa de voto no mesmo grupo         [PASSED]
+Atribuir ids aos terminais de voto                          [PASSED]
+Identificar pessoa e verificar se pode votar nessa mesa     [PASSED]
+Contactar com o servidor RMI suportando falhas de 30s       [PASSED]
+Responder pedidos feitos pelos terminais de forma correta   [PASSED]
+
+VOTING TERMINAL:
+Fazer Login                                                 [PASSED]
+Listar e escolher eleiçoes em que o utilizador pode votar   [PASSED]
+Listar listas e opçoes de voto                              [PASSED]
+Efetuar voto                                                [PASSED]
+Não permitir voto duplo                                     [PASSED]
+Bloquear passados 120 segundos de inatividade               [PASSED]
+
+RMI SERVER:
+Contactar a base de dados e efetuar operaçoes pedidas       [PASSED]
+Verificar se já existe um servidor principal                [PASSED]
+Envio de "Heartbeats" do secundario para o principal        [PASSED]
+Secundario ocupa lugar do principal em caso de falha        [PASSED]
