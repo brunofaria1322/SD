@@ -33,6 +33,9 @@ public class VoteAction extends ActionSupport implements SessionAware {
 	public String execute() throws RemoteException {
 		if(session.containsKey("loggedin") && (boolean)session.get("loggedin")) {
 			if(session.containsKey("electionId") && session.get("electionId")!=null){
+				System.out.println((String) session.get("username"));
+				System.out.println((Integer) session.get("electionId"));
+				System.out.println(Integer.parseInt(listId));
 				getWebServer().vote((String) session.get("username"), (Integer) session.get("electionId"), Integer.parseInt(listId), 0);
 				return SUCCESS;
 			}

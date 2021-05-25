@@ -7,52 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fa6e7ba3-39ce-4dec-993b-116b1686d440" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/WebInterface.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/com_google_code_gson_gson_2_8_6.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/com_google_code_gson_gson_2_8_6.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/javax_servlet_jstl_1_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/javax_servlet_jstl_1_2.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/lib.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/lib1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/lib1.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/META-INF/MANIFEST.MF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/adminIndex.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/adminPage.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/adminPage.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/changeElectionProperties.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/checkUsersVotingHistory.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/checkUsersVotingHistory.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/createElection.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/createElection.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/error.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/error.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/logIn.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/logIn.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/manageCandidateLists.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/manageCandidateLists.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/manageElection.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/manageElection.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/managePollingStations.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/managePollingStations.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/registerPerson.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/registerPerson.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/vote.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/vote.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/jsp/voterIndex.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/jsp/voterIndex.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebContent/styles/forms.css" beforeDir="false" afterPath="$PROJECT_DIR$/WebContent/styles/forms.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eVoting.iml" beforeDir="false" afterPath="$PROJECT_DIR$/eVoting.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/CreateElectionAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/CreateElectionAction.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/VoteAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/VoteAction.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/VoterIndexAction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/eVoting/WebInterface/action/VoterIndexAction.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Commun/database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Commun/database.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/AddFacebookAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/AddFacebookAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/AdminPage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/AdminPage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ChangeElectionPropertiesAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ChangeElectionPropertiesAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/CheckUsersVotingHistory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/CheckUsersVotingHistory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ChooseElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ChooseElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/CreateElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/CreateElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/LoginAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ManageCandidateListsAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ManageCandidateListsAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ManageElectionAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ManageElectionAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/ManagePollingStationsAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/ManagePollingStationsAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/RegisterPersonAction.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/WebInterface/action/VoteAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/VoteAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/action/VoterIndexAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/action/VoterIndexAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebInterface/model/WebServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/struts.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/struts.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
