@@ -26,17 +26,20 @@ public class VoteAction extends ActionSupport implements SessionAware {
 
 	private List<String[]> results;
 	private List<String[]> candidateList;
-	private Integer listId;
+	private String listId;
 
 
 	@Override
 	public String execute() throws RemoteException {
 		if(session.containsKey("loggedin") && (boolean)session.get("loggedin")) {
-			getWebServer().vote((String) session.get("username"), electionId, listId, 0);
-			return SUCCESS;
+			if(session.containsKey("electionId") && session.get("electionId")!=null){
+				getWebServer().vote((String) session.get("username"), (Integer) session.get("electionId"), Integer.parseInt(listId), 0);
+				return SUCCESS;
+			}
+			return LOGIN;
 		}
 		else{
-			return "none";
+			return LOGIN;
 		}
 	}
 
@@ -103,6 +106,13 @@ public class VoteAction extends ActionSupport implements SessionAware {
 	public Integer getElectionId() { return electionId;	}
 	public void setElectionId(Integer electionId) { this.electionId = electionId; }
 
+	public String getListId() {
+		return listId;
+	}
+	public void setListId(String listId) {
+		this.listId = listId;
+	}
+
 	public HashMap<String, String> getElection() { return election; }
 	public void setElection(HashMap<String, String> election) { this.election = election; }
 
@@ -130,13 +140,5 @@ public class VoteAction extends ActionSupport implements SessionAware {
 	public void setWebServer(WebServer WebServer) {
 		WebServer.connect();
 		this.session.put("WebServer", WebServer);
-	}
-
-	public Integer getListId() {
-		return listId;
-	}
-
-	public void setListId(Integer listId) {
-		this.listId = listId;
 	}
 }

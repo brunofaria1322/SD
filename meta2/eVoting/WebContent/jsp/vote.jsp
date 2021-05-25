@@ -44,7 +44,6 @@
 									<label class="d-flex justify-content-between wd-100">
 										<c:out value="${candidate[1]}"/>
 										<input class="form-check-input" type="radio" name="listId" value="${candidate[0]}"/>
-										<input type="hidden" name="electionId" value="${electionId}">
 									</label>
 
 								</li>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The core configuration file for the framework is the default (struts.xml) file
+and should reside on the classpath of the webapp (generally /WEB-INF/classes). -->
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+    <!-- devMode equals debug information and reload everything for every request -->
+    <constant name="struts.devMode" value="true" />
+    <constant name="struts.ui.theme" value="simple" />
+    <constant name="struts.action.excludePattern" value="/ws"/>
+    <package name="WebInterface" extends="struts-default">
+
+        <default-action-ref name="logIn" />
+
+        <global-results>
+            <result name="error">/jsp/error.jsp</result>
+            <result name="login">/jsp/logIn.jsp</result>
+        </global-results>
+
+        <!-- all exceptions not caught by the application will lead to error.jsp -->
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error" />
+        </global-exception-mappings>
+
+        <!-- 'logIn' action leads to the view provided by logIn.jsp -->
+        <action name="logIn">
+            <result>/jsp/logIn.jsp</result>
+        </action>
+
+        <!-- 'signInAction' action calls 'execute' in 'LoginAction' -->
+        <action name="logInAction" class="WebInterface.action.LoginAction" method="execute">
+            <result name="admin">/jsp/adminIndex.jsp</result>
+            <result name="voter" type="redirectAction">voterIndex</result>
+        </action>
+
+        <!-- Voter Index Options -->
+        <action name="voterIndex" class="WebInterface.action.VoterIndexAction" method="display">
+            <result name="none">/jsp/voterIndex.jsp</result>
+        </action>
+
+        <action name="votePage" class="WebInterface.action.VoteAction" method="display">
+            <result name="none">/jsp/vote.jsp</result>
+        </action>
+
+        <action name="voteAction" class="WebInterface.action.VoteAction" method="execute">
+            <result name="success" type="redirectAction">voterIndex</result>
+        </action>
+
+
+        <!-- Admin Index Options -->
+        <!-- Register Person -->
+        <action name="registerPerson" class="WebInterface.action.RegisterPersonAction" method="display">
+            <result name="none" >/jsp/registerPerson.jsp</result>
+        </action>
+
+        <action name="registerPersonAction" class="WebInterface.action.RegisterPersonAction" method="execute">
+            <result name="success" >/jsp/adminIndex.jsp</result>
+            <result name="none" >/jsp/registerPerson.jsp</result>
+        </action>
+
+        <!-- Create Election -->
+        <action name="createElection" class="WebInterface.action.CreateElectionAction" method="display">
+            <result name="none" >/jsp/createElection.jsp</result>
+        </action>
+
+        <action name="createElectionAction" class="WebInterface.action.CreateElectionAction" method="execute">
+            <result name="success" >/jsp/adminIndex.jsp</result>
+            <result name="none" type="redirectAction">createElection</result>
+        </action>
+
+        <!-- Manage Election -->
+        <action name="chooseElection" class="WebInterface.action.ChooseElectionAction" method="display">
+            <result name="none" >/jsp/chooseElection.jsp</result>
+        </action>
+
+        <action name="manageElection" class="WebInterface.action.ManageElectionAction" method="execute">
+            <result name="success" >/jsp/manageElection.jsp</result>
+        </action>
+
+        <!-- Change Election Properties -->
+        <action name="changeElectionProperties" class="WebInterface.action.ChangeElectionPropertiesAction" method="display">
+            <result name="none" >/jsp/changeElectionProperties.jsp</result>
+        </action>
+
+        <action name="changeElectionPropertiesAction" class="WebInterface.action.ChangeElectionPropertiesAction" method="execute">
+            <result name="success" type="redirectAction">manageElection</result>
+            <result name="none" type="redirectAction">changeElectionProperties</result>
+        </action>
+
+        <!-- Manage Election Candidate Lists -->
+        <action name="manageCandidateLists" class="WebInterface.action.ManageCandidateListsAction" method="execute">
+            <result name="success" >/jsp/manageCandidateLists.jsp</result>
+        </action>
+
+        <action name="addCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="addCandidateList">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <action name="removeCandidateList" class="WebInterface.action.ManageCandidateListsAction" method="removeCandidateList">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <action name="addCandidate" class="WebInterface.action.ManageCandidateListsAction" method="addCandidate">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <action name="removeCandidate" class="WebInterface.action.ManageCandidateListsAction" method="removeCandidate">
+            <result name="success" type="redirectAction">manageCandidateLists</result>
+            <result name="none" type="redirectAction">manageCandidateLists</result>
+        </action>
+
+        <!-- Manage Polling Stations -->
+        <action name="managePollingStations" class="WebInterface.action.ManagePollingStationsAction" method="execute">
+            <result name="success" >/jsp/managePollingStations.jsp</result>
+        </action>
+
+        <action name="addPollingStation" class="WebInterface.action.ManagePollingStationsAction" method="addPollingStation">
+            <result name="success" type="redirectAction">managePollingStations</result>
+        </action>
+
+        <action name="removePollingStation" class="WebInterface.action.ManagePollingStationsAction" method="removePollingStation">
+            <result name="success" type="redirectAction">managePollingStations</result>
+        </action>
+
+        <!-- Check Users Voting History -->
+        <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
+            <result name="success">/jsp/checkUsersVotingHistory.jsp</result>
+            <result name="none">/jsp/checkUsersVotingHistory.jsp</result>
+        </action>
+
+        <!-- Facebook -->
+        <action name="addFacebookAction" class="WebInterface.action.AddFacebookAction" method="execute">
+            <result name="admin">/jsp/adminIndex.jsp</result>
+            <result name="voter" type="redirectAction">voterIndex</result>
+        </action>
+
+        <!-- Admin's Page -->
+        <action name="adminPage" class="WebInterface.action.AdminPage" method="display">
+            <result name="none">/jsp/adminPage.jsp</result>
+        </action>
+
+    </package>
+
+</struts>
