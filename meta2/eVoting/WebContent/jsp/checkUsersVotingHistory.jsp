@@ -13,6 +13,7 @@
 </head>
 <body >
 	<div class="container">
+		<p class="text-danger"> <c:out value="${session.error}"/> </p>
 		<div class = "text-center m-3">
 			<s:form method="GET" action="checkUsersVotingHistory">
 				<s:textfield name="username" label="Model" />
