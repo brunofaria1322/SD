@@ -34,7 +34,8 @@
 			</div>
 		</c:forEach>
 
-		<a class="list-group-item list-group-item-action bg-primary text-white mt-3" href="<s:url action="addFacebookAction"/>"> Associate Facebook </a>
+		<a class="list-group-item list-group-item-action bg-primary text-white mt-3" href="https://www.facebook.com/v3.2/dialog/oauth?response_type=code&client_id=2913897935402035&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2FeVoting%2FaddFacebookAction&state=secret694822
+"> Associate Facebook </a>
 
 	</main>
 </body>

@@ -4,6 +4,7 @@ import Commun.Web;
 import Commun.database;
 import com.google.gson.Gson;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnOpen;
@@ -145,9 +146,12 @@ public class WebServer extends UnicastRemoteObject implements Web {
 	}
 
 	@OnOpen
-	public void start(Session session) {
+	public void start(Session session) throws RemoteException {
 		this.wsSession = session;
+		this.callback();
 		users.add(this);
+		change();
+		System.out.println("open");
 	}
 
 	@OnClose

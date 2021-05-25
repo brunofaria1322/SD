@@ -29,9 +29,15 @@ public class CheckUsersVotingHistory extends ActionSupport implements SessionAwa
 		HashMap<Integer,database.Pair<Integer,String>> votes = getWebServer().getUserVotes(username);
 		HashMap<Integer,String> deps = getWebServer().getDepartments();
 		HashMap<Integer,HashMap<String,String>> elecs = getWebServer().getElections(username, null);
+		results = new ArrayList<>();
 		try{
 			for(Integer key: votes.keySet()){
-				results.add(new String[] {elecs.get(key).get("titulo"),deps.get(votes.get(key).left), votes.get(key).right});
+				if(key!=0) {
+					results.add(new String[]{elecs.get(key).get("titulo"), deps.get(votes.get(key).left), votes.get(key).right});
+				}
+				else {
+					results.add(new String[]{elecs.get(key).get("titulo"), "eVote", votes.get(key).right});
+				}
 			}
 		}
 		catch( java.lang.NullPointerException e){

@@ -42,7 +42,7 @@ public class AddFacebookAction extends ActionSupport implements SessionAware {
 				final String secretState = "secret" + new Random().nextInt(999_999);
 				final OAuth20Service service = new ServiceBuilder(appKey)
 						.apiSecret(appSecret)
-						.callback("http://localhost:8080/eVoting/AddFacebookAction")
+						.callback("http://localhost:8080/eVoting/addFacebookAction")
 						.build(FacebookApi.instance());
 
 				final OAuth2AccessToken accessToken = service.getAccessToken(code);
@@ -52,7 +52,7 @@ public class AddFacebookAction extends ActionSupport implements SessionAware {
 				try (Response response = service.execute(request)) {
 					Type type = new TypeToken<HashMap<String, String>>(){}.getType();
 					HashMap<String, String> body = new Gson().fromJson(response.getBody(), type);
-					getWebServer().addFacebook(username,body.get("id"));
+					getWebServer().addFacebook((String) session.get("username"),body.get("id"));
 				}
 			}
 			if(session.containsKey("admin") && (boolean)session.get("admin")){

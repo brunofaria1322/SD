@@ -11,7 +11,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
     <!-- devMode equals debug information and reload everything for every request -->
     <constant name="struts.devMode" value="true" />
     <constant name="struts.ui.theme" value="simple" />
-
+    <constant name="struts.action.excludePattern" value="/ws"/>
     <package name="WebInterface" extends="struts-default">
 
         <default-action-ref name="logIn" />
@@ -132,6 +132,7 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         <!-- Check Users Voting History -->
         <action name="checkUsersVotingHistory" class="WebInterface.action.CheckUsersVotingHistory" method="execute">
             <result name="success">/jsp/checkUsersVotingHistory.jsp</result>
+            <result name="none">/jsp/checkUsersVotingHistory.jsp</result>
         </action>
 
         <!-- Facebook -->
@@ -141,9 +142,9 @@ and should reside on the classpath of the webapp (generally /WEB-INF/classes). -
         </action>
 
         <!-- Admin's Page -->
-        <!--action name="adminPage" class="WebInterface.action.AdminPageAction" method="display">
+        <action name="adminPage" class="WebInterface.action.AdminPage" method="display">
             <result name="none">/jsp/adminPage.jsp</result>
-        </action-->
+        </action>
 
     </package>
 

@@ -1,9 +1,11 @@
 
 package WebInterface.action;
 
+import WebInterface.model.WebServer;
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
 
+import java.io.IOException;
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +22,7 @@ public class AdminPage extends ActionSupport implements SessionAware {
 	private List<String[]> results;
 
 
-	public String display() {
+	public String display() throws IOException {
 		return NONE;
 	}
 
@@ -40,5 +42,17 @@ public class AdminPage extends ActionSupport implements SessionAware {
 	@Override
 	public void setSession(Map<String, Object> session) {
 		this.session = session;
+	}
+
+	public WebServer getWebServer() throws IOException {
+		if(!session.containsKey("WebServer"))
+			this.setWebServer(new WebServer());
+		return (WebServer) session.get("WebServer");
+	}
+
+	public void setWebServer(WebServer WebServer) throws IOException {
+		this.session.put("WebServer", WebServer);
+		getWebServer().readConfig();
+		getWebServer().connect();
 	}
 }
